@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { IdentityValues } from "@/lib/schema";
+import type { DomainFormValues } from '@/lib/domain-schema';
 
 export type StepKey =
   | "identity" | "brandStory" | "aboutOwner" | "media" | "heroVideo"
