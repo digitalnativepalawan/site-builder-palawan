@@ -14,7 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      site_content: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          order_index: number
+          section_type: string
+          site_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          order_index?: number
+          section_type: string
+          site_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          order_index?: number
+          section_type?: string
+          site_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_content_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          created_at: string
+          id: string
+          site_name: string
+          status: string
+          subdomain: string
+          template: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          site_name: string
+          status?: string
+          subdomain: string
+          template?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          site_name?: string
+          status?: string
+          subdomain?: string
+          template?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
