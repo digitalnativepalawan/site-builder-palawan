@@ -178,8 +178,8 @@ export default function SiteSettings() {
       <div className="flex-1 p-4 sm:p-6 max-w-3xl mx-auto w-full">
         <Tabs defaultValue="colors" className="w-full">
           <TabsList className="w-full flex flex-wrap h-auto gap-1 mb-6">
-            {["colors", "typography", "layout", "buttons", "identity", "navigation", "social", "seo"].map(tab => (
-              <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">{tab}</TabsTrigger>
+            {["colors", "typography", "layout", "buttons", "logo", "identity", "navigation", "social", "seo"].map(tab => (
+              <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">{tab === "logo" ? "Logo & Branding" : tab}</TabsTrigger>
             ))}
           </TabsList>
 
