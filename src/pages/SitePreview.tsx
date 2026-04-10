@@ -284,6 +284,7 @@ export default function SitePreview() {
 
       {/* Custom CSS */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
+      {colorOverrideCss && <style dangerouslySetInnerHTML={{ __html: colorOverrideCss }} />}
       {autoDarkCss && <style dangerouslySetInnerHTML={{ __html: autoDarkCss }} />}
 
       {/* Preview Container */}
