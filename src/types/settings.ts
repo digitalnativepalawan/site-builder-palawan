@@ -108,6 +108,11 @@ export function getTemplateDefaults(template: string): SiteSettingsData {
     social_links: SOCIAL_PLATFORMS.map(p => ({ platform: p, url: "", visible: false })),
     seo: { metaTitle: "", metaDescription: "", ogImageUrl: "", gaId: "" },
     custom_css: "",
+    logo_settings: {
+      headerLogoUrl: "", headerLogoSize: 120, headerLogoPosition: "left",
+      heroLogoEnabled: false, heroLogoUrl: "", heroLogoUseSameAsHeader: true, heroLogoSize: 180,
+      faviconUrl: "", addShadow: false, addWhiteBorder: false,
+    },
   };
 
   if (template === "blog") {

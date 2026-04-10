@@ -11,11 +11,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle, ImageIcon } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Json } from "@/integrations/supabase/types";
 import {
   type SiteSettingsData, type SiteColors, type SiteTypography, type SiteLayout,
   type SiteButtons, type SiteIdentity, type SiteNavigation, type SocialLink, type SiteSeo, type NavLink,
+  type LogoSettings,
   getTemplateDefaults, FONT_OPTIONS_HEADING, FONT_OPTIONS_BODY,
 } from "@/types/settings";
 
