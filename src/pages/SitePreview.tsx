@@ -135,6 +135,7 @@ export default function SitePreview() {
   const headerSettings = { ...defaultHeaderSettings, ...(ss?.header_settings as Partial<SiteSettingsData["header_settings"]> || {}) };
   const footerSettings = { ...defaultFooterSettings, ...(ss?.footer_settings as Partial<SiteSettingsData["footer_settings"]> || {}) };
   const navSettings = ss?.navigation as SiteSettingsData["navigation"] | undefined;
+  const themeMode = (ss?.theme_mode as SiteSettingsData["theme_mode"]) || "light";
 
   // Parse social links and display settings
   const rawSocial = ss?.social_links;
@@ -150,27 +151,57 @@ export default function SitePreview() {
     }
   }
 
-  // Derive header/footer colors from Colors tab
-  const headerBg = colors?.cardBg || "#ffffff";
+  // Dark mode color overrides
+  const darkColors = {
+    background: "#0f0f0f",
+    text: "#e5e5e5",
+    heading: "#ffffff",
+    cardBg: "#1a1a1a",
+  };
+
+  // Derive header/footer colors based on effective theme
+  const headerBg = themeMode === "dark" ? darkColors.cardBg : (colors?.cardBg || "#ffffff");
   const headerTextColor = isDark(headerBg) ? "#f8fafc" : "#1e293b";
-  const footerBg = colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b";
+  const footerBg = themeMode === "dark" ? "#0a0a0a" : (colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b");
   const footerTextColor = isDark(footerBg) ? "#e2e8f0" : "#1e293b";
 
+  // Determine effective colors based on theme mode
+  const effectiveColors = colors ? (() => {
+    if (themeMode === "dark") {
+      return { ...colors, background: darkColors.background, text: darkColors.text, heading: darkColors.heading, cardBg: darkColors.cardBg };
+    }
+    return colors;
+  })() : undefined;
+
   const cssVars: React.CSSProperties = {
-    ...(colors ? {
-      "--site-primary": colors.primary,
-      "--site-bg": colors.background,
-      "--site-text": colors.text,
-      "--site-heading": colors.heading,
-      "--site-card-bg": colors.cardBg,
+    ...(effectiveColors ? {
+      "--site-primary": effectiveColors.primary,
+      "--site-bg": effectiveColors.background,
+      "--site-text": effectiveColors.text,
+      "--site-heading": effectiveColors.heading,
+      "--site-card-bg": effectiveColors.cardBg,
     } as React.CSSProperties : {}),
   };
 
   const wrapperStyle: React.CSSProperties = {
     ...cssVars,
-    ...(colors ? { backgroundColor: colors.background, color: colors.text } : {}),
+    ...(effectiveColors ? { backgroundColor: effectiveColors.background, color: effectiveColors.text } : {}),
     ...(typo ? { fontFamily: typo.bodyFont } : {}),
   };
+
+  // Dark-mode CSS for "auto" mode using prefers-color-scheme
+  const autoDarkCss = themeMode === "auto" ? `
+    @media (prefers-color-scheme: dark) {
+      .site-preview-wrapper {
+        background-color: ${darkColors.background} !important;
+        color: ${darkColors.text} !important;
+        --site-bg: ${darkColors.background};
+        --site-text: ${darkColors.text};
+        --site-heading: ${darkColors.heading};
+        --site-card-bg: ${darkColors.cardBg};
+      }
+    }
+  ` : "";
 
   const renderSection = (section: { id: string; section_type: string; data: ReturnType<typeof parseSectionData> }) => {
     const { data } = section;
@@ -237,6 +268,7 @@ export default function SitePreview() {
 
       {/* Custom CSS */}
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
+      {autoDarkCss && <style dangerouslySetInnerHTML={{ __html: autoDarkCss }} />}
 
       {/* Preview Container */}
       <div className="flex-1 overflow-auto flex justify-center p-4">
@@ -244,7 +276,7 @@ export default function SitePreview() {
           className={`transition-all duration-300 ${device !== "desktop" ? "shadow-2xl border rounded-lg overflow-hidden" : "w-full"}`}
           style={{ maxWidth: deviceWidths[device], width: "100%", minHeight: "100%" }}
         >
-          <div className={`min-h-screen max-w-full overflow-x-hidden ${!colors ? style.bg : ""}`} style={wrapperStyle}>
+          <div className={`site-preview-wrapper min-h-screen max-w-full overflow-x-hidden ${!effectiveColors ? style.bg : ""}`} style={wrapperStyle}>
             {/* ═══ HEADER ═══ */}
             {headerSettings.visible && (
               <header

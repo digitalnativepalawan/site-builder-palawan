@@ -52,6 +52,7 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
     logo_settings: { ...d.logo_settings, ...(row.logo_settings as LogoSettings || {}) },
     header_settings: { ...d.header_settings, ...(row.header_settings as HeaderSettings || {}) },
     footer_settings: { ...d.footer_settings, ...(row.footer_settings as FooterSettings || {}) },
+    theme_mode: (row.theme_mode as SiteSettingsData["theme_mode"]) || "light",
   };
 }
 
@@ -137,6 +138,7 @@ export default function SiteSettings() {
         logo_settings: s.logo_settings as unknown as Json,
         header_settings: s.header_settings as unknown as Json,
         footer_settings: s.footer_settings as unknown as Json,
+        theme_mode: s.theme_mode,
       }).eq("site_id", siteId!);
       if (error) throw error;
     },
@@ -304,6 +306,43 @@ export default function SiteSettings() {
                 <Label className="capitalize">{k === "cardBg" ? "Card Background" : k}</Label>
               </div>
             ))}
+
+            {/* Theme Mode */}
+            <div className="mt-6 pt-6 border-t space-y-3">
+              <Label className="text-base font-semibold">Theme Mode</Label>
+              <p className="text-sm text-muted-foreground">Choose how your site appears to visitors.</p>
+              <Select value={settings.theme_mode} onValueChange={v => upd("theme_mode", v as SiteSettingsData["theme_mode"])}>
+                <SelectTrigger className="min-h-[44px] w-full max-w-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">☀️ Light</SelectItem>
+                  <SelectItem value="dark">🌙 Dark</SelectItem>
+                  <SelectItem value="auto">💻 Auto (system preference)</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Theme preview cards */}
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {/* Light preview */}
+                <div className={`rounded-lg border p-4 ${settings.theme_mode === "light" ? "ring-2 ring-primary" : "opacity-60"}`} style={{ backgroundColor: c.background, color: c.text }}>
+                  <p className="text-xs font-medium mb-1" style={{ color: c.heading }}>Light Mode</p>
+                  <div className="h-2 rounded w-3/4 mb-1" style={{ backgroundColor: c.heading, opacity: 0.2 }} />
+                  <div className="h-2 rounded w-1/2" style={{ backgroundColor: c.text, opacity: 0.15 }} />
+                  <div className="mt-2 rounded p-2" style={{ backgroundColor: c.cardBg }}>
+                    <div className="h-1.5 rounded w-2/3" style={{ backgroundColor: c.text, opacity: 0.15 }} />
+                  </div>
+                </div>
+                {/* Dark preview */}
+                <div className={`rounded-lg border p-4 ${settings.theme_mode === "dark" ? "ring-2 ring-primary" : settings.theme_mode === "auto" ? "ring-1 ring-primary/50" : "opacity-60"}`} style={{ backgroundColor: "#0f0f0f", color: "#e5e5e5" }}>
+                  <p className="text-xs font-medium mb-1" style={{ color: "#ffffff" }}>Dark Mode</p>
+                  <div className="h-2 rounded w-3/4 mb-1" style={{ backgroundColor: "#ffffff", opacity: 0.2 }} />
+                  <div className="h-2 rounded w-1/2" style={{ backgroundColor: "#e5e5e5", opacity: 0.15 }} />
+                  <div className="mt-2 rounded p-2" style={{ backgroundColor: "#1a1a1a" }}>
+                    <div className="h-1.5 rounded w-2/3" style={{ backgroundColor: "#e5e5e5", opacity: 0.15 }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 rounded-lg border p-6" style={{ backgroundColor: c.background, color: c.text }}>
               <h3 style={{ color: c.heading, fontWeight: 700, fontSize: 20 }}>Preview Heading</h3>
               <p className="mt-2">This is body text on the chosen background.</p>

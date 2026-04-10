@@ -64,6 +64,7 @@ export type Database = {
           site_id: string
           site_identity: Json
           social_links: Json
+          theme_mode: string
           typography: Json
           updated_at: string
         }
@@ -81,6 +82,7 @@ export type Database = {
           site_id: string
           site_identity?: Json
           social_links?: Json
+          theme_mode?: string
           typography?: Json
           updated_at?: string
         }
@@ -98,6 +100,7 @@ export type Database = {
           site_id?: string
           site_identity?: Json
           social_links?: Json
+          theme_mode?: string
           typography?: Json
           updated_at?: string
         }
