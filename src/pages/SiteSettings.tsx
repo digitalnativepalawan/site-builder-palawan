@@ -18,13 +18,17 @@ import type { Json } from "@/integrations/supabase/types";
 import {
   type SiteSettingsData, type SiteColors, type SiteTypography, type SiteLayout,
   type SiteButtons, type SiteIdentity, type SiteNavigation, type SocialLink, type SiteSeo, type NavLink,
-  type LogoSettings, type HeaderSettings, type FooterSettings,
+  type LogoSettings, type HeaderSettings, type FooterSettings, type SocialDisplaySettings,
   getTemplateDefaults, FONT_OPTIONS_HEADING, FONT_OPTIONS_BODY,
-  defaultHeaderSettings, defaultFooterSettings,
+  defaultHeaderSettings, defaultFooterSettings, defaultSocialDisplay,
 } from "@/types/settings";
 
 function parseSettings(row: Record<string, unknown>): SiteSettingsData {
   const d = getTemplateDefaults("business");
+  // social_display is stored inside the social_links JSONB as a nested key, or separately
+  const rawSocial = row.social_links as any;
+  const socialDisplay = rawSocial?._display ? { ...d.social_display, ...rawSocial._display } : d.social_display;
+  const socialLinks = Array.isArray(rawSocial) ? (rawSocial as SocialLink[]) : d.social_links;
   return {
     colors: { ...d.colors, ...(row.colors as SiteColors || {}) },
     typography: { ...d.typography, ...(row.typography as SiteTypography || {}) },
@@ -32,7 +36,8 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
     buttons: { ...d.buttons, ...(row.buttons as SiteButtons || {}) },
     site_identity: { ...d.site_identity, ...(row.site_identity as SiteIdentity || {}) },
     navigation: { ...d.navigation, ...(row.navigation as SiteNavigation || {}) },
-    social_links: Array.isArray(row.social_links) ? (row.social_links as SocialLink[]) : d.social_links,
+    social_links: socialLinks,
+    social_display: socialDisplay,
     seo: { ...d.seo, ...(row.seo as SiteSeo || {}) },
     custom_css: (row.custom_css as string) || "",
     logo_settings: { ...d.logo_settings, ...(row.logo_settings as LogoSettings || {}) },
