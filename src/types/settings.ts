@@ -66,6 +66,38 @@ export interface LogoSettings {
   addWhiteBorder: boolean;
 }
 
+export interface HeaderSettings {
+  visible: boolean;
+  sticky: boolean;
+  bgColor: string;
+  layout: "logo-left" | "logo-center";
+  height: "60px" | "72px" | "80px";
+  ctaVisible: boolean;
+  ctaText: string;
+  ctaLink: string;
+}
+
+export interface FooterSettings {
+  visible: boolean;
+  columns: 2 | 3 | 4;
+  showLogo: boolean;
+  copyrightText: string;
+  bgColor: string;
+  showBackToTop: boolean;
+}
+
+export const defaultHeaderSettings: HeaderSettings = {
+  visible: true, sticky: false, bgColor: "#ffffff",
+  layout: "logo-left", height: "72px",
+  ctaVisible: false, ctaText: "", ctaLink: "",
+};
+
+export const defaultFooterSettings: FooterSettings = {
+  visible: true, columns: 3, showLogo: false,
+  copyrightText: "© {year} {site name}", bgColor: "#1e293b",
+  showBackToTop: false,
+};
+
 export interface SiteSettingsData {
   colors: SiteColors;
   typography: SiteTypography;
@@ -77,6 +109,8 @@ export interface SiteSettingsData {
   seo: SiteSeo;
   custom_css: string;
   logo_settings: LogoSettings;
+  header_settings: HeaderSettings;
+  footer_settings: FooterSettings;
 }
 
 const SOCIAL_PLATFORMS = ["Twitter", "Instagram", "Facebook", "LinkedIn", "GitHub", "TikTok"];
@@ -113,6 +147,8 @@ export function getTemplateDefaults(template: string): SiteSettingsData {
       heroLogoEnabled: false, heroLogoUrl: "", heroLogoUseSameAsHeader: true, heroLogoSize: 180,
       faviconUrl: "", addShadow: false, addWhiteBorder: false,
     },
+    header_settings: { ...defaultHeaderSettings },
+    footer_settings: { ...defaultFooterSettings },
   };
 
   if (template === "blog") {

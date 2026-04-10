@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Monitor, Tablet, Smartphone, ArrowLeft } from "lucide-react";
+import { Loader2, Monitor, Tablet, Smartphone, ArrowLeft, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { parseSectionData } from "@/types/sections";
 import type { SiteSettingsData } from "@/types/settings";
+import { defaultHeaderSettings, defaultFooterSettings } from "@/types/settings";
 import {
   CoverSection, TextSection, PhotoSection, BulletListSection, PricingSection,
   FaqSection, TwoColumnsSection, KeyNumbersSection, NumberCardsSection,
@@ -75,6 +76,9 @@ export default function SitePreview() {
   const customCss = (ss?.custom_css as string) || "";
   const identity = ss?.site_identity as SiteSettingsData["site_identity"] | undefined;
   const logoSettings = ss?.logo_settings as SiteSettingsData["logo_settings"] | undefined;
+  const headerSettings = { ...defaultHeaderSettings, ...(ss?.header_settings as Partial<SiteSettingsData["header_settings"]> || {}) };
+  const footerSettings = { ...defaultFooterSettings, ...(ss?.footer_settings as Partial<SiteSettingsData["footer_settings"]> || {}) };
+  const navSettings = ss?.navigation as SiteSettingsData["navigation"] | undefined;
   const spacingMap = { compact: "2rem", comfortable: "3rem", relaxed: "4.5rem" };
 
   const cssVars: React.CSSProperties = {
@@ -115,6 +119,9 @@ export default function SitePreview() {
     }
   };
 
+  const copyrightText = footerSettings.copyrightText
+    .replace("{year}", String(new Date().getFullYear()))
+    .replace("{site name}", site.site_name);
   const footerText = identity?.footerText || `${site.site_name} · © ${new Date().getFullYear()}`;
 
   // Google fonts link
@@ -161,20 +168,53 @@ export default function SitePreview() {
           style={{ maxWidth: deviceWidths[device], width: "100%", minHeight: "100%" }}
         >
           <div className={`min-h-screen max-w-full overflow-x-hidden ${!colors ? style.bg : ""}`} style={wrapperStyle}>
-            {/* Header with logo */}
-            {logoSettings?.headerLogoUrl && (
-              <header className={`px-4 sm:px-6 lg:px-8 py-3 border-b border-current/10 flex items-center ${logoSettings.headerLogoPosition === "center" ? "justify-center" : "justify-start"}`}>
-                <img
-                  src={logoSettings.headerLogoUrl}
-                  alt="Site logo"
-                  style={{
-                    height: device === "mobile" ? logoSettings.headerLogoSize * 0.8 : logoSettings.headerLogoSize,
-                    maxHeight: 80,
-                    objectFit: "contain" as const,
-                    ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
-                    ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
-                  }}
-                />
+            {/* Header */}
+            {headerSettings.visible && (
+              <header
+                className={`px-4 sm:px-6 lg:px-8 border-b border-current/10 ${headerSettings.sticky ? "sticky top-0 z-50" : ""} ${headerSettings.layout === "logo-center" ? "flex flex-col items-center" : "flex items-center justify-between"}`}
+                style={{ backgroundColor: headerSettings.bgColor, minHeight: headerSettings.height }}
+              >
+                <div className={`flex items-center gap-3 ${headerSettings.layout === "logo-center" ? "justify-center" : ""}`}>
+                  {logoSettings?.headerLogoUrl ? (
+                    <img
+                      src={logoSettings.headerLogoUrl}
+                      alt="Site logo"
+                      style={{
+                        height: device === "mobile" ? (logoSettings.headerLogoSize || 120) * 0.8 : (logoSettings.headerLogoSize || 120),
+                        maxHeight: 80,
+                        objectFit: "contain" as const,
+                        ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+                        ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+                      }}
+                    />
+                  ) : (
+                    <span style={{ color: colors?.heading || "#0f172a", fontWeight: 700 }}>{identity?.siteTitle || site.site_name}</span>
+                  )}
+                </div>
+                {headerSettings.layout === "logo-left" && (
+                  <div className="flex items-center gap-4">
+                    {navSettings?.links?.map((link, i) => (
+                      <a key={i} href={link.url} className="text-sm hover:opacity-70" style={{ color: colors?.text }}>{link.label}</a>
+                    ))}
+                    {headerSettings.ctaVisible && headerSettings.ctaText && (
+                      <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
+                        {headerSettings.ctaText}
+                      </a>
+                    )}
+                  </div>
+                )}
+                {headerSettings.layout === "logo-center" && navSettings?.links && navSettings.links.length > 0 && (
+                  <div className="flex items-center gap-4 pb-2">
+                    {navSettings.links.map((link, i) => (
+                      <a key={i} href={link.url} className="text-sm hover:opacity-70" style={{ color: colors?.text }}>{link.label}</a>
+                    ))}
+                    {headerSettings.ctaVisible && headerSettings.ctaText && (
+                      <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
+                        {headerSettings.ctaText}
+                      </a>
+                    )}
+                  </div>
+                )}
               </header>
             )}
             {/* Hero logo injection */}
@@ -203,9 +243,28 @@ export default function SitePreview() {
               }
               return renderSection(section);
             })}
-            <footer className={`py-8 px-4 border-t ${!colors ? `${style.text} opacity-50` : "opacity-50"} text-center text-sm`}>
-              <p>{footerText}</p>
-            </footer>
+            {/* Footer */}
+            {footerSettings.visible && (
+              <footer className="py-8 px-4 text-sm" style={{ backgroundColor: footerSettings.bgColor, color: "#e2e8f0" }}>
+                <div className={`max-w-5xl mx-auto grid gap-6`} style={{ gridTemplateColumns: `repeat(${footerSettings.columns}, 1fr)` }}>
+                  {footerSettings.showLogo && logoSettings?.headerLogoUrl && (
+                    <div className="flex items-start">
+                      <img src={logoSettings.headerLogoUrl} alt="Logo" style={{ height: 40, objectFit: "contain" as const }} />
+                    </div>
+                  )}
+                  <div className={footerSettings.showLogo ? "" : `col-span-${footerSettings.columns}`}>
+                    <p className="opacity-70">{copyrightText}</p>
+                  </div>
+                </div>
+                {footerSettings.showBackToTop && (
+                  <div className="flex justify-center mt-6">
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-1 text-xs opacity-60 hover:opacity-100 transition-opacity" style={{ color: "#e2e8f0" }}>
+                      <ArrowUp className="h-3 w-3" /> Back to Top
+                    </button>
+                  </div>
+                )}
+              </footer>
+            )}
           </div>
         </div>
       </div>

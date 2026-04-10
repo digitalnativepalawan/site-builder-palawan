@@ -18,8 +18,9 @@ import type { Json } from "@/integrations/supabase/types";
 import {
   type SiteSettingsData, type SiteColors, type SiteTypography, type SiteLayout,
   type SiteButtons, type SiteIdentity, type SiteNavigation, type SocialLink, type SiteSeo, type NavLink,
-  type LogoSettings,
+  type LogoSettings, type HeaderSettings, type FooterSettings,
   getTemplateDefaults, FONT_OPTIONS_HEADING, FONT_OPTIONS_BODY,
+  defaultHeaderSettings, defaultFooterSettings,
 } from "@/types/settings";
 
 function parseSettings(row: Record<string, unknown>): SiteSettingsData {
@@ -35,6 +36,8 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
     seo: { ...d.seo, ...(row.seo as SiteSeo || {}) },
     custom_css: (row.custom_css as string) || "",
     logo_settings: { ...d.logo_settings, ...(row.logo_settings as LogoSettings || {}) },
+    header_settings: { ...d.header_settings, ...(row.header_settings as HeaderSettings || {}) },
+    footer_settings: { ...d.footer_settings, ...(row.footer_settings as FooterSettings || {}) },
   };
 }
 
@@ -92,6 +95,8 @@ export default function SiteSettings() {
         seo: defaults.seo as unknown as Json,
         custom_css: defaults.custom_css,
         logo_settings: defaults.logo_settings as unknown as Json,
+        header_settings: defaults.header_settings as unknown as Json,
+        footer_settings: defaults.footer_settings as unknown as Json,
       }).then(({ error }) => {
         if (!error) qc.invalidateQueries({ queryKey: ["site-settings", siteId] });
       });
@@ -114,6 +119,8 @@ export default function SiteSettings() {
         seo: s.seo as unknown as Json,
         custom_css: s.custom_css,
         logo_settings: s.logo_settings as unknown as Json,
+        header_settings: s.header_settings as unknown as Json,
+        footer_settings: s.footer_settings as unknown as Json,
       }).eq("site_id", siteId!);
       if (error) throw error;
     },
@@ -238,6 +245,8 @@ export default function SiteSettings() {
   const isPng = (url: string) => url.toLowerCase().endsWith(".png") || url.toLowerCase().endsWith(".svg");
   const logoVisibilityWarning = logo.headerLogoUrl && c.background && !isPng(logo.headerLogoUrl);
   const effectiveHeroLogo = logo.heroLogoUseSameAsHeader ? logo.headerLogoUrl : logo.heroLogoUrl;
+  const hdr = settings.header_settings;
+  const ftr = settings.footer_settings;
 
   const logoImgStyle = (size: number): React.CSSProperties => ({
     height: size,
@@ -264,7 +273,7 @@ export default function SiteSettings() {
       <div className="flex-1 p-4 sm:p-6 max-w-3xl mx-auto w-full">
         <Tabs defaultValue="colors" className="w-full">
           <TabsList className="w-full flex flex-wrap h-auto gap-1 mb-6">
-            {["colors", "typography", "layout", "buttons", "logo", "identity", "navigation", "social", "seo", "domain", "backup"].map(tab => (
+            {["colors", "typography", "layout", "buttons", "logo", "identity", "navigation", "social", "seo", "header", "footer", "domain", "backup"].map(tab => (
               <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">
                 {tab === "logo" ? "Logo & Branding" : tab === "domain" ? "Domain" : tab === "backup" ? "Backup" : tab}
               </TabsTrigger>
@@ -619,6 +628,98 @@ export default function SiteSettings() {
               <Textarea value={settings.custom_css} onChange={e => upd("custom_css" as keyof SiteSettingsData, e.target.value as never)} rows={8} className="font-mono text-sm" placeholder=".my-class { color: red; }" />
             </div>
           </TabsContent>
+
+          {/* TAB: HEADER SETTINGS */}
+          <TabsContent value="header" className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={hdr.visible} onCheckedChange={v => upd("header_settings", { ...hdr, visible: v })} />
+              <Label>Show Header</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={hdr.sticky} onCheckedChange={v => upd("header_settings", { ...hdr, sticky: v })} />
+              <Label>Sticky Header</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="color" value={hdr.bgColor} onChange={e => upd("header_settings", { ...hdr, bgColor: e.target.value })} className="h-10 w-14 rounded border cursor-pointer" />
+              <Label>Header Background Color</Label>
+            </div>
+            <div>
+              <Label>Layout</Label>
+              <Select value={hdr.layout} onValueChange={v => upd("header_settings", { ...hdr, layout: v as HeaderSettings["layout"] })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="logo-left">Logo left + nav right</SelectItem>
+                  <SelectItem value="logo-center">Logo center + nav below</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Desktop Height</Label>
+              <Select value={hdr.height} onValueChange={v => upd("header_settings", { ...hdr, height: v as HeaderSettings["height"] })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="60px">60px</SelectItem>
+                  <SelectItem value="72px">72px</SelectItem>
+                  <SelectItem value="80px">80px</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <hr className="border-border" />
+            <h3 className="font-heading text-base font-semibold">CTA Button</h3>
+            <div className="flex items-center gap-3">
+              <Switch checked={hdr.ctaVisible} onCheckedChange={v => upd("header_settings", { ...hdr, ctaVisible: v })} />
+              <Label>Show CTA Button</Label>
+            </div>
+            {hdr.ctaVisible && (
+              <div className="space-y-3 pl-4 border-l-2 border-primary/20">
+                <div>
+                  <Label>Button Text</Label>
+                  <Input value={hdr.ctaText} onChange={e => upd("header_settings", { ...hdr, ctaText: e.target.value })} className="min-h-[44px]" placeholder="Get Started" />
+                </div>
+                <div>
+                  <Label>Button Link</Label>
+                  <Input value={hdr.ctaLink} onChange={e => upd("header_settings", { ...hdr, ctaLink: e.target.value })} className="min-h-[44px]" placeholder="https://..." />
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* TAB: FOOTER SETTINGS */}
+          <TabsContent value="footer" className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={ftr.visible} onCheckedChange={v => upd("footer_settings", { ...ftr, visible: v })} />
+              <Label>Show Footer</Label>
+            </div>
+            <div>
+              <Label>Columns</Label>
+              <Select value={String(ftr.columns)} onValueChange={v => upd("footer_settings", { ...ftr, columns: Number(v) as 2 | 3 | 4 })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2 Columns</SelectItem>
+                  <SelectItem value="3">3 Columns</SelectItem>
+                  <SelectItem value="4">4 Columns</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={ftr.showLogo} onCheckedChange={v => upd("footer_settings", { ...ftr, showLogo: v })} />
+              <Label>Show Logo in Footer</Label>
+            </div>
+            <div>
+              <Label>Copyright Text</Label>
+              <Input value={ftr.copyrightText} onChange={e => upd("footer_settings", { ...ftr, copyrightText: e.target.value })} className="min-h-[44px]" placeholder="© {year} {site name}" />
+              <p className="text-xs text-muted-foreground mt-1">Use <code className="bg-muted px-1 rounded">{"{year}"}</code> and <code className="bg-muted px-1 rounded">{"{site name}"}</code> as dynamic variables.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="color" value={ftr.bgColor} onChange={e => upd("footer_settings", { ...ftr, bgColor: e.target.value })} className="h-10 w-14 rounded border cursor-pointer" />
+              <Label>Footer Background Color</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={ftr.showBackToTop} onCheckedChange={v => upd("footer_settings", { ...ftr, showBackToTop: v })} />
+              <Label>Show "Back to Top" Button</Label>
+            </div>
+          </TabsContent>
+
           {/* TAB: CUSTOM DOMAIN */}
           <TabsContent value="domain" className="space-y-6">
             <div className="space-y-4">
