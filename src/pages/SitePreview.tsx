@@ -175,21 +175,21 @@ export default function SitePreview() {
   const renderSection = (section: { id: string; section_type: string; data: ReturnType<typeof parseSectionData> }) => {
     const { data } = section;
     switch (section.section_type) {
-      case "cover": case "hero": return <CoverSection key={section.id} data={data} style={style} />;
-      case "text_block": return <TextSection key={section.id} data={data} style={style} />;
-      case "photo": return <PhotoSection key={section.id} data={data} />;
-      case "image_gallery": return <ImageGallerySection key={section.id} data={data} />;
-      case "bullet_list": return <BulletListSection key={section.id} data={data} style={style} />;
-      case "pricing": return <PricingSection key={section.id} data={data} style={style} />;
-      case "faq": return <FaqSection key={section.id} data={data} style={style} />;
-      case "two_columns": return <TwoColumnsSection key={section.id} data={data} style={style} />;
-      case "key_numbers": return <KeyNumbersSection key={section.id} data={data} style={style} />;
-      case "number_cards": return <NumberCardsSection key={section.id} data={data} style={style} />;
-      case "timeline": return <TimelineSection key={section.id} data={data} style={style} />;
-      case "youtube": return <YoutubeSection key={section.id} data={data} style={style} />;
-      case "contact_form": return <ContactFormSection key={section.id} data={data} style={style} />;
-      case "separator": return <SeparatorSection key={section.id} data={data} />;
-      case "cta": return <CtaSection key={section.id} data={data} style={style} />;
+      case "cover": case "hero": return <CoverSection key={section.id} data={data} style={style} device={device} />;
+      case "text_block": return <TextSection key={section.id} data={data} style={style} device={device} />;
+      case "photo": return <PhotoSection key={section.id} data={data} device={device} />;
+      case "image_gallery": return <ImageGallerySection key={section.id} data={data} device={device} />;
+      case "bullet_list": return <BulletListSection key={section.id} data={data} style={style} device={device} />;
+      case "pricing": return <PricingSection key={section.id} data={data} style={style} device={device} />;
+      case "faq": return <FaqSection key={section.id} data={data} style={style} device={device} />;
+      case "two_columns": return <TwoColumnsSection key={section.id} data={data} style={style} device={device} />;
+      case "key_numbers": return <KeyNumbersSection key={section.id} data={data} style={style} device={device} />;
+      case "number_cards": return <NumberCardsSection key={section.id} data={data} style={style} device={device} />;
+      case "timeline": return <TimelineSection key={section.id} data={data} style={style} device={device} />;
+      case "youtube": return <YoutubeSection key={section.id} data={data} style={style} device={device} />;
+      case "contact_form": return <ContactFormSection key={section.id} data={data} style={style} device={device} />;
+      case "separator": return <SeparatorSection key={section.id} data={data} device={device} />;
+      case "cta": return <CtaSection key={section.id} data={data} style={style} device={device} />;
       default: return null;
     }
   };
