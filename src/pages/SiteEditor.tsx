@@ -264,6 +264,7 @@ export default function SiteEditor() {
                   <CardContent className="flex items-center gap-3 p-4">
                     <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {(() => { const Icon = SECTION_ICONS[section.section_type]; return Icon ? <Icon className="h-5 w-5 text-muted-foreground shrink-0" /> : null; })()}
                       <span className="font-medium truncate">{sectionLabel(section.section_type)}</span>
                       {section.data.headline && (
                         <span className="text-sm text-muted-foreground truncate hidden sm:inline">— {section.data.headline}</span>
@@ -309,9 +310,9 @@ export default function SiteEditor() {
                             className="min-h-[44px] justify-start gap-2 text-left h-auto py-3"
                             onClick={() => addSection.mutate(s.type)}
                           >
-                            <span className="text-lg shrink-0">{s.label.split(" ")[0]}</span>
+                            {(() => { const Icon = SECTION_ICONS[s.type]; return Icon ? <Icon className="h-5 w-5 shrink-0" /> : null; })()}
                             <div className="min-w-0">
-                              <div className="font-medium text-sm truncate">{s.label.slice(s.label.indexOf(" ") + 1)}</div>
+                              <div className="font-medium text-sm truncate">{s.label}</div>
                               <div className="text-xs text-muted-foreground truncate">{s.desc}</div>
                             </div>
                           </Button>
