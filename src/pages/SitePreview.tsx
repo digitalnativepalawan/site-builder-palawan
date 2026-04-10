@@ -125,8 +125,6 @@ export default function SitePreview() {
   }
 
   const baseStyle = templateStyles[site.template as keyof typeof templateStyles] || templateStyles.business;
-  // When custom colors (or dark mode) are active, strip template bg classes so inline colors take effect
-  const style = effectiveColors ? { ...baseStyle, bg: "" } : baseStyle;
 
   const ss = settingsRow as unknown as Record<string, unknown> | null;
   const colors = ss?.colors as SiteSettingsData["colors"] | undefined;
