@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,7 +59,7 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
 export default function SiteSettings() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  
   const { toast } = useToast();
   const qc = useQueryClient();
   const [settings, setSettings] = useState<SiteSettingsData | null>(null);
@@ -150,9 +150,9 @@ export default function SiteSettings() {
   });
 
   const uploadFile = async (file: File) => {
-    if (!user || !siteId) return null;
+    if (!siteId) return null;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/${siteId}/${crypto.randomUUID()}.${ext}`;
+    const path = `dev/${siteId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("site-assets").upload(path, file);
     if (error) return null;
     return supabase.storage.from("site-assets").getPublicUrl(path).data.publicUrl;

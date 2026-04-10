@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -25,7 +25,7 @@ import {
 export default function SiteEditor() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingSection, setEditingSection] = useState<Section | null>(null);
@@ -145,9 +145,9 @@ export default function SiteEditor() {
 
   // --- Upload helpers ---
   const uploadFile = async (file: File) => {
-    if (!user || !siteId) return null;
+    if (!siteId) return null;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/${siteId}/${crypto.randomUUID()}.${ext}`;
+    const path = `dev/${siteId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("site-assets").upload(path, file);
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return null; }
     return supabase.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
