@@ -175,6 +175,14 @@ export default function SiteEditor() {
     setUploading(false);
   };
 
+  const SECTION_ICONS: Record<string, LucideIcon> = {
+    cover: LayoutTemplate, hero: LayoutTemplate, text_block: AlignLeft, photo: Image,
+    image_gallery: Image, bullet_list: List, pricing: CreditCard, faq: HelpCircle,
+    two_columns: Columns2, key_numbers: Hash, number_cards: Grid3x3, timeline: Clock,
+    youtube: Youtube, contact_form: Mail, separator: Minus, cta: Megaphone,
+    split_layout: Columns2, grid_cards: Grid3x3,
+  };
+
   const isCoverType = (s: Section) => s.section_type === "cover" || s.section_type === "hero";
 
   const renderEditPanel = () => {
