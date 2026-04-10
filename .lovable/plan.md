@@ -1,73 +1,43 @@
 
 
-## Plan: Mobile Hamburger Menu, Color Sync, Social Icons, and Mobile Responsive Fixes
+## Plan: Fix Mobile Preview with iframe + Responsive Issues
 
-### Overview
-Four interconnected changes: (1) hamburger menu for mobile header, (2) remove color pickers from header/footer tabs and derive colors from the Colors tab, (3) social icon display in header/footer with settings, (4) comprehensive mobile responsive fixes for all section renderers.
+### Problem
+The preview simulates mobile by narrowing a `<div>` container, but CSS media queries (`sm:`, `lg:`) respond to the **browser viewport**, not the container. This means all responsive behavior (hamburger menu, single columns, left alignment) never triggers in mobile preview mode.
 
-### 1. Remove Color Pickers from Header & Footer Tabs (`SiteSettings.tsx`)
+### Solution
+Wrap the site preview content in an `<iframe>` using `srcdoc` so CSS breakpoints respond to the iframe's actual width (375px for mobile, 768px for tablet).
 
-- **Header tab** (line 642-645): Remove the `bgColor` color picker. Add a note: "Header uses Card Background color from the Colors tab."
-- **Footer tab** (line 713-715): Remove the `bgColor` color picker. Add a note: "Footer uses a dark variant of your Primary color."
-- Preview (`SitePreview.tsx`): Header uses `colors.cardBg` for background. Footer uses `colors.primary` (or a darkened variant). Auto-calculate contrasting text color (light text on dark bg, dark on light).
+### Implementation
 
-### 2. Social Icons in Header & Footer
+**File: `src/pages/SitePreview.tsx`**
 
-**Types** (`src/types/settings.ts`):
-- Add to `SocialLink`: `showInHeader: boolean` (default false), `showInFooter: boolean` (default true)
-- Add to `SiteSettingsData` or a new field: `socialIconStyle: "rounded" | "square" | "text"` (default "rounded")
+1. Extract the entire site content (header + sections + footer) into a standalone HTML string rendered via `<iframe srcdoc={...}>`.
+2. The iframe gets `width: 375px` / `768px` / `100%` based on the device mode, so real CSS breakpoints activate correctly.
+3. Include Tailwind CSS and Google Fonts in the iframe's `<head>`.
+4. The hamburger menu, single-column grids, left-aligned text, and all responsive classes will work naturally since the iframe viewport IS the simulated device width.
 
-**Settings UI** (`SiteSettings.tsx`, Social tab):
-- Add "Show social icons in header" toggle
-- Add "Show social icons in footer" toggle  
-- Add "Icon style" select: Rounded / Square / Just text
+**Alternative (simpler, no iframe):** Pass the `device` mode as a prop to all section renderers and the header/footer, and use JS-driven conditional classes instead of CSS breakpoints. E.g., `device === "mobile" ? "text-left" : "text-center"`. This avoids iframe complexity but requires touching every component.
 
-**Preview** (`SitePreview.tsx`):
-- Render visible social links as icons (using Lucide icons for Twitter/GitHub/LinkedIn or simple SVG) in header (next to CTA) and footer (own column)
+### Recommended: Prop-based approach
+The iframe approach requires duplicating all CSS/fonts in the iframe and handling scroll/navigation. The prop-based approach is simpler:
 
-### 3. Mobile Hamburger Menu (`SitePreview.tsx`)
-
-- Add a hamburger icon button visible at `sm:` breakpoint and below
-- On click, toggle a full-width dropdown/slide-down with nav links stacked vertically, CTA button full-width, and social icons
-- Desktop: unchanged layout. Mobile: logo + hamburger only in the header bar
-
-### 4. Mobile Responsive Fixes (`SectionRenderers.tsx`)
-
-Apply consistent mobile rules to ALL section renderers:
-
-| Rule | Implementation |
-|------|---------------|
-| Full width | `px-5` on mobile (20px), responsive `sm:px-6 lg:px-8` |
-| Left align on mobile | `text-left sm:text-center` where center is used |
-| 1-column grids | Already using `grid-cols-1 sm:grid-cols-2` — verify all |
-| Full-width images | `w-full h-auto` — verify |
-| Consistent gap | `py-12` (48px) on all sections |
-| Font sizes | Explicit `text-[28px] sm:text-3xl lg:text-4xl` for headlines, `text-base` min for body |
-| Buttons | `w-full sm:w-auto` + `min-h-[44px]` + vertical stack on mobile |
-| No horizontal scroll | `overflow-x-hidden` on wrapper, `max-w-full` on all containers |
-
-**Sections to update:**
-- **CoverSection**: Left-align text on mobile, stack buttons vertically, ensure headline 28px min
-- **TextSection**: Already mostly fine, verify padding
-- **PhotoSection**: Ensure full-width image
-- **BulletListSection**: Force single column on mobile regardless of `two-col` setting
-- **PricingSection**: Force `grid-cols-1` on mobile
-- **FaqSection**: Verify padding consistency
-- **TwoColumnsSection**: Already stacks, verify gap
-- **KeyNumbersSection**: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`
-- **NumberCardsSection**: `grid-cols-1` on mobile
-- **TimelineSection**: Full-width events
-- **YoutubeSection**: Full-width video
-- **ContactFormSection**: Full-width inputs (already done)
-- **CtaSection**: Left-align on mobile, full-width button
-- **Header/Footer**: Hamburger menu handles this
+1. Pass `device` prop to all renderers and header/footer
+2. Replace `sm:text-center` with `{device !== "mobile" ? "text-center" : "text-left"}`
+3. Replace `sm:grid-cols-2` with `{device !== "mobile" ? "grid-cols-2" : "grid-cols-1"}`
+4. Replace `hidden sm:flex` / `flex sm:hidden` with device checks
+5. This ensures the hamburger menu, column stacking, and alignment all work correctly in preview
 
 ### Files Changed
 
 | File | Change |
 |------|--------|
-| `src/types/settings.ts` | Add `socialIconStyle`, update `SocialLink` with header/footer toggles |
-| `src/pages/SiteSettings.tsx` | Remove color pickers from header/footer tabs, add social display options |
-| `src/pages/SitePreview.tsx` | Color sync, hamburger menu, social icons in header/footer |
-| `src/components/preview/SectionRenderers.tsx` | Mobile responsive fixes for all 14 section types |
+| `src/components/preview/SectionRenderers.tsx` | Add `device` prop to all renderers, replace CSS breakpoints with device-conditional classes |
+| `src/pages/SitePreview.tsx` | Pass `device` to all renderers and header/footer, fix hamburger visibility |
+
+### Scope
+- All 14 section renderers updated
+- Header hamburger menu fixed
+- Footer responsive layout fixed
+- No database changes needed
 
