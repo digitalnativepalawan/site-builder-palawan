@@ -54,6 +54,8 @@ export type Database = {
           buttons: Json
           colors: Json
           custom_css: string | null
+          footer_settings: Json
+          header_settings: Json
           id: string
           layout: Json
           logo_settings: Json
@@ -69,6 +71,8 @@ export type Database = {
           buttons?: Json
           colors?: Json
           custom_css?: string | null
+          footer_settings?: Json
+          header_settings?: Json
           id?: string
           layout?: Json
           logo_settings?: Json
@@ -84,6 +88,8 @@ export type Database = {
           buttons?: Json
           colors?: Json
           custom_css?: string | null
+          footer_settings?: Json
+          header_settings?: Json
           id?: string
           layout?: Json
           logo_settings?: Json
