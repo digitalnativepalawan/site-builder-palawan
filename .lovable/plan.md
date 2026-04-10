@@ -1,57 +1,80 @@
 
 
-## Plan: Update Site Editor to 5 Simple Block Types
+## Plan: Site Settings Page + Device Preview Toolbar
 
-### Summary
-Replace the current 4 section types (hero, text_block, image_gallery, video) with 5 new block types: **Hero**, **Text Block**, **Image Gallery**, **Split Layout**, and **Grid/Cards**. The Hero block is always present and non-deletable. The "video" type is removed.
+### 1. Database Migration
 
-### Data Model Changes
+Create `site_settings` table with RLS policies matching the `sites` table ownership pattern:
 
-No database migration needed -- the `site_content` table already stores `section_type` (text) and `data` (jsonb), which is flexible enough. We just change the types and data shapes used in code.
-
-New `SectionData` interface covers all block types:
-
-```text
-Hero:        headline, subheadline, body, buttonText, buttonUrl, buttonText2, buttonUrl2, backgroundImage
-Text Block:  headline, body, alignment (left|center), width (narrow|normal), background (white|light-gray)
-Image Gallery: images[], layout (single|2-col|3-col)
-Split Layout: headline, body, imageUrl, imageAlt, imagePosition (left|right), buttonText, buttonUrl
-Grid/Cards:  headline, cards[] (each: image, title, subtitle, description), columns (2|3|4)
+```sql
+CREATE TABLE public.site_settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_id uuid NOT NULL REFERENCES public.sites(id) ON DELETE CASCADE UNIQUE,
+  colors jsonb NOT NULL DEFAULT '{}',
+  typography jsonb NOT NULL DEFAULT '{}',
+  layout jsonb NOT NULL DEFAULT '{}',
+  buttons jsonb NOT NULL DEFAULT '{}',
+  site_identity jsonb NOT NULL DEFAULT '{}',
+  navigation jsonb NOT NULL DEFAULT '{}',
+  social_links jsonb NOT NULL DEFAULT '{}',
+  seo jsonb NOT NULL DEFAULT '{}',
+  custom_css text DEFAULT '',
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 ```
 
-### Editor Changes (SiteEditor.tsx)
+RLS: owners can CRUD via `sites.user_id = auth.uid()`, public can SELECT for published sites.
 
-1. **Replace section types** -- remove "video", add "split_layout" and "grid_cards"
-2. **Hero enforcement** -- auto-create hero at order_index 0 if none exists; hide delete button on hero; hero always shows first in the list
-3. **Add Block picker** -- 4 buttons: Text Block, Image Gallery, Split Layout, Grid/Cards (no Hero button since it's auto-created)
-4. **Edit panel per block type**:
-   - **Text Block**: headline, body textarea, alignment select (left/center), width select (narrow/normal), background select (white/light gray)
-   - **Image Gallery**: image upload (existing logic), layout select (single/2-col/3-col), caption inputs
-   - **Split Layout**: image upload (single), image position toggle (left/right), headline, body, optional button
-   - **Grid/Cards**: headline, dynamic card list (add/remove cards), each card has image upload, title, subtitle, description, columns select (2/3/4)
-   - **Hero**: headline, subheadline, body, two CTA buttons (text+url), background image upload
-5. **Reorder** -- keep existing up/down arrow approach (drag-to-reorder via @dnd-kit is a separate enhancement)
+### 2. New Files
 
-### Preview Changes (SitePreview.tsx)
-
-1. **Remove** `VideoSection`
-2. **Add** `SplitLayoutSection` -- flexbox row, image on one side, text on other, stacks vertically on mobile
-3. **Add** `GridCardsSection` -- responsive CSS grid (1 col mobile, 2 col tablet, user-chosen cols desktop), each card with image, title, subtitle, description
-4. **Update** `TextSection` -- respect alignment, width, background props
-5. **Update** `HeroSection` -- support background image and second CTA button
-6. **Update** `ImageGallerySection` -- respect layout prop (single/2-col/3-col) instead of auto 1-2-3-4 grid
-
-### Files Modified
-
-| File | Changes |
+| File | Purpose |
 |------|---------|
-| `src/pages/SiteEditor.tsx` | Full rewrite of block types, edit forms, hero enforcement |
-| `src/pages/SitePreview.tsx` | Add split/grid renderers, update text/hero/gallery renderers |
+| `src/pages/SiteSettings.tsx` | Settings page with 8 tabs (Colors, Typography, Layout, Buttons, Identity, Navigation, Social, SEO/CSS) |
+| `src/types/settings.ts` | TypeScript interfaces for each settings JSONB column + template defaults |
 
-### Technical Details
+### 3. Modified Files
 
-- Existing hero/text_block/image_gallery data in the DB remains compatible (new fields are optional)
-- Old "video" sections in DB will render as null (graceful fallback)
-- Image uploads reuse existing Supabase Storage logic
-- No new dependencies needed
+| File | Change |
+|------|--------|
+| `src/App.tsx` | Add route `/sites/:siteId/settings` → `SiteSettings` |
+| `src/pages/SiteEditor.tsx` | Add "Settings" button in top bar linking to settings page |
+| `src/pages/SitePreview.tsx` | Fetch `site_settings`, apply as CSS variables + inline styles; add device preview toolbar (mobile/tablet/desktop buttons with iframe resize) |
+
+### 4. Settings Page Details
+
+- **8 shadcn Tabs** in a scrollable layout
+- Each tab loads/saves its respective JSONB column
+- On first visit, auto-creates a `site_settings` row with template-specific defaults (Blog/Portfolio/Business)
+- Color pickers use native `<input type="color">`
+- Font dropdowns use shadcn Select
+- Upload fields (logo, favicon, OG image) use existing Supabase Storage upload pattern
+- Nav links manager: dynamic list with add/remove/reorder
+- Social links: 6 platform rows with URL input + show/hide Switch
+- Save button persists all tabs at once
+
+### 5. Device Preview Toolbar
+
+- Fixed bar at top of preview page with 3 buttons: Mobile (375px), Tablet (768px), Desktop (100%)
+- Wraps the site content in an iframe or a `<div>` with constrained `max-width` + centered layout
+- "Back to Editor" button included
+
+### 6. Applying Settings to Public Site
+
+In `SitePreview.tsx`:
+- Query `site_settings` alongside site data
+- Inject CSS variables on a wrapper div: `--color-primary`, `--color-bg`, `--color-text`, `--color-heading`, `--color-card-bg`
+- Apply font families via inline style on wrapper
+- Apply content width, spacing, border radius as CSS variables
+- Inject `custom_css` via a `<style>` tag
+- Section renderers read these CSS variables instead of hardcoded template classes
+
+### 7. Template Defaults
+
+Stored in `src/types/settings.ts` and used when auto-creating settings:
+
+- **Blog**: Playfair Display headings, Lora body, relaxed spacing, narrow width, sharp radius
+- **Portfolio**: Montserrat headings, Inter body, comfortable spacing, wide width, sharp radius  
+- **Business**: Inter headings, Inter body, comfortable spacing, standard width, 4px radius
+
+Each template also gets matching default colors derived from the existing `templateStyles` object.
 
