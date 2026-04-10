@@ -150,9 +150,9 @@ export default function SiteSettings() {
   });
 
   const uploadFile = async (file: File) => {
-    if (!user || !siteId) return null;
+    if (!siteId) return null;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/${siteId}/${crypto.randomUUID()}.${ext}`;
+    const path = `dev/${siteId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("site-assets").upload(path, file);
     if (error) return null;
     return supabase.storage.from("site-assets").getPublicUrl(path).data.publicUrl;
