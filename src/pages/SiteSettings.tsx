@@ -245,6 +245,8 @@ export default function SiteSettings() {
   const isPng = (url: string) => url.toLowerCase().endsWith(".png") || url.toLowerCase().endsWith(".svg");
   const logoVisibilityWarning = logo.headerLogoUrl && c.background && !isPng(logo.headerLogoUrl);
   const effectiveHeroLogo = logo.heroLogoUseSameAsHeader ? logo.headerLogoUrl : logo.heroLogoUrl;
+  const hdr = settings.header_settings;
+  const ftr = settings.footer_settings;
 
   const logoImgStyle = (size: number): React.CSSProperties => ({
     height: size,
