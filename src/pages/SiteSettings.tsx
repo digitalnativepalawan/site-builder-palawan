@@ -25,10 +25,19 @@ import {
 
 function parseSettings(row: Record<string, unknown>): SiteSettingsData {
   const d = getTemplateDefaults("business");
-  // social_display is stored inside the social_links JSONB as a nested key, or separately
-  const rawSocial = row.social_links as any;
-  const socialDisplay = rawSocial?._display ? { ...d.social_display, ...rawSocial._display } : d.social_display;
-  const socialLinks = Array.isArray(rawSocial) ? (rawSocial as SocialLink[]) : d.social_links;
+  // social_display might be stored as last element with _display key
+  const rawSocial = row.social_links;
+  let socialLinks = d.social_links;
+  let socialDisplay = d.social_display;
+  if (Array.isArray(rawSocial)) {
+    const displayItem = rawSocial.find((item: any) => item && typeof item === "object" && "_display" in item);
+    if (displayItem) {
+      socialDisplay = { ...d.social_display, ...(displayItem as any)._display };
+      socialLinks = rawSocial.filter((item: any) => !(item && typeof item === "object" && "_display" in item)) as SocialLink[];
+    } else {
+      socialLinks = rawSocial as SocialLink[];
+    }
+  }
   return {
     colors: { ...d.colors, ...(row.colors as SiteColors || {}) },
     typography: { ...d.typography, ...(row.typography as SiteTypography || {}) },
