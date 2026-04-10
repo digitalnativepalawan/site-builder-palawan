@@ -124,7 +124,7 @@ export default function SitePreview() {
     return <div className="flex min-h-screen items-center justify-center"><div className="text-center"><h1 className="font-heading text-4xl font-bold mb-2">404</h1><p className="text-muted-foreground">Site not found</p></div></div>;
   }
 
-  const style = templateStyles[site.template as keyof typeof templateStyles] || templateStyles.business;
+  const baseStyle = templateStyles[site.template as keyof typeof templateStyles] || templateStyles.business;
 
   const ss = settingsRow as unknown as Record<string, unknown> | null;
   const colors = ss?.colors as SiteSettingsData["colors"] | undefined;
@@ -172,6 +172,9 @@ export default function SitePreview() {
     }
     return colors;
   })() : undefined;
+
+  // When custom colors (or dark mode) are active, strip template bg classes so inline colors take effect
+  const style = effectiveColors ? { ...baseStyle, bg: "" } : baseStyle;
 
   const cssVars: React.CSSProperties = {
     ...(effectiveColors ? {
