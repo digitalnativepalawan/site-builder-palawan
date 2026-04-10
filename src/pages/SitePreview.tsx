@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Monitor, Tablet, Smartphone, ArrowLeft } from "lucide-react";
+import { Loader2, Monitor, Tablet, Smartphone, ArrowLeft, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { parseSectionData } from "@/types/sections";
 import type { SiteSettingsData } from "@/types/settings";
+import { defaultHeaderSettings, defaultFooterSettings } from "@/types/settings";
 import {
   CoverSection, TextSection, PhotoSection, BulletListSection, PricingSection,
   FaqSection, TwoColumnsSection, KeyNumbersSection, NumberCardsSection,
@@ -75,6 +76,9 @@ export default function SitePreview() {
   const customCss = (ss?.custom_css as string) || "";
   const identity = ss?.site_identity as SiteSettingsData["site_identity"] | undefined;
   const logoSettings = ss?.logo_settings as SiteSettingsData["logo_settings"] | undefined;
+  const headerSettings = { ...defaultHeaderSettings, ...(ss?.header_settings as Partial<SiteSettingsData["header_settings"]> || {}) };
+  const footerSettings = { ...defaultFooterSettings, ...(ss?.footer_settings as Partial<SiteSettingsData["footer_settings"]> || {}) };
+  const navSettings = ss?.navigation as SiteSettingsData["navigation"] | undefined;
   const spacingMap = { compact: "2rem", comfortable: "3rem", relaxed: "4.5rem" };
 
   const cssVars: React.CSSProperties = {
@@ -115,6 +119,9 @@ export default function SitePreview() {
     }
   };
 
+  const copyrightText = footerSettings.copyrightText
+    .replace("{year}", String(new Date().getFullYear()))
+    .replace("{site name}", site.site_name);
   const footerText = identity?.footerText || `${site.site_name} · © ${new Date().getFullYear()}`;
 
   // Google fonts link
