@@ -124,6 +124,7 @@ export interface SiteSettingsData {
   logo_settings: LogoSettings;
   header_settings: HeaderSettings;
   footer_settings: FooterSettings;
+  theme_mode: "light" | "dark" | "auto";
 }
 
 const SOCIAL_PLATFORMS = ["Twitter", "Instagram", "Facebook", "LinkedIn", "GitHub", "TikTok"];
@@ -163,6 +164,7 @@ export function getTemplateDefaults(template: string): SiteSettingsData {
     },
     header_settings: { ...defaultHeaderSettings },
     footer_settings: { ...defaultFooterSettings },
+    theme_mode: "light",
   };
 
   if (template === "blog") {
