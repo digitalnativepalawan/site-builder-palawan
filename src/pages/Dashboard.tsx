@@ -26,7 +26,7 @@ function SidebarNav() {
 
   const links = [
     { icon: LayoutDashboard, label: "My Sites", onClick: () => navigate("/dashboard") },
-    { icon: Settings, label: "Account", onClick: () => {} },
+    { icon: Settings, label: "Account", onClick: () => navigate("/account") },
     { icon: LogOut, label: "Logout", onClick: signOut },
   ];
 

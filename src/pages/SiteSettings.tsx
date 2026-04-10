@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle, ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle, ImageIcon, Globe, Download, Upload, CheckCircle, XCircle } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Json } from "@/integrations/supabase/types";
@@ -46,6 +46,10 @@ export default function SiteSettings() {
   const qc = useQueryClient();
   const [settings, setSettings] = useState<SiteSettingsData | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [customDomain, setCustomDomain] = useState("");
+  const [domainSaving, setDomainSaving] = useState(false);
+  const [domainStatus, setDomainStatus] = useState<"idle" | "checking" | "ok" | "fail">("idle");
+  const backupInputRef = useRef<HTMLInputElement>(null);
 
   const { data: site } = useQuery({
     queryKey: ["site", siteId],
@@ -55,6 +59,11 @@ export default function SiteSettings() {
       return data;
     },
   });
+
+  // Sync custom_domain from site data
+  useEffect(() => {
+    if (site?.custom_domain) setCustomDomain(site.custom_domain);
+  }, [site]);
 
   const { data: existingRow, isLoading } = useQuery({
     queryKey: ["site-settings", siteId],
@@ -137,6 +146,83 @@ export default function SiteSettings() {
     return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
+  const saveCustomDomain = async () => {
+    setDomainSaving(true);
+    const { error } = await supabase.from("sites").update({ custom_domain: customDomain || null } as any).eq("id", siteId!);
+    setDomainSaving(false);
+    if (error) {
+      toast({ title: "Error saving domain", description: error.message, variant: "destructive" });
+    } else {
+      qc.invalidateQueries({ queryKey: ["site", siteId] });
+      toast({ title: "Custom domain saved!" });
+    }
+  };
+
+  const verifyDomain = async () => {
+    if (!customDomain) return;
+    setDomainStatus("checking");
+    try {
+      const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(customDomain)}&type=CNAME`);
+      const json = await res.json();
+      setDomainStatus(json.Answer ? "ok" : "fail");
+    } catch {
+      setDomainStatus("fail");
+    }
+  };
+
+  const downloadBackup = async () => {
+    const { data: content } = await supabase.from("site_content").select("*").eq("site_id", siteId!);
+    const { data: settingsData } = await supabase.from("site_settings").select("*").eq("site_id", siteId!).maybeSingle();
+    const backup = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      site_id: siteId,
+      site_content: content || [],
+      site_settings: settingsData || {},
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backup-${site?.site_name || siteId}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Backup downloaded!" });
+  };
+
+  const restoreBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const backup = JSON.parse(text);
+      if (!backup.site_content || !backup.site_settings) throw new Error("Invalid backup file");
+
+      // Restore settings
+      const { version, exported_at, site_id: _sid, ...settingsToRestore } = backup.site_settings;
+      await supabase.from("site_settings").update(settingsToRestore).eq("site_id", siteId!);
+
+      // Delete existing content and re-insert
+      await supabase.from("site_content").delete().eq("site_id", siteId!);
+      if (backup.site_content.length > 0) {
+        const rows = backup.site_content.map((row: any) => ({
+          site_id: siteId!,
+          section_type: row.section_type,
+          data: row.data,
+          order_index: row.order_index,
+        }));
+        await supabase.from("site_content").insert(rows);
+      }
+
+      qc.invalidateQueries({ queryKey: ["site-settings", siteId] });
+      qc.invalidateQueries({ queryKey: ["site-content", siteId] });
+      toast({ title: "Backup restored successfully!" });
+    } catch (err: any) {
+      toast({ title: "Restore failed", description: err.message, variant: "destructive" });
+    }
+    if (backupInputRef.current) backupInputRef.current.value = "";
+  };
+
   const upd = <K extends keyof SiteSettingsData>(key: K, val: SiteSettingsData[K]) =>
     setSettings(prev => prev ? { ...prev, [key]: val } : prev);
 
@@ -178,8 +264,10 @@ export default function SiteSettings() {
       <div className="flex-1 p-4 sm:p-6 max-w-3xl mx-auto w-full">
         <Tabs defaultValue="colors" className="w-full">
           <TabsList className="w-full flex flex-wrap h-auto gap-1 mb-6">
-            {["colors", "typography", "layout", "buttons", "logo", "identity", "navigation", "social", "seo"].map(tab => (
-              <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">{tab === "logo" ? "Logo & Branding" : tab}</TabsTrigger>
+            {["colors", "typography", "layout", "buttons", "logo", "identity", "navigation", "social", "seo", "domain", "backup"].map(tab => (
+              <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">
+                {tab === "logo" ? "Logo & Branding" : tab === "domain" ? "Domain" : tab === "backup" ? "Backup" : tab}
+              </TabsTrigger>
             ))}
           </TabsList>
 
@@ -529,6 +617,94 @@ export default function SiteSettings() {
             <div>
               <Label>Custom CSS</Label>
               <Textarea value={settings.custom_css} onChange={e => upd("custom_css" as keyof SiteSettingsData, e.target.value as never)} rows={8} className="font-mono text-sm" placeholder=".my-class { color: red; }" />
+            </div>
+          </TabsContent>
+          {/* TAB: CUSTOM DOMAIN */}
+          <TabsContent value="domain" className="space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2">
+                <Globe className="h-4 w-4" /> Custom Domain
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Connect your own domain name to this site.
+              </p>
+              <div className="space-y-2">
+                <Label>Custom Domain</Label>
+                <Input
+                  value={customDomain}
+                  onChange={e => setCustomDomain(e.target.value.trim())}
+                  placeholder="www.mybusiness.com"
+                  className="min-h-[44px]"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button className="min-h-[44px] gap-2" onClick={saveCustomDomain} disabled={domainSaving}>
+                  {domainSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  Save Domain
+                </Button>
+                <Button variant="outline" className="min-h-[44px] gap-2" onClick={verifyDomain} disabled={!customDomain || domainStatus === "checking"}>
+                  {domainStatus === "checking" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
+                  Verify DNS
+                </Button>
+              </div>
+              {domainStatus === "ok" && (
+                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md p-3">
+                  <CheckCircle className="h-4 w-4 shrink-0" /> DNS is properly configured! Your domain is pointing correctly.
+                </div>
+              )}
+              {domainStatus === "fail" && (
+                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  <XCircle className="h-4 w-4 shrink-0" /> DNS not yet configured. Please add the CNAME record and wait for propagation (up to 48 hours).
+                </div>
+              )}
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold">DNS Setup Instructions</h3>
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-2 text-sm">
+                <p className="font-medium">Add the following DNS record at your domain registrar:</p>
+                <div className="rounded border bg-background p-3 font-mono text-xs space-y-1">
+                  <p><strong>Type:</strong> CNAME</p>
+                  <p><strong>Name:</strong> {customDomain?.startsWith("www.") ? "www" : "@"}</p>
+                  <p><strong>Value:</strong> cname.vercel-dns.com</p>
+                  <p><strong>TTL:</strong> 3600 (or Auto)</p>
+                </div>
+                <p className="text-muted-foreground mt-2">
+                  DNS changes can take up to 48 hours to propagate. After adding the record, click "Verify DNS" to check.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB: BACKUP & RESTORE */}
+          <TabsContent value="backup" className="space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2">
+                <Download className="h-4 w-4" /> Download Backup
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Export all your site content and settings as a JSON file. Use this to keep a safe copy of your work.
+              </p>
+              <Button className="min-h-[44px] gap-2" onClick={downloadBackup}>
+                <Download className="h-4 w-4" /> Download Backup
+              </Button>
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2">
+                <Upload className="h-4 w-4" /> Restore from Backup
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Upload a previously downloaded backup file to restore your site's content and settings.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>Restoring will <strong>overwrite</strong> all current content and settings. This cannot be undone.</span>
+              </div>
+              <input type="file" ref={backupInputRef} accept=".json" className="hidden" onChange={restoreBackup} />
+              <Button variant="outline" className="min-h-[44px] gap-2" onClick={() => backupInputRef.current?.click()}>
+                <Upload className="h-4 w-4" /> Upload & Restore
+              </Button>
             </div>
           </TabsContent>
         </Tabs>

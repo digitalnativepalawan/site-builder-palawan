@@ -108,6 +108,7 @@ export type Database = {
       sites: {
         Row: {
           created_at: string
+          custom_domain: string | null
           id: string
           site_name: string
           status: string
@@ -118,6 +119,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          custom_domain?: string | null
           id?: string
           site_name: string
           status?: string
@@ -128,6 +130,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          custom_domain?: string | null
           id?: string
           site_name?: string
           status?: string
