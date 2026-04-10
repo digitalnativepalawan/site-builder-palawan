@@ -20,13 +20,10 @@ function generateSubdomain(name: string): string {
 }
 
 function SidebarNav() {
-  const { signOut } = useAuth();
   const navigate = useNavigate();
 
   const links = [
     { icon: LayoutDashboard, label: "My Sites", onClick: () => navigate("/dashboard") },
-    { icon: Settings, label: "Account", onClick: () => navigate("/account") },
-    { icon: LogOut, label: "Logout", onClick: signOut },
   ];
 
   return (
@@ -50,7 +47,7 @@ function SidebarNav() {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const DEV_USER_ID = "00000000-0000-0000-0000-000000000000";
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -71,7 +68,7 @@ export default function Dashboard() {
   const createSite = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.from("sites").insert({
-        user_id: user!.id,
+        user_id: DEV_USER_ID,
         site_name: newSiteName,
         subdomain: generateSubdomain(newSiteName),
         template: newTemplate,

@@ -59,7 +59,7 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
 export default function SiteSettings() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  
   const { toast } = useToast();
   const qc = useQueryClient();
   const [settings, setSettings] = useState<SiteSettingsData | null>(null);

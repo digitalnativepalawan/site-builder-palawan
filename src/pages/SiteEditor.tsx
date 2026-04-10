@@ -25,7 +25,7 @@ import {
 export default function SiteEditor() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingSection, setEditingSection] = useState<Section | null>(null);
