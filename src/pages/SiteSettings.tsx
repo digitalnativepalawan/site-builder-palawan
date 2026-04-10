@@ -34,6 +34,7 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
     social_links: Array.isArray(row.social_links) ? (row.social_links as SocialLink[]) : d.social_links,
     seo: { ...d.seo, ...(row.seo as SiteSeo || {}) },
     custom_css: (row.custom_css as string) || "",
+    logo_settings: { ...d.logo_settings, ...(row.logo_settings as LogoSettings || {}) },
   };
 }
 
