@@ -46,6 +46,10 @@ export default function SiteSettings() {
   const qc = useQueryClient();
   const [settings, setSettings] = useState<SiteSettingsData | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [customDomain, setCustomDomain] = useState("");
+  const [domainSaving, setDomainSaving] = useState(false);
+  const [domainStatus, setDomainStatus] = useState<"idle" | "checking" | "ok" | "fail">("idle");
+  const backupInputRef = useRef<HTMLInputElement>(null);
 
   const { data: site } = useQuery({
     queryKey: ["site", siteId],
