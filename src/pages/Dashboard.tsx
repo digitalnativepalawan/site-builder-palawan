@@ -47,7 +47,7 @@ function SidebarNav() {
 }
 
 export default function Dashboard() {
-  const DEV_USER_ID = "00000000-0000-0000-0000-000000000000";
+  const DEV_USER_ID = "4f66ea34-fdde-44aa-8d98-99c2a5a89f16";
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
