@@ -60,6 +60,11 @@ export default function SiteSettings() {
     },
   });
 
+  // Sync custom_domain from site data
+  useEffect(() => {
+    if (site?.custom_domain) setCustomDomain(site.custom_domain);
+  }, [site]);
+
   const { data: existingRow, isLoading } = useQuery({
     queryKey: ["site-settings", siteId],
     queryFn: async () => {
