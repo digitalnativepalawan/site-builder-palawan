@@ -619,6 +619,94 @@ export default function SiteSettings() {
               <Textarea value={settings.custom_css} onChange={e => upd("custom_css" as keyof SiteSettingsData, e.target.value as never)} rows={8} className="font-mono text-sm" placeholder=".my-class { color: red; }" />
             </div>
           </TabsContent>
+          {/* TAB: CUSTOM DOMAIN */}
+          <TabsContent value="domain" className="space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2">
+                <Globe className="h-4 w-4" /> Custom Domain
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Connect your own domain name to this site.
+              </p>
+              <div className="space-y-2">
+                <Label>Custom Domain</Label>
+                <Input
+                  value={customDomain}
+                  onChange={e => setCustomDomain(e.target.value.trim())}
+                  placeholder="www.mybusiness.com"
+                  className="min-h-[44px]"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button className="min-h-[44px] gap-2" onClick={saveCustomDomain} disabled={domainSaving}>
+                  {domainSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  Save Domain
+                </Button>
+                <Button variant="outline" className="min-h-[44px] gap-2" onClick={verifyDomain} disabled={!customDomain || domainStatus === "checking"}>
+                  {domainStatus === "checking" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
+                  Verify DNS
+                </Button>
+              </div>
+              {domainStatus === "ok" && (
+                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md p-3">
+                  <CheckCircle className="h-4 w-4 shrink-0" /> DNS is properly configured! Your domain is pointing correctly.
+                </div>
+              )}
+              {domainStatus === "fail" && (
+                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  <XCircle className="h-4 w-4 shrink-0" /> DNS not yet configured. Please add the CNAME record and wait for propagation (up to 48 hours).
+                </div>
+              )}
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold">DNS Setup Instructions</h3>
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-2 text-sm">
+                <p className="font-medium">Add the following DNS record at your domain registrar:</p>
+                <div className="rounded border bg-background p-3 font-mono text-xs space-y-1">
+                  <p><strong>Type:</strong> CNAME</p>
+                  <p><strong>Name:</strong> {customDomain?.startsWith("www.") ? "www" : "@"}</p>
+                  <p><strong>Value:</strong> cname.vercel-dns.com</p>
+                  <p><strong>TTL:</strong> 3600 (or Auto)</p>
+                </div>
+                <p className="text-muted-foreground mt-2">
+                  DNS changes can take up to 48 hours to propagate. After adding the record, click "Verify DNS" to check.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB: BACKUP & RESTORE */}
+          <TabsContent value="backup" className="space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2">
+                <Download className="h-4 w-4" /> Download Backup
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Export all your site content and settings as a JSON file. Use this to keep a safe copy of your work.
+              </p>
+              <Button className="min-h-[44px] gap-2" onClick={downloadBackup}>
+                <Download className="h-4 w-4" /> Download Backup
+              </Button>
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2">
+                <Upload className="h-4 w-4" /> Restore from Backup
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Upload a previously downloaded backup file to restore your site's content and settings.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>Restoring will <strong>overwrite</strong> all current content and settings. This cannot be undone.</span>
+              </div>
+              <input type="file" ref={backupInputRef} accept=".json" className="hidden" onChange={restoreBackup} />
+              <Button variant="outline" className="min-h-[44px] gap-2" onClick={() => backupInputRef.current?.click()}>
+                <Upload className="h-4 w-4" /> Upload & Restore
+              </Button>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
