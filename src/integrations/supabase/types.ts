@@ -49,6 +49,59 @@ export type Database = {
           },
         ]
       }
+      site_settings: {
+        Row: {
+          buttons: Json
+          colors: Json
+          custom_css: string | null
+          id: string
+          layout: Json
+          navigation: Json
+          seo: Json
+          site_id: string
+          site_identity: Json
+          social_links: Json
+          typography: Json
+          updated_at: string
+        }
+        Insert: {
+          buttons?: Json
+          colors?: Json
+          custom_css?: string | null
+          id?: string
+          layout?: Json
+          navigation?: Json
+          seo?: Json
+          site_id: string
+          site_identity?: Json
+          social_links?: Json
+          typography?: Json
+          updated_at?: string
+        }
+        Update: {
+          buttons?: Json
+          colors?: Json
+          custom_css?: string | null
+          id?: string
+          layout?: Json
+          navigation?: Json
+          seo?: Json
+          site_id?: string
+          site_identity?: Json
+          social_links?: Json
+          typography?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_settings_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: true
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sites: {
         Row: {
           created_at: string
