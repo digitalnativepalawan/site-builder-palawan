@@ -243,9 +243,28 @@ export default function SitePreview() {
               }
               return renderSection(section);
             })}
-            <footer className={`py-8 px-4 border-t ${!colors ? `${style.text} opacity-50` : "opacity-50"} text-center text-sm`}>
-              <p>{footerText}</p>
-            </footer>
+            {/* Footer */}
+            {footerSettings.visible && (
+              <footer className="py-8 px-4 text-sm" style={{ backgroundColor: footerSettings.bgColor, color: "#e2e8f0" }}>
+                <div className={`max-w-5xl mx-auto grid gap-6`} style={{ gridTemplateColumns: `repeat(${footerSettings.columns}, 1fr)` }}>
+                  {footerSettings.showLogo && logoSettings?.headerLogoUrl && (
+                    <div className="flex items-start">
+                      <img src={logoSettings.headerLogoUrl} alt="Logo" style={{ height: 40, objectFit: "contain" as const }} />
+                    </div>
+                  )}
+                  <div className={footerSettings.showLogo ? "" : `col-span-${footerSettings.columns}`}>
+                    <p className="opacity-70">{copyrightText}</p>
+                  </div>
+                </div>
+                {footerSettings.showBackToTop && (
+                  <div className="flex justify-center mt-6">
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-1 text-xs opacity-60 hover:opacity-100 transition-opacity" style={{ color: "#e2e8f0" }}>
+                      <ArrowUp className="h-3 w-3" /> Back to Top
+                    </button>
+                  </div>
+                )}
+              </footer>
+            )}
           </div>
         </div>
       </div>
