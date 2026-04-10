@@ -151,12 +151,6 @@ export default function SitePreview() {
     }
   }
 
-  // Derive header/footer colors based on effective theme
-  const headerBg = themeMode === "dark" ? darkColors.cardBg : (colors?.cardBg || "#ffffff");
-  const headerTextColor = isDark(headerBg) ? "#f8fafc" : "#1e293b";
-  const footerBg = themeMode === "dark" ? "#0a0a0a" : (colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b");
-  const footerTextColor = isDark(footerBg) ? "#e2e8f0" : "#1e293b";
-
   // Dark mode color overrides
   const darkColors = {
     background: "#0f0f0f",
@@ -164,6 +158,12 @@ export default function SitePreview() {
     heading: "#ffffff",
     cardBg: "#1a1a1a",
   };
+
+  // Derive header/footer colors based on effective theme
+  const headerBg = themeMode === "dark" ? darkColors.cardBg : (colors?.cardBg || "#ffffff");
+  const headerTextColor = isDark(headerBg) ? "#f8fafc" : "#1e293b";
+  const footerBg = themeMode === "dark" ? "#0a0a0a" : (colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b");
+  const footerTextColor = isDark(footerBg) ? "#e2e8f0" : "#1e293b";
 
   // Determine effective colors based on theme mode
   const effectiveColors = colors ? (() => {
