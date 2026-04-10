@@ -46,6 +46,12 @@ export interface SocialLink {
   visible: boolean;
 }
 
+export interface SocialDisplaySettings {
+  showInHeader: boolean;
+  showInFooter: boolean;
+  iconStyle: "rounded" | "square" | "text";
+}
+
 export interface SiteSeo {
   metaTitle: string;
   metaDescription: string;
@@ -86,6 +92,12 @@ export interface FooterSettings {
   showBackToTop: boolean;
 }
 
+export const defaultSocialDisplay: SocialDisplaySettings = {
+  showInHeader: false,
+  showInFooter: true,
+  iconStyle: "rounded",
+};
+
 export const defaultHeaderSettings: HeaderSettings = {
   visible: true, sticky: false, bgColor: "#ffffff",
   layout: "logo-left", height: "72px",
@@ -106,6 +118,7 @@ export interface SiteSettingsData {
   site_identity: SiteIdentity;
   navigation: SiteNavigation;
   social_links: SocialLink[];
+  social_display: SocialDisplaySettings;
   seo: SiteSeo;
   custom_css: string;
   logo_settings: LogoSettings;
@@ -140,6 +153,7 @@ export function getTemplateDefaults(template: string): SiteSettingsData {
     site_identity: { siteTitle: "", logoUrl: "", faviconUrl: "", footerText: "" },
     navigation: { headerStyle: "solid", links: [] },
     social_links: SOCIAL_PLATFORMS.map(p => ({ platform: p, url: "", visible: false })),
+    social_display: { ...defaultSocialDisplay },
     seo: { metaTitle: "", metaDescription: "", ogImageUrl: "", gaId: "" },
     custom_css: "",
     logo_settings: {
