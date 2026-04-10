@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, GripVertical, Eye, Loader2, Save, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Eye, Loader2, Save, ChevronUp, ChevronDown, Settings } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { parseSectionData, sectionLabel, SECTION_TYPES, SECTION_DEFAULTS } from "@/types/sections";
 import type { SectionData, Section } from "@/types/sections";
@@ -225,6 +225,9 @@ export default function SiteEditor() {
           <h1 className="font-heading text-lg font-bold truncate">{site?.site_name || "Loading..."}</h1>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" className="min-h-[44px]" onClick={() => navigate(`/sites/${siteId}/settings`)}>
+            <Settings className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Settings</span>
+          </Button>
           <Button variant="outline" className="min-h-[44px]" onClick={() => navigate(`/preview/${siteId}`)}>
             <Eye className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Preview</span>
           </Button>

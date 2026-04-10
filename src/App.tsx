@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import SiteEditor from "./pages/SiteEditor";
 import SitePreview from "./pages/SitePreview";
+import SiteSettings from "./pages/SiteSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/sites/:siteId/edit" element={<ProtectedRoute><SiteEditor /></ProtectedRoute>} />
+            <Route path="/sites/:siteId/settings" element={<ProtectedRoute><SiteSettings /></ProtectedRoute>} />
             <Route path="/preview/:siteId" element={<SitePreview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
