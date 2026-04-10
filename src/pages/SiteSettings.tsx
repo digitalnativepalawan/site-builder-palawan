@@ -146,6 +146,83 @@ export default function SiteSettings() {
     return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
+  const saveCustomDomain = async () => {
+    setDomainSaving(true);
+    const { error } = await supabase.from("sites").update({ custom_domain: customDomain || null } as any).eq("id", siteId!);
+    setDomainSaving(false);
+    if (error) {
+      toast({ title: "Error saving domain", description: error.message, variant: "destructive" });
+    } else {
+      qc.invalidateQueries({ queryKey: ["site", siteId] });
+      toast({ title: "Custom domain saved!" });
+    }
+  };
+
+  const verifyDomain = async () => {
+    if (!customDomain) return;
+    setDomainStatus("checking");
+    try {
+      const res = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(customDomain)}&type=CNAME`);
+      const json = await res.json();
+      setDomainStatus(json.Answer ? "ok" : "fail");
+    } catch {
+      setDomainStatus("fail");
+    }
+  };
+
+  const downloadBackup = async () => {
+    const { data: content } = await supabase.from("site_content").select("*").eq("site_id", siteId!);
+    const { data: settingsData } = await supabase.from("site_settings").select("*").eq("site_id", siteId!).maybeSingle();
+    const backup = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      site_id: siteId,
+      site_content: content || [],
+      site_settings: settingsData || {},
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backup-${site?.site_name || siteId}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Backup downloaded!" });
+  };
+
+  const restoreBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const backup = JSON.parse(text);
+      if (!backup.site_content || !backup.site_settings) throw new Error("Invalid backup file");
+
+      // Restore settings
+      const { version, exported_at, site_id: _sid, ...settingsToRestore } = backup.site_settings;
+      await supabase.from("site_settings").update(settingsToRestore).eq("site_id", siteId!);
+
+      // Delete existing content and re-insert
+      await supabase.from("site_content").delete().eq("site_id", siteId!);
+      if (backup.site_content.length > 0) {
+        const rows = backup.site_content.map((row: any) => ({
+          site_id: siteId!,
+          section_type: row.section_type,
+          data: row.data,
+          order_index: row.order_index,
+        }));
+        await supabase.from("site_content").insert(rows);
+      }
+
+      qc.invalidateQueries({ queryKey: ["site-settings", siteId] });
+      qc.invalidateQueries({ queryKey: ["site-content", siteId] });
+      toast({ title: "Backup restored successfully!" });
+    } catch (err: any) {
+      toast({ title: "Restore failed", description: err.message, variant: "destructive" });
+    }
+    if (backupInputRef.current) backupInputRef.current.value = "";
+  };
+
   const upd = <K extends keyof SiteSettingsData>(key: K, val: SiteSettingsData[K]) =>
     setSettings(prev => prev ? { ...prev, [key]: val } : prev);
 
