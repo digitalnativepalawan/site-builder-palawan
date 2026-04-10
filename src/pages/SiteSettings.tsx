@@ -113,6 +113,8 @@ export default function SiteSettings() {
 
   const saveMutation = useMutation({
     mutationFn: async (s: SiteSettingsData) => {
+      // Store social_display alongside social_links as a special _display key
+      const socialPayload = [...s.social_links, { _display: s.social_display }] as unknown as Json;
       const { error } = await supabase.from("site_settings").update({
         colors: s.colors as unknown as Json,
         typography: s.typography as unknown as Json,
@@ -120,7 +122,7 @@ export default function SiteSettings() {
         buttons: s.buttons as unknown as Json,
         site_identity: s.site_identity as unknown as Json,
         navigation: s.navigation as unknown as Json,
-        social_links: s.social_links as unknown as Json,
+        social_links: socialPayload,
         seo: s.seo as unknown as Json,
         custom_css: s.custom_css,
         logo_settings: s.logo_settings as unknown as Json,
