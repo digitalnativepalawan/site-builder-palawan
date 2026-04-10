@@ -82,6 +82,7 @@ export default function SiteSettings() {
         social_links: defaults.social_links as unknown as Json,
         seo: defaults.seo as unknown as Json,
         custom_css: defaults.custom_css,
+        logo_settings: defaults.logo_settings as unknown as Json,
       }).then(({ error }) => {
         if (!error) qc.invalidateQueries({ queryKey: ["site-settings", siteId] });
       });
@@ -103,6 +104,7 @@ export default function SiteSettings() {
         social_links: s.social_links as unknown as Json,
         seo: s.seo as unknown as Json,
         custom_css: s.custom_css,
+        logo_settings: s.logo_settings as unknown as Json,
       }).eq("site_id", siteId!);
       if (error) throw error;
     },
