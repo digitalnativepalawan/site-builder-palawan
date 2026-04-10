@@ -173,6 +173,9 @@ export default function SitePreview() {
     return colors;
   })() : undefined;
 
+  // When custom colors (or dark mode) are active, strip template bg classes so inline colors take effect
+  const style = effectiveColors ? { ...baseStyle, bg: "" } : baseStyle;
+
   const cssVars: React.CSSProperties = {
     ...(effectiveColors ? {
       "--site-primary": effectiveColors.primary,
