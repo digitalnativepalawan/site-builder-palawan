@@ -168,20 +168,53 @@ export default function SitePreview() {
           style={{ maxWidth: deviceWidths[device], width: "100%", minHeight: "100%" }}
         >
           <div className={`min-h-screen max-w-full overflow-x-hidden ${!colors ? style.bg : ""}`} style={wrapperStyle}>
-            {/* Header with logo */}
-            {logoSettings?.headerLogoUrl && (
-              <header className={`px-4 sm:px-6 lg:px-8 py-3 border-b border-current/10 flex items-center ${logoSettings.headerLogoPosition === "center" ? "justify-center" : "justify-start"}`}>
-                <img
-                  src={logoSettings.headerLogoUrl}
-                  alt="Site logo"
-                  style={{
-                    height: device === "mobile" ? logoSettings.headerLogoSize * 0.8 : logoSettings.headerLogoSize,
-                    maxHeight: 80,
-                    objectFit: "contain" as const,
-                    ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
-                    ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
-                  }}
-                />
+            {/* Header */}
+            {headerSettings.visible && (
+              <header
+                className={`px-4 sm:px-6 lg:px-8 border-b border-current/10 ${headerSettings.sticky ? "sticky top-0 z-50" : ""} ${headerSettings.layout === "logo-center" ? "flex flex-col items-center" : "flex items-center justify-between"}`}
+                style={{ backgroundColor: headerSettings.bgColor, minHeight: headerSettings.height }}
+              >
+                <div className={`flex items-center gap-3 ${headerSettings.layout === "logo-center" ? "justify-center" : ""}`}>
+                  {logoSettings?.headerLogoUrl ? (
+                    <img
+                      src={logoSettings.headerLogoUrl}
+                      alt="Site logo"
+                      style={{
+                        height: device === "mobile" ? (logoSettings.headerLogoSize || 120) * 0.8 : (logoSettings.headerLogoSize || 120),
+                        maxHeight: 80,
+                        objectFit: "contain" as const,
+                        ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+                        ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+                      }}
+                    />
+                  ) : (
+                    <span style={{ color: colors?.heading || "#0f172a", fontWeight: 700 }}>{identity?.siteTitle || site.site_name}</span>
+                  )}
+                </div>
+                {headerSettings.layout === "logo-left" && (
+                  <div className="flex items-center gap-4">
+                    {navSettings?.links?.map((link, i) => (
+                      <a key={i} href={link.url} className="text-sm hover:opacity-70" style={{ color: colors?.text }}>{link.label}</a>
+                    ))}
+                    {headerSettings.ctaVisible && headerSettings.ctaText && (
+                      <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
+                        {headerSettings.ctaText}
+                      </a>
+                    )}
+                  </div>
+                )}
+                {headerSettings.layout === "logo-center" && navSettings?.links && navSettings.links.length > 0 && (
+                  <div className="flex items-center gap-4 pb-2">
+                    {navSettings.links.map((link, i) => (
+                      <a key={i} href={link.url} className="text-sm hover:opacity-70" style={{ color: colors?.text }}>{link.label}</a>
+                    ))}
+                    {headerSettings.ctaVisible && headerSettings.ctaText && (
+                      <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
+                        {headerSettings.ctaText}
+                      </a>
+                    )}
+                  </div>
+                )}
               </header>
             )}
             {/* Hero logo injection */}
