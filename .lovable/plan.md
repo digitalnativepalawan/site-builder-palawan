@@ -1,55 +1,73 @@
 
 
-## Plan: Add Header and Footer Settings Tabs
+## Plan: Mobile Hamburger Menu, Color Sync, Social Icons, and Mobile Responsive Fixes
 
 ### Overview
-Add two new tabs ("Header" and "Footer") to the Site Settings page, backed by two new JSONB columns in the `site_settings` table. The public preview will read and apply these settings.
+Four interconnected changes: (1) hamburger menu for mobile header, (2) remove color pickers from header/footer tabs and derive colors from the Colors tab, (3) social icon display in header/footer with settings, (4) comprehensive mobile responsive fixes for all section renderers.
 
-### 1. Database Migration
-Add `header_settings` and `footer_settings` JSONB columns (default `'{}'`) to `site_settings`.
+### 1. Remove Color Pickers from Header & Footer Tabs (`SiteSettings.tsx`)
 
-### 2. TypeScript Types (`src/types/settings.ts`)
-Add interfaces:
-```typescript
-interface HeaderSettings {
-  visible: boolean;           // default true
-  sticky: boolean;            // default false
-  bgColor: string;            // default "#ffffff"
-  layout: "logo-left" | "logo-center";  // default "logo-left"
-  height: "60px" | "72px" | "80px";     // default "72px"
-  ctaVisible: boolean;        // default false
-  ctaText: string;
-  ctaLink: string;
-}
+- **Header tab** (line 642-645): Remove the `bgColor` color picker. Add a note: "Header uses Card Background color from the Colors tab."
+- **Footer tab** (line 713-715): Remove the `bgColor` color picker. Add a note: "Footer uses a dark variant of your Primary color."
+- Preview (`SitePreview.tsx`): Header uses `colors.cardBg` for background. Footer uses `colors.primary` (or a darkened variant). Auto-calculate contrasting text color (light text on dark bg, dark on light).
 
-interface FooterSettings {
-  visible: boolean;           // default true
-  columns: 2 | 3 | 4;        // default 3
-  showLogo: boolean;          // default false
-  copyrightText: string;      // default "© {year} {site name}"
-  bgColor: string;            // default "#1e293b"
-  showBackToTop: boolean;     // default false
-}
-```
-Add defaults to `SiteSettingsData` and `getTemplateDefaults`.
+### 2. Social Icons in Header & Footer
 
-### 3. Settings UI (`src/pages/SiteSettings.tsx`)
-- Add "header" and "footer" to the tab list
-- Parse `header_settings` and `footer_settings` in `parseSettings()`
-- Include both in `saveMutation`
-- **Header tab**: show/hide toggle, sticky toggle, color picker, layout select, height select, CTA section with text/link inputs
-- **Footer tab**: show/hide toggle, columns select, show logo toggle, copyright text input (with `{year}`/`{site name}` placeholder hint), color picker, back-to-top toggle
+**Types** (`src/types/settings.ts`):
+- Add to `SocialLink`: `showInHeader: boolean` (default false), `showInFooter: boolean` (default true)
+- Add to `SiteSettingsData` or a new field: `socialIconStyle: "rounded" | "square" | "text"` (default "rounded")
 
-### 4. Public Preview (`src/pages/SitePreview.tsx`)
-- Read `header_settings` and `footer_settings` from the settings row
-- **Header**: Conditionally render based on `visible`. Apply `sticky top-0 z-50`, background color, height, layout mode. Show CTA button if enabled. Render nav links from existing navigation settings.
-- **Footer**: Conditionally render based on `visible`. Apply background color, column layout, logo, copyright text (replace `{year}` and `{site name}` dynamically), and a "Back to Top" scroll button.
+**Settings UI** (`SiteSettings.tsx`, Social tab):
+- Add "Show social icons in header" toggle
+- Add "Show social icons in footer" toggle  
+- Add "Icon style" select: Rounded / Square / Just text
+
+**Preview** (`SitePreview.tsx`):
+- Render visible social links as icons (using Lucide icons for Twitter/GitHub/LinkedIn or simple SVG) in header (next to CTA) and footer (own column)
+
+### 3. Mobile Hamburger Menu (`SitePreview.tsx`)
+
+- Add a hamburger icon button visible at `sm:` breakpoint and below
+- On click, toggle a full-width dropdown/slide-down with nav links stacked vertically, CTA button full-width, and social icons
+- Desktop: unchanged layout. Mobile: logo + hamburger only in the header bar
+
+### 4. Mobile Responsive Fixes (`SectionRenderers.tsx`)
+
+Apply consistent mobile rules to ALL section renderers:
+
+| Rule | Implementation |
+|------|---------------|
+| Full width | `px-5` on mobile (20px), responsive `sm:px-6 lg:px-8` |
+| Left align on mobile | `text-left sm:text-center` where center is used |
+| 1-column grids | Already using `grid-cols-1 sm:grid-cols-2` — verify all |
+| Full-width images | `w-full h-auto` — verify |
+| Consistent gap | `py-12` (48px) on all sections |
+| Font sizes | Explicit `text-[28px] sm:text-3xl lg:text-4xl` for headlines, `text-base` min for body |
+| Buttons | `w-full sm:w-auto` + `min-h-[44px]` + vertical stack on mobile |
+| No horizontal scroll | `overflow-x-hidden` on wrapper, `max-w-full` on all containers |
+
+**Sections to update:**
+- **CoverSection**: Left-align text on mobile, stack buttons vertically, ensure headline 28px min
+- **TextSection**: Already mostly fine, verify padding
+- **PhotoSection**: Ensure full-width image
+- **BulletListSection**: Force single column on mobile regardless of `two-col` setting
+- **PricingSection**: Force `grid-cols-1` on mobile
+- **FaqSection**: Verify padding consistency
+- **TwoColumnsSection**: Already stacks, verify gap
+- **KeyNumbersSection**: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`
+- **NumberCardsSection**: `grid-cols-1` on mobile
+- **TimelineSection**: Full-width events
+- **YoutubeSection**: Full-width video
+- **ContactFormSection**: Full-width inputs (already done)
+- **CtaSection**: Left-align on mobile, full-width button
+- **Header/Footer**: Hamburger menu handles this
 
 ### Files Changed
+
 | File | Change |
 |------|--------|
-| `supabase/migrations/...` | Add 2 JSONB columns |
-| `src/types/settings.ts` | Add interfaces + defaults |
-| `src/pages/SiteSettings.tsx` | Add 2 tabs, parse/save logic |
-| `src/pages/SitePreview.tsx` | Render header/footer from settings |
+| `src/types/settings.ts` | Add `socialIconStyle`, update `SocialLink` with header/footer toggles |
+| `src/pages/SiteSettings.tsx` | Remove color pickers from header/footer tabs, add social display options |
+| `src/pages/SitePreview.tsx` | Color sync, hamburger menu, social icons in header/footer |
+| `src/components/preview/SectionRenderers.tsx` | Mobile responsive fixes for all 14 section types |
 
