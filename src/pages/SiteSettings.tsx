@@ -18,8 +18,9 @@ import type { Json } from "@/integrations/supabase/types";
 import {
   type SiteSettingsData, type SiteColors, type SiteTypography, type SiteLayout,
   type SiteButtons, type SiteIdentity, type SiteNavigation, type SocialLink, type SiteSeo, type NavLink,
-  type LogoSettings,
+  type LogoSettings, type HeaderSettings, type FooterSettings,
   getTemplateDefaults, FONT_OPTIONS_HEADING, FONT_OPTIONS_BODY,
+  defaultHeaderSettings, defaultFooterSettings,
 } from "@/types/settings";
 
 function parseSettings(row: Record<string, unknown>): SiteSettingsData {
@@ -35,6 +36,8 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
     seo: { ...d.seo, ...(row.seo as SiteSeo || {}) },
     custom_css: (row.custom_css as string) || "",
     logo_settings: { ...d.logo_settings, ...(row.logo_settings as LogoSettings || {}) },
+    header_settings: { ...d.header_settings, ...(row.header_settings as HeaderSettings || {}) },
+    footer_settings: { ...d.footer_settings, ...(row.footer_settings as FooterSettings || {}) },
   };
 }
 
@@ -92,6 +95,8 @@ export default function SiteSettings() {
         seo: defaults.seo as unknown as Json,
         custom_css: defaults.custom_css,
         logo_settings: defaults.logo_settings as unknown as Json,
+        header_settings: defaults.header_settings as unknown as Json,
+        footer_settings: defaults.footer_settings as unknown as Json,
       }).then(({ error }) => {
         if (!error) qc.invalidateQueries({ queryKey: ["site-settings", siteId] });
       });
@@ -114,6 +119,8 @@ export default function SiteSettings() {
         seo: s.seo as unknown as Json,
         custom_css: s.custom_css,
         logo_settings: s.logo_settings as unknown as Json,
+        header_settings: s.header_settings as unknown as Json,
+        footer_settings: s.footer_settings as unknown as Json,
       }).eq("site_id", siteId!);
       if (error) throw error;
     },
