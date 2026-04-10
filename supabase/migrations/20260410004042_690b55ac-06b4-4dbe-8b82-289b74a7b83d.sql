@@ -1,0 +1,1 @@
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS logo_settings jsonb NOT NULL DEFAULT '{}';
