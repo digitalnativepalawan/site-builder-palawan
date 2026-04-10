@@ -621,57 +621,73 @@ export default function SiteSettings() {
           </TabsContent>
           {/* TAB: CUSTOM DOMAIN */}
           <TabsContent value="domain" className="space-y-6">
+            <div className="space-y-4">
+              <h2 className="text-xl font-heading font-bold">Custom Domain Setup</h2>
+              <p className="text-sm text-muted-foreground">
+                Your current site URL: <span className="font-mono font-medium text-foreground">{site?.subdomain}.vercel.app</span>
+              </p>
+            </div>
+
+            <hr className="border-border" />
+
+            <div className="space-y-4">
+              <h3 className="font-heading text-base font-semibold">How to add your own domain (free on Vercel)</h3>
+
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-4 text-sm">
+                <div className="space-y-1">
+                  <p className="font-semibold">Step 1:</p>
+                  <p className="text-muted-foreground">Go to your Vercel dashboard</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Step 2:</p>
+                  <p className="text-muted-foreground">Find your project (name matches your site)</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Step 3:</p>
+                  <p className="text-muted-foreground">Go to Settings → Domains → Add Domain</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Step 4:</p>
+                  <p className="text-muted-foreground">Enter: <span className="font-mono">www.yourdomain.com</span></p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Step 5:</p>
+                  <p className="text-muted-foreground">Copy the DNS records Vercel shows you</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Step 6:</p>
+                  <p className="text-muted-foreground">At your domain registrar, add:</p>
+                  <div className="rounded border bg-background p-3 font-mono text-xs space-y-1 ml-4">
+                    <p>CNAME record: www → cname.vercel-dns.com</p>
+                    <p>A record: @ → 76.76.21.21</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-border" />
+
             <div className="space-y-3">
               <h3 className="font-heading text-base font-semibold flex items-center gap-2">
-                <Globe className="h-4 w-4" /> Custom Domain
+                <AlertTriangle className="h-4 w-4 text-amber-500" /> Important for login to keep working
               </h3>
-              <p className="text-sm text-muted-foreground">
-                Connect your own domain name to this site.
-              </p>
-              <div className="space-y-2">
-                <Label>Custom Domain</Label>
-                <Input
-                  value={customDomain}
-                  onChange={e => setCustomDomain(e.target.value.trim())}
-                  placeholder="www.mybusiness.com"
-                  className="min-h-[44px]"
-                />
+              <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-2 text-sm">
+                <p>After your domain is added, update your backend auth settings:</p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
+                  <li>Go to <strong>app.supabase.com → Authentication → URL Configuration</strong></li>
+                  <li>Add your domain to <strong>"Site URL"</strong> and <strong>"Redirect URLs"</strong></li>
+                </ul>
               </div>
-              <div className="flex gap-2">
-                <Button className="min-h-[44px] gap-2" onClick={saveCustomDomain} disabled={domainSaving}>
-                  {domainSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  Save Domain
-                </Button>
-                <Button variant="outline" className="min-h-[44px] gap-2" onClick={verifyDomain} disabled={!customDomain || domainStatus === "checking"}>
-                  {domainStatus === "checking" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4 w-4" />}
-                  Verify DNS
-                </Button>
-              </div>
-              {domainStatus === "ok" && (
-                <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md p-3">
-                  <CheckCircle className="h-4 w-4 shrink-0" /> DNS is properly configured! Your domain is pointing correctly.
-                </div>
-              )}
-              {domainStatus === "fail" && (
-                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
-                  <XCircle className="h-4 w-4 shrink-0" /> DNS not yet configured. Please add the CNAME record and wait for propagation (up to 48 hours).
-                </div>
-              )}
             </div>
+
             <hr className="border-border" />
+
             <div className="space-y-3">
-              <h3 className="font-heading text-base font-semibold">DNS Setup Instructions</h3>
-              <div className="rounded-lg border bg-muted/30 p-4 space-y-2 text-sm">
-                <p className="font-medium">Add the following DNS record at your domain registrar:</p>
-                <div className="rounded border bg-background p-3 font-mono text-xs space-y-1">
-                  <p><strong>Type:</strong> CNAME</p>
-                  <p><strong>Name:</strong> {customDomain?.startsWith("www.") ? "www" : "@"}</p>
-                  <p><strong>Value:</strong> cname.vercel-dns.com</p>
-                  <p><strong>TTL:</strong> 3600 (or Auto)</p>
-                </div>
-                <p className="text-muted-foreground mt-2">
-                  DNS changes can take up to 48 hours to propagate. After adding the record, click "Verify DNS" to check.
-                </p>
+              <h3 className="font-heading text-base font-semibold">Free Tier Info</h3>
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-2 text-sm text-muted-foreground">
+                <p>• <strong>Vercel:</strong> Custom domains are FREE</p>
+                <p>• <strong>Supabase:</strong> 500MB database, 50k users FREE</p>
+                <p>• Most sites never need to upgrade</p>
               </div>
             </div>
           </TabsContent>
