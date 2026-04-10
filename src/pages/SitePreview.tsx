@@ -151,10 +151,10 @@ export default function SitePreview() {
     }
   }
 
-  // Derive header/footer colors from Colors tab
-  const headerBg = colors?.cardBg || "#ffffff";
+  // Derive header/footer colors based on effective theme
+  const headerBg = themeMode === "dark" ? darkColors.cardBg : (colors?.cardBg || "#ffffff");
   const headerTextColor = isDark(headerBg) ? "#f8fafc" : "#1e293b";
-  const footerBg = colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b";
+  const footerBg = themeMode === "dark" ? "#0a0a0a" : (colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b");
   const footerTextColor = isDark(footerBg) ? "#e2e8f0" : "#1e293b";
 
   // Dark mode color overrides
