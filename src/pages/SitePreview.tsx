@@ -194,6 +194,17 @@ export default function SitePreview() {
     ...(typo ? { fontFamily: typo.bodyFont } : {}),
   };
 
+  // Inject heading color + card bg overrides via CSS when custom colors are active
+  const colorOverrideCss = effectiveColors ? `
+    .site-preview-wrapper h1, .site-preview-wrapper h2, .site-preview-wrapper h3,
+    .site-preview-wrapper h4, .site-preview-wrapper h5, .site-preview-wrapper h6 {
+      color: ${effectiveColors.heading} !important;
+    }
+    .site-preview-wrapper .bg-card {
+      background-color: ${effectiveColors.cardBg} !important;
+    }
+  ` : "";
+
   // Dark-mode CSS for "auto" mode using prefers-color-scheme
   const autoDarkCss = themeMode === "auto" ? `
     @media (prefers-color-scheme: dark) {
