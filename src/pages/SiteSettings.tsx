@@ -618,6 +618,27 @@ export default function SiteSettings() {
                 }} />
               </div>
             ))}
+            <hr className="border-border my-4" />
+            <h3 className="font-heading text-base font-semibold">Display Options</h3>
+            <div className="flex items-center gap-3">
+              <Switch checked={settings.social_display.showInHeader} onCheckedChange={v => upd("social_display", { ...settings.social_display, showInHeader: v })} />
+              <Label>Show social icons in header</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={settings.social_display.showInFooter} onCheckedChange={v => upd("social_display", { ...settings.social_display, showInFooter: v })} />
+              <Label>Show social icons in footer</Label>
+            </div>
+            <div>
+              <Label>Icon Style</Label>
+              <Select value={settings.social_display.iconStyle} onValueChange={v => upd("social_display", { ...settings.social_display, iconStyle: v as SocialDisplaySettings["iconStyle"] })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rounded">Rounded</SelectItem>
+                  <SelectItem value="square">Square</SelectItem>
+                  <SelectItem value="text">Just text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </TabsContent>
 
           {/* TAB 8: SEO & CUSTOM CSS */}
@@ -655,10 +676,7 @@ export default function SiteSettings() {
               <Switch checked={hdr.sticky} onCheckedChange={v => upd("header_settings", { ...hdr, sticky: v })} />
               <Label>Sticky Header</Label>
             </div>
-            <div className="flex items-center gap-3">
-              <input type="color" value={hdr.bgColor} onChange={e => upd("header_settings", { ...hdr, bgColor: e.target.value })} className="h-10 w-14 rounded border cursor-pointer" />
-              <Label>Header Background Color</Label>
-            </div>
+            <p className="text-xs text-muted-foreground bg-muted/50 rounded p-2">Header background automatically uses the <strong>Card Background</strong> color from the Colors tab.</p>
             <div>
               <Label>Layout</Label>
               <Select value={hdr.layout} onValueChange={v => upd("header_settings", { ...hdr, layout: v as HeaderSettings["layout"] })}>
@@ -726,10 +744,7 @@ export default function SiteSettings() {
               <Input value={ftr.copyrightText} onChange={e => upd("footer_settings", { ...ftr, copyrightText: e.target.value })} className="min-h-[44px]" placeholder="© {year} {site name}" />
               <p className="text-xs text-muted-foreground mt-1">Use <code className="bg-muted px-1 rounded">{"{year}"}</code> and <code className="bg-muted px-1 rounded">{"{site name}"}</code> as dynamic variables.</p>
             </div>
-            <div className="flex items-center gap-3">
-              <input type="color" value={ftr.bgColor} onChange={e => upd("footer_settings", { ...ftr, bgColor: e.target.value })} className="h-10 w-14 rounded border cursor-pointer" />
-              <Label>Footer Background Color</Label>
-            </div>
+            <p className="text-xs text-muted-foreground bg-muted/50 rounded p-2">Footer background automatically uses a dark color derived from your <strong>Primary</strong> color in the Colors tab.</p>
             <div className="flex items-center gap-3">
               <Switch checked={ftr.showBackToTop} onCheckedChange={v => upd("footer_settings", { ...ftr, showBackToTop: v })} />
               <Label>Show "Back to Top" Button</Label>
