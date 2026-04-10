@@ -53,6 +53,19 @@ export interface SiteSeo {
   gaId: string;
 }
 
+export interface LogoSettings {
+  headerLogoUrl: string;
+  headerLogoSize: number;
+  headerLogoPosition: "left" | "center";
+  heroLogoEnabled: boolean;
+  heroLogoUrl: string;
+  heroLogoUseSameAsHeader: boolean;
+  heroLogoSize: number;
+  faviconUrl: string;
+  addShadow: boolean;
+  addWhiteBorder: boolean;
+}
+
 export interface SiteSettingsData {
   colors: SiteColors;
   typography: SiteTypography;
@@ -63,6 +76,7 @@ export interface SiteSettingsData {
   social_links: SocialLink[];
   seo: SiteSeo;
   custom_css: string;
+  logo_settings: LogoSettings;
 }
 
 const SOCIAL_PLATFORMS = ["Twitter", "Instagram", "Facebook", "LinkedIn", "GitHub", "TikTok"];
@@ -94,6 +108,11 @@ export function getTemplateDefaults(template: string): SiteSettingsData {
     social_links: SOCIAL_PLATFORMS.map(p => ({ platform: p, url: "", visible: false })),
     seo: { metaTitle: "", metaDescription: "", ogImageUrl: "", gaId: "" },
     custom_css: "",
+    logo_settings: {
+      headerLogoUrl: "", headerLogoSize: 120, headerLogoPosition: "left",
+      heroLogoEnabled: false, heroLogoUrl: "", heroLogoUseSameAsHeader: true, heroLogoSize: 180,
+      faviconUrl: "", addShadow: false, addWhiteBorder: false,
+    },
   };
 
   if (template === "blog") {

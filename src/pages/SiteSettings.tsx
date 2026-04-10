@@ -11,11 +11,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle, ImageIcon } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Json } from "@/integrations/supabase/types";
 import {
   type SiteSettingsData, type SiteColors, type SiteTypography, type SiteLayout,
   type SiteButtons, type SiteIdentity, type SiteNavigation, type SocialLink, type SiteSeo, type NavLink,
+  type LogoSettings,
   getTemplateDefaults, FONT_OPTIONS_HEADING, FONT_OPTIONS_BODY,
 } from "@/types/settings";
 
@@ -31,6 +34,7 @@ function parseSettings(row: Record<string, unknown>): SiteSettingsData {
     social_links: Array.isArray(row.social_links) ? (row.social_links as SocialLink[]) : d.social_links,
     seo: { ...d.seo, ...(row.seo as SiteSeo || {}) },
     custom_css: (row.custom_css as string) || "",
+    logo_settings: { ...d.logo_settings, ...(row.logo_settings as LogoSettings || {}) },
   };
 }
 
@@ -78,6 +82,7 @@ export default function SiteSettings() {
         social_links: defaults.social_links as unknown as Json,
         seo: defaults.seo as unknown as Json,
         custom_css: defaults.custom_css,
+        logo_settings: defaults.logo_settings as unknown as Json,
       }).then(({ error }) => {
         if (!error) qc.invalidateQueries({ queryKey: ["site-settings", siteId] });
       });
@@ -99,6 +104,7 @@ export default function SiteSettings() {
         social_links: s.social_links as unknown as Json,
         seo: s.seo as unknown as Json,
         custom_css: s.custom_css,
+        logo_settings: s.logo_settings as unknown as Json,
       }).eq("site_id", siteId!);
       if (error) throw error;
     },
@@ -141,6 +147,18 @@ export default function SiteSettings() {
   const id = settings.site_identity;
   const nav = settings.navigation;
   const seo = settings.seo;
+  const logo = settings.logo_settings;
+
+  const isPng = (url: string) => url.toLowerCase().endsWith(".png") || url.toLowerCase().endsWith(".svg");
+  const logoVisibilityWarning = logo.headerLogoUrl && c.background && !isPng(logo.headerLogoUrl);
+  const effectiveHeroLogo = logo.heroLogoUseSameAsHeader ? logo.headerLogoUrl : logo.heroLogoUrl;
+
+  const logoImgStyle = (size: number): React.CSSProperties => ({
+    height: size,
+    objectFit: "contain" as const,
+    ...(logo.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+    ...(logo.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+  });
 
   return (
     <div className="flex min-h-screen flex-col max-w-full overflow-x-hidden">
@@ -160,8 +178,8 @@ export default function SiteSettings() {
       <div className="flex-1 p-4 sm:p-6 max-w-3xl mx-auto w-full">
         <Tabs defaultValue="colors" className="w-full">
           <TabsList className="w-full flex flex-wrap h-auto gap-1 mb-6">
-            {["colors", "typography", "layout", "buttons", "identity", "navigation", "social", "seo"].map(tab => (
-              <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">{tab}</TabsTrigger>
+            {["colors", "typography", "layout", "buttons", "logo", "identity", "navigation", "social", "seo"].map(tab => (
+              <TabsTrigger key={tab} value={tab} className="capitalize text-xs sm:text-sm">{tab === "logo" ? "Logo & Branding" : tab}</TabsTrigger>
             ))}
           </TabsList>
 
@@ -289,6 +307,122 @@ export default function SiteSettings() {
                   b.style === "outline" ? { border: `2px solid ${c.primary}`, color: c.primary, background: "transparent" } :
                     { background: "transparent", color: c.primary }),
               }}>Preview Button</button>
+            </div>
+          </TabsContent>
+
+          {/* TAB: LOGO & BRANDING */}
+          <TabsContent value="logo" className="space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Header Logo</h3>
+              {logo.headerLogoUrl && <img src={logo.headerLogoUrl} alt="Header logo" style={logoImgStyle(logo.headerLogoSize)} />}
+              <Input type="file" accept=".png,.svg,.jpg,.jpeg,.webp" onChange={e => handleFileUpload(e, url => upd("logo_settings", { ...logo, headerLogoUrl: url }))} disabled={uploading} className="min-h-[44px]" />
+              {logo.headerLogoUrl && !isPng(logo.headerLogoUrl) && (
+                <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> Use a PNG or SVG for better transparency support.
+                </div>
+              )}
+              <div>
+                <Label>Logo Size: {logo.headerLogoSize}px</Label>
+                <Slider min={80} max={200} step={4} value={[logo.headerLogoSize]} onValueChange={([v]) => upd("logo_settings", { ...logo, headerLogoSize: v })} className="mt-2" />
+              </div>
+              <div>
+                <Label>Position</Label>
+                <Select value={logo.headerLogoPosition} onValueChange={v => upd("logo_settings", { ...logo, headerLogoPosition: v as "left" | "center" })}>
+                  <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left Aligned</SelectItem>
+                    <SelectItem value="center">Centered</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold">Hero Logo</h3>
+              <div className="flex items-center gap-3">
+                <Switch checked={logo.heroLogoEnabled} onCheckedChange={v => upd("logo_settings", { ...logo, heroLogoEnabled: v })} />
+                <Label>Show large logo in hero section</Label>
+              </div>
+              {logo.heroLogoEnabled && (
+                <>
+                  <div className="flex items-center gap-3">
+                    <Checkbox checked={logo.heroLogoUseSameAsHeader} onCheckedChange={v => upd("logo_settings", { ...logo, heroLogoUseSameAsHeader: !!v })} />
+                    <Label>Use same image as header logo</Label>
+                  </div>
+                  {!logo.heroLogoUseSameAsHeader && (
+                    <>
+                      {logo.heroLogoUrl && <img src={logo.heroLogoUrl} alt="Hero logo" style={logoImgStyle(logo.heroLogoSize)} />}
+                      <Input type="file" accept=".png,.svg,.jpg,.jpeg,.webp" onChange={e => handleFileUpload(e, url => upd("logo_settings", { ...logo, heroLogoUrl: url }))} disabled={uploading} className="min-h-[44px]" />
+                    </>
+                  )}
+                  <div>
+                    <Label>Hero Logo Size: {logo.heroLogoSize}px</Label>
+                    <Slider min={120} max={300} step={4} value={[logo.heroLogoSize]} onValueChange={([v]) => upd("logo_settings", { ...logo, heroLogoSize: v })} className="mt-2" />
+                  </div>
+                </>
+              )}
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold">Favicon</h3>
+              {logo.faviconUrl && <img src={logo.faviconUrl} alt="Favicon" className="h-8 w-8 object-contain border rounded" />}
+              <Input type="file" accept=".png,.ico,.svg" onChange={e => handleFileUpload(e, url => upd("logo_settings", { ...logo, faviconUrl: url }))} disabled={uploading} className="min-h-[44px]" />
+              <p className="text-xs text-muted-foreground">Recommended: 32×32 or 64×64 square image</p>
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold">Smart Helpers</h3>
+              <div className="flex items-center gap-3">
+                <Checkbox checked={logo.addShadow} onCheckedChange={v => upd("logo_settings", { ...logo, addShadow: !!v })} />
+                <Label>Add subtle shadow (helps logo stand out)</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Checkbox checked={logo.addWhiteBorder} onCheckedChange={v => upd("logo_settings", { ...logo, addWhiteBorder: !!v })} />
+                <Label>Add white border (for dark logos on dark backgrounds)</Label>
+              </div>
+              {logoVisibilityWarning && (
+                <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0" /> Your logo may not be visible on this background. Consider using a PNG with transparency.
+                </div>
+              )}
+            </div>
+            <hr className="border-border" />
+            <div className="space-y-3">
+              <h3 className="font-heading text-base font-semibold">Live Preview</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <div className="px-4 py-2 border-b" style={{ backgroundColor: c.background }}>
+                  <div className={`flex items-center ${logo.headerLogoPosition === "center" ? "justify-center" : "justify-start"} gap-3`}>
+                    {logo.headerLogoUrl ? (
+                      <img src={logo.headerLogoUrl} alt="Header" style={logoImgStyle(Math.min(logo.headerLogoSize, 48))} />
+                    ) : (
+                      <span style={{ color: c.heading, fontWeight: 700 }}>{id.siteTitle || site?.site_name || "Site Name"}</span>
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground p-2 bg-muted/30">Desktop Header</p>
+              </div>
+              {logo.heroLogoEnabled && effectiveHeroLogo && (
+                <div className="rounded-lg border overflow-hidden">
+                  <div className="py-8 flex flex-col items-center gap-3" style={{ backgroundColor: c.background }}>
+                    <img src={effectiveHeroLogo} alt="Hero" style={logoImgStyle(Math.min(logo.heroLogoSize, 160))} />
+                    <h2 style={{ color: c.heading, fontWeight: 700, fontSize: 20 }}>Welcome</h2>
+                  </div>
+                  <p className="text-xs text-muted-foreground p-2 bg-muted/30">Hero Section with Logo</p>
+                </div>
+              )}
+              <div className="rounded-lg border overflow-hidden max-w-[320px]">
+                <div className="px-3 py-2 border-b" style={{ backgroundColor: c.background }}>
+                  <div className={`flex items-center ${logo.headerLogoPosition === "center" ? "justify-center" : "justify-between"}`}>
+                    {logo.headerLogoUrl ? (
+                      <img src={logo.headerLogoUrl} alt="Mobile" style={logoImgStyle(Math.min(logo.headerLogoSize * 0.8, 36))} />
+                    ) : (
+                      <span style={{ color: c.heading, fontWeight: 700, fontSize: 14 }}>{id.siteTitle || site?.site_name || "Site"}</span>
+                    )}
+                    <span className="text-xs" style={{ color: c.text }}>☰</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground p-2 bg-muted/30">Mobile Header</p>
+              </div>
             </div>
           </TabsContent>
 

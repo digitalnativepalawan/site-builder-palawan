@@ -56,6 +56,7 @@ export type Database = {
           custom_css: string | null
           id: string
           layout: Json
+          logo_settings: Json
           navigation: Json
           seo: Json
           site_id: string
@@ -70,6 +71,7 @@ export type Database = {
           custom_css?: string | null
           id?: string
           layout?: Json
+          logo_settings?: Json
           navigation?: Json
           seo?: Json
           site_id: string
@@ -84,6 +86,7 @@ export type Database = {
           custom_css?: string | null
           id?: string
           layout?: Json
+          logo_settings?: Json
           navigation?: Json
           seo?: Json
           site_id?: string

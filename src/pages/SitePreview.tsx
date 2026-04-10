@@ -74,6 +74,7 @@ export default function SitePreview() {
   const layout = ss?.layout as SiteSettingsData["layout"] | undefined;
   const customCss = (ss?.custom_css as string) || "";
   const identity = ss?.site_identity as SiteSettingsData["site_identity"] | undefined;
+  const logoSettings = ss?.logo_settings as SiteSettingsData["logo_settings"] | undefined;
   const spacingMap = { compact: "2rem", comfortable: "3rem", relaxed: "4.5rem" };
 
   const cssVars: React.CSSProperties = {
@@ -160,7 +161,48 @@ export default function SitePreview() {
           style={{ maxWidth: deviceWidths[device], width: "100%", minHeight: "100%" }}
         >
           <div className={`min-h-screen max-w-full overflow-x-hidden ${!colors ? style.bg : ""}`} style={wrapperStyle}>
-            {sections?.map(renderSection)}
+            {/* Header with logo */}
+            {logoSettings?.headerLogoUrl && (
+              <header className={`px-4 sm:px-6 lg:px-8 py-3 border-b border-current/10 flex items-center ${logoSettings.headerLogoPosition === "center" ? "justify-center" : "justify-start"}`}>
+                <img
+                  src={logoSettings.headerLogoUrl}
+                  alt="Site logo"
+                  style={{
+                    height: device === "mobile" ? logoSettings.headerLogoSize * 0.8 : logoSettings.headerLogoSize,
+                    maxHeight: 80,
+                    objectFit: "contain" as const,
+                    ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+                    ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+                  }}
+                />
+              </header>
+            )}
+            {/* Hero logo injection */}
+            {sections?.map((section) => {
+              if ((section.section_type === "cover" || section.section_type === "hero") && logoSettings?.heroLogoEnabled) {
+                const heroUrl = logoSettings.heroLogoUseSameAsHeader ? logoSettings.headerLogoUrl : logoSettings.heroLogoUrl;
+                if (heroUrl) {
+                  return (
+                    <div key={`hero-logo-${section.id}`}>
+                      <div className="flex justify-center pt-8">
+                        <img
+                          src={heroUrl}
+                          alt="Hero logo"
+                          style={{
+                            height: device === "mobile" ? logoSettings.heroLogoSize * 0.8 : logoSettings.heroLogoSize,
+                            objectFit: "contain" as const,
+                            ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+                            ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+                          }}
+                        />
+                      </div>
+                      {renderSection(section)}
+                    </div>
+                  );
+                }
+              }
+              return renderSection(section);
+            })}
             <footer className={`py-8 px-4 border-t ${!colors ? `${style.text} opacity-50` : "opacity-50"} text-center text-sm`}>
               <p>{footerText}</p>
             </footer>
