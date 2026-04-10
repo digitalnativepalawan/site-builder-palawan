@@ -147,6 +147,18 @@ export default function SiteSettings() {
   const id = settings.site_identity;
   const nav = settings.navigation;
   const seo = settings.seo;
+  const logo = settings.logo_settings;
+
+  const isPng = (url: string) => url.toLowerCase().endsWith(".png") || url.toLowerCase().endsWith(".svg");
+  const logoVisibilityWarning = logo.headerLogoUrl && c.background && !isPng(logo.headerLogoUrl);
+  const effectiveHeroLogo = logo.heroLogoUseSameAsHeader ? logo.headerLogoUrl : logo.heroLogoUrl;
+
+  const logoImgStyle = (size: number): React.CSSProperties => ({
+    height: size,
+    objectFit: "contain" as const,
+    ...(logo.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+    ...(logo.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+  });
 
   return (
     <div className="flex min-h-screen flex-col max-w-full overflow-x-hidden">
