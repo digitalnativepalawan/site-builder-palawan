@@ -628,6 +628,98 @@ export default function SiteSettings() {
               <Textarea value={settings.custom_css} onChange={e => upd("custom_css" as keyof SiteSettingsData, e.target.value as never)} rows={8} className="font-mono text-sm" placeholder=".my-class { color: red; }" />
             </div>
           </TabsContent>
+
+          {/* TAB: HEADER SETTINGS */}
+          <TabsContent value="header" className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={hdr.visible} onCheckedChange={v => upd("header_settings", { ...hdr, visible: v })} />
+              <Label>Show Header</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={hdr.sticky} onCheckedChange={v => upd("header_settings", { ...hdr, sticky: v })} />
+              <Label>Sticky Header</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="color" value={hdr.bgColor} onChange={e => upd("header_settings", { ...hdr, bgColor: e.target.value })} className="h-10 w-14 rounded border cursor-pointer" />
+              <Label>Header Background Color</Label>
+            </div>
+            <div>
+              <Label>Layout</Label>
+              <Select value={hdr.layout} onValueChange={v => upd("header_settings", { ...hdr, layout: v as HeaderSettings["layout"] })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="logo-left">Logo left + nav right</SelectItem>
+                  <SelectItem value="logo-center">Logo center + nav below</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Desktop Height</Label>
+              <Select value={hdr.height} onValueChange={v => upd("header_settings", { ...hdr, height: v as HeaderSettings["height"] })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="60px">60px</SelectItem>
+                  <SelectItem value="72px">72px</SelectItem>
+                  <SelectItem value="80px">80px</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <hr className="border-border" />
+            <h3 className="font-heading text-base font-semibold">CTA Button</h3>
+            <div className="flex items-center gap-3">
+              <Switch checked={hdr.ctaVisible} onCheckedChange={v => upd("header_settings", { ...hdr, ctaVisible: v })} />
+              <Label>Show CTA Button</Label>
+            </div>
+            {hdr.ctaVisible && (
+              <div className="space-y-3 pl-4 border-l-2 border-primary/20">
+                <div>
+                  <Label>Button Text</Label>
+                  <Input value={hdr.ctaText} onChange={e => upd("header_settings", { ...hdr, ctaText: e.target.value })} className="min-h-[44px]" placeholder="Get Started" />
+                </div>
+                <div>
+                  <Label>Button Link</Label>
+                  <Input value={hdr.ctaLink} onChange={e => upd("header_settings", { ...hdr, ctaLink: e.target.value })} className="min-h-[44px]" placeholder="https://..." />
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* TAB: FOOTER SETTINGS */}
+          <TabsContent value="footer" className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={ftr.visible} onCheckedChange={v => upd("footer_settings", { ...ftr, visible: v })} />
+              <Label>Show Footer</Label>
+            </div>
+            <div>
+              <Label>Columns</Label>
+              <Select value={String(ftr.columns)} onValueChange={v => upd("footer_settings", { ...ftr, columns: Number(v) as 2 | 3 | 4 })}>
+                <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2 Columns</SelectItem>
+                  <SelectItem value="3">3 Columns</SelectItem>
+                  <SelectItem value="4">4 Columns</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={ftr.showLogo} onCheckedChange={v => upd("footer_settings", { ...ftr, showLogo: v })} />
+              <Label>Show Logo in Footer</Label>
+            </div>
+            <div>
+              <Label>Copyright Text</Label>
+              <Input value={ftr.copyrightText} onChange={e => upd("footer_settings", { ...ftr, copyrightText: e.target.value })} className="min-h-[44px]" placeholder="© {year} {site name}" />
+              <p className="text-xs text-muted-foreground mt-1">Use <code className="bg-muted px-1 rounded">{"{year}"}</code> and <code className="bg-muted px-1 rounded">{"{site name}"}</code> as dynamic variables.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="color" value={ftr.bgColor} onChange={e => upd("footer_settings", { ...ftr, bgColor: e.target.value })} className="h-10 w-14 rounded border cursor-pointer" />
+              <Label>Footer Background Color</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={ftr.showBackToTop} onCheckedChange={v => upd("footer_settings", { ...ftr, showBackToTop: v })} />
+              <Label>Show "Back to Top" Button</Label>
+            </div>
+          </TabsContent>
+
           {/* TAB: CUSTOM DOMAIN */}
           <TabsContent value="domain" className="space-y-6">
             <div className="space-y-4">
