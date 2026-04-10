@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, GripVertical, Eye, Loader2, Save, ChevronUp, ChevronDown, Settings } from "lucide-react";
+import {
+  ArrowLeft, Plus, Trash2, GripVertical, Eye, Loader2, Save, ChevronUp, ChevronDown, Settings,
+  LayoutTemplate, AlignLeft, Image, List, CreditCard, HelpCircle, Columns2, Hash, Grid3x3, Clock, Youtube, Mail, Minus, Megaphone,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { parseSectionData, sectionLabel, SECTION_TYPES, SECTION_DEFAULTS } from "@/types/sections";
 import type { SectionData, Section } from "@/types/sections";
@@ -171,6 +175,14 @@ export default function SiteEditor() {
     setUploading(false);
   };
 
+  const SECTION_ICONS: Record<string, LucideIcon> = {
+    cover: LayoutTemplate, hero: LayoutTemplate, text_block: AlignLeft, photo: Image,
+    image_gallery: Image, bullet_list: List, pricing: CreditCard, faq: HelpCircle,
+    two_columns: Columns2, key_numbers: Hash, number_cards: Grid3x3, timeline: Clock,
+    youtube: Youtube, contact_form: Mail, separator: Minus, cta: Megaphone,
+    split_layout: Columns2, grid_cards: Grid3x3,
+  };
+
   const isCoverType = (s: Section) => s.section_type === "cover" || s.section_type === "hero";
 
   const renderEditPanel = () => {
@@ -252,6 +264,7 @@ export default function SiteEditor() {
                   <CardContent className="flex items-center gap-3 p-4">
                     <GripVertical className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {(() => { const Icon = SECTION_ICONS[section.section_type]; return Icon ? <Icon className="h-5 w-5 text-muted-foreground shrink-0" /> : null; })()}
                       <span className="font-medium truncate">{sectionLabel(section.section_type)}</span>
                       {section.data.headline && (
                         <span className="text-sm text-muted-foreground truncate hidden sm:inline">— {section.data.headline}</span>
@@ -297,9 +310,9 @@ export default function SiteEditor() {
                             className="min-h-[44px] justify-start gap-2 text-left h-auto py-3"
                             onClick={() => addSection.mutate(s.type)}
                           >
-                            <span className="text-lg shrink-0">{s.label.split(" ")[0]}</span>
+                            {(() => { const Icon = SECTION_ICONS[s.type]; return Icon ? <Icon className="h-5 w-5 shrink-0" /> : null; })()}
                             <div className="min-w-0">
-                              <div className="font-medium text-sm truncate">{s.label.slice(s.label.indexOf(" ") + 1)}</div>
+                              <div className="font-medium text-sm truncate">{s.label}</div>
                               <div className="text-xs text-muted-foreground truncate">{s.desc}</div>
                             </div>
                           </Button>
