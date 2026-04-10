@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Monitor, Tablet, Smartphone, ArrowLeft, ArrowUp } from "lucide-react";
+import { Loader2, Monitor, Tablet, Smartphone, ArrowLeft, ArrowUp, Menu, X, Twitter, Instagram, Facebook, Linkedin, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { parseSectionData } from "@/types/sections";
-import type { SiteSettingsData } from "@/types/settings";
-import { defaultHeaderSettings, defaultFooterSettings } from "@/types/settings";
+import type { SiteSettingsData, SocialLink, SocialDisplaySettings } from "@/types/settings";
+import { defaultHeaderSettings, defaultFooterSettings, defaultSocialDisplay } from "@/types/settings";
 import {
   CoverSection, TextSection, PhotoSection, BulletListSection, PricingSection,
   FaqSection, TwoColumnsSection, KeyNumbersSection, NumberCardsSection,
@@ -20,15 +20,73 @@ const templateStyles = {
   blog: { bg: "bg-gradient-to-b from-amber-50 to-white", text: "text-stone-800", accent: "bg-stone-800 hover:bg-stone-900 text-white", headingFont: "font-serif", bodyFont: "font-body" },
 };
 
-type Style = typeof templateStyles.business;
 type DeviceMode = "desktop" | "tablet" | "mobile";
-
 const deviceWidths: Record<DeviceMode, string> = { desktop: "100%", tablet: "768px", mobile: "375px" };
+
+/* Helper: determine if a color is dark */
+function isDark(hex: string): boolean {
+  const c = hex.replace("#", "");
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return (r * 0.299 + g * 0.587 + b * 0.114) < 140;
+}
+
+/* Helper: darken a hex color */
+function darkenHex(hex: string, amount = 40): string {
+  const c = hex.replace("#", "");
+  const r = Math.max(0, parseInt(c.substring(0, 2), 16) - amount);
+  const g = Math.max(0, parseInt(c.substring(2, 4), 16) - amount);
+  const b = Math.max(0, parseInt(c.substring(4, 6), 16) - amount);
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+/* Social icon mapping */
+const socialIcons: Record<string, typeof Twitter> = {
+  Twitter, Instagram, Facebook, LinkedIn: Linkedin, GitHub: Github,
+};
+
+function SocialIcons({ links, display, color }: { links: SocialLink[]; display: SocialDisplaySettings; color: string }) {
+  const visible = links.filter(l => l.visible && l.url);
+  if (!visible.length) return null;
+
+  return (
+    <div className="flex items-center gap-2">
+      {visible.map(l => {
+        const Icon = socialIcons[l.platform];
+        if (display.iconStyle === "text") {
+          return (
+            <a key={l.platform} href={l.url} target="_blank" rel="noopener noreferrer" className="text-xs hover:opacity-70 transition-opacity" style={{ color }}>
+              {l.platform}
+            </a>
+          );
+        }
+        if (!Icon) {
+          return (
+            <a key={l.platform} href={l.url} target="_blank" rel="noopener noreferrer"
+              className={`inline-flex items-center justify-center w-8 h-8 text-xs font-medium hover:opacity-70 transition-opacity ${display.iconStyle === "rounded" ? "rounded-full" : "rounded"}`}
+              style={{ color, border: `1px solid ${color}40` }}>
+              {l.platform.charAt(0)}
+            </a>
+          );
+        }
+        return (
+          <a key={l.platform} href={l.url} target="_blank" rel="noopener noreferrer"
+            className={`inline-flex items-center justify-center w-8 h-8 hover:opacity-70 transition-opacity ${display.iconStyle === "rounded" ? "rounded-full" : "rounded"}`}
+            style={{ color, border: `1px solid ${color}40` }}>
+            <Icon className="h-4 w-4" />
+          </a>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function SitePreview() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
   const [device, setDevice] = useState<DeviceMode>("desktop");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: site, isLoading: siteLoading } = useQuery({
     queryKey: ["preview-site", siteId],
@@ -68,18 +126,35 @@ export default function SitePreview() {
 
   const style = templateStyles[site.template as keyof typeof templateStyles] || templateStyles.business;
 
-  // Build CSS variables from settings
   const ss = settingsRow as unknown as Record<string, unknown> | null;
   const colors = ss?.colors as SiteSettingsData["colors"] | undefined;
   const typo = ss?.typography as SiteSettingsData["typography"] | undefined;
-  const layout = ss?.layout as SiteSettingsData["layout"] | undefined;
   const customCss = (ss?.custom_css as string) || "";
   const identity = ss?.site_identity as SiteSettingsData["site_identity"] | undefined;
   const logoSettings = ss?.logo_settings as SiteSettingsData["logo_settings"] | undefined;
   const headerSettings = { ...defaultHeaderSettings, ...(ss?.header_settings as Partial<SiteSettingsData["header_settings"]> || {}) };
   const footerSettings = { ...defaultFooterSettings, ...(ss?.footer_settings as Partial<SiteSettingsData["footer_settings"]> || {}) };
   const navSettings = ss?.navigation as SiteSettingsData["navigation"] | undefined;
-  const spacingMap = { compact: "2rem", comfortable: "3rem", relaxed: "4.5rem" };
+
+  // Parse social links and display settings
+  const rawSocial = ss?.social_links;
+  let socialLinks: SocialLink[] = [];
+  let socialDisplay: SocialDisplaySettings = { ...defaultSocialDisplay };
+  if (Array.isArray(rawSocial)) {
+    const displayItem = rawSocial.find((item: any) => item && typeof item === "object" && "_display" in item);
+    if (displayItem) {
+      socialDisplay = { ...defaultSocialDisplay, ...(displayItem as any)._display };
+      socialLinks = rawSocial.filter((item: any) => !(item && typeof item === "object" && "_display" in item)) as SocialLink[];
+    } else {
+      socialLinks = rawSocial as SocialLink[];
+    }
+  }
+
+  // Derive header/footer colors from Colors tab
+  const headerBg = colors?.cardBg || "#ffffff";
+  const headerTextColor = isDark(headerBg) ? "#f8fafc" : "#1e293b";
+  const footerBg = colors?.primary ? darkenHex(colors.primary, 60) : "#1e293b";
+  const footerTextColor = isDark(footerBg) ? "#e2e8f0" : "#1e293b";
 
   const cssVars: React.CSSProperties = {
     ...(colors ? {
@@ -122,7 +197,6 @@ export default function SitePreview() {
   const copyrightText = footerSettings.copyrightText
     .replace("{year}", String(new Date().getFullYear()))
     .replace("{site name}", site.site_name);
-  const footerText = identity?.footerText || `${site.site_name} · © ${new Date().getFullYear()}`;
 
   // Google fonts link
   const fontFamilies = new Set<string>();
@@ -135,6 +209,9 @@ export default function SitePreview() {
     if (match) fontFamilies.add(match[1].replace(/ /g, "+"));
   }
 
+  const navLinks = navSettings?.links || [];
+  const visibleSocials = socialLinks.filter(l => l.visible && l.url);
+
   return (
     <div className="flex flex-col min-h-screen bg-muted/30">
       {/* Device Preview Toolbar */}
@@ -144,7 +221,7 @@ export default function SitePreview() {
         </Button>
         <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
           {([["desktop", Monitor], ["tablet", Tablet], ["mobile", Smartphone]] as [DeviceMode, typeof Monitor][]).map(([mode, Icon]) => (
-            <Button key={mode} variant={device === mode ? "default" : "ghost"} size="sm" className="min-h-[36px] min-w-[36px] px-3" onClick={() => setDevice(mode)}>
+            <Button key={mode} variant={device === mode ? "default" : "ghost"} size="sm" className="min-h-[36px] min-w-[36px] px-3" onClick={() => { setDevice(mode); setMobileMenuOpen(false); }}>
               <Icon className="h-4 w-4" />
               <span className="hidden sm:inline ml-1.5 capitalize">{mode}</span>
             </Button>
@@ -168,48 +245,79 @@ export default function SitePreview() {
           style={{ maxWidth: deviceWidths[device], width: "100%", minHeight: "100%" }}
         >
           <div className={`min-h-screen max-w-full overflow-x-hidden ${!colors ? style.bg : ""}`} style={wrapperStyle}>
-            {/* Header */}
+            {/* ═══ HEADER ═══ */}
             {headerSettings.visible && (
               <header
-                className={`px-4 sm:px-6 lg:px-8 border-b border-current/10 ${headerSettings.sticky ? "sticky top-0 z-50" : ""} ${headerSettings.layout === "logo-center" ? "flex flex-col items-center" : "flex items-center justify-between"}`}
-                style={{ backgroundColor: headerSettings.bgColor, minHeight: headerSettings.height }}
+                className={`px-5 sm:px-6 lg:px-8 border-b ${headerSettings.sticky ? "sticky top-0 z-50" : ""}`}
+                style={{ backgroundColor: headerBg, minHeight: headerSettings.height }}
               >
-                <div className={`flex items-center gap-3 ${headerSettings.layout === "logo-center" ? "justify-center" : ""}`}>
-                  {logoSettings?.headerLogoUrl ? (
-                    <img
-                      src={logoSettings.headerLogoUrl}
-                      alt="Site logo"
-                      style={{
-                        height: device === "mobile" ? (logoSettings.headerLogoSize || 120) * 0.8 : (logoSettings.headerLogoSize || 120),
-                        maxHeight: 80,
-                        objectFit: "contain" as const,
-                        ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
-                        ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
-                      }}
-                    />
-                  ) : (
-                    <span style={{ color: colors?.heading || "#0f172a", fontWeight: 700 }}>{identity?.siteTitle || site.site_name}</span>
-                  )}
-                </div>
-                {headerSettings.layout === "logo-left" && (
+                {/* Desktop header */}
+                <div className={`hidden sm:flex items-center ${headerSettings.layout === "logo-center" ? "flex-col" : "justify-between"}`} style={{ minHeight: headerSettings.height }}>
+                  <div className={`flex items-center gap-3 ${headerSettings.layout === "logo-center" ? "justify-center" : ""}`}>
+                    {logoSettings?.headerLogoUrl ? (
+                      <img src={logoSettings.headerLogoUrl} alt="Site logo"
+                        style={{
+                          height: logoSettings.headerLogoSize || 120, maxHeight: 80, objectFit: "contain" as const,
+                          ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+                          ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
+                        }}
+                      />
+                    ) : (
+                      <span style={{ color: headerTextColor, fontWeight: 700, fontSize: 18 }}>{identity?.siteTitle || site.site_name}</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-4">
-                    {navSettings?.links?.map((link, i) => (
-                      <a key={i} href={link.url} className="text-sm hover:opacity-70" style={{ color: colors?.text }}>{link.label}</a>
+                    {navLinks.map((link, i) => (
+                      <a key={i} href={link.url} className="text-sm hover:opacity-70 transition-opacity" style={{ color: headerTextColor }}>{link.label}</a>
                     ))}
+                    {socialDisplay.showInHeader && visibleSocials.length > 0 && (
+                      <SocialIcons links={socialLinks} display={socialDisplay} color={headerTextColor} />
+                    )}
                     {headerSettings.ctaVisible && headerSettings.ctaText && (
                       <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
                         {headerSettings.ctaText}
                       </a>
                     )}
                   </div>
-                )}
-                {headerSettings.layout === "logo-center" && navSettings?.links && navSettings.links.length > 0 && (
-                  <div className="flex items-center gap-4 pb-2">
-                    {navSettings.links.map((link, i) => (
-                      <a key={i} href={link.url} className="text-sm hover:opacity-70" style={{ color: colors?.text }}>{link.label}</a>
+                </div>
+
+                {/* Mobile header */}
+                <div className="flex sm:hidden items-center justify-between" style={{ minHeight: headerSettings.height }}>
+                  <div className="flex items-center gap-2">
+                    {logoSettings?.headerLogoUrl ? (
+                      <img src={logoSettings.headerLogoUrl} alt="Site logo"
+                        style={{
+                          height: (logoSettings.headerLogoSize || 120) * 0.65, maxHeight: 48, objectFit: "contain" as const,
+                          ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
+                        }}
+                      />
+                    ) : (
+                      <span style={{ color: headerTextColor, fontWeight: 700, fontSize: 16 }}>{identity?.siteTitle || site.site_name}</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    style={{ color: headerTextColor }}
+                    aria-label="Toggle menu"
+                  >
+                    {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                  </button>
+                </div>
+
+                {/* Mobile dropdown menu */}
+                {mobileMenuOpen && (
+                  <div className="sm:hidden pb-4 space-y-2 border-t" style={{ borderColor: `${headerTextColor}20` }}>
+                    {navLinks.map((link, i) => (
+                      <a key={i} href={link.url} className="block py-2 text-base hover:opacity-70 transition-opacity" style={{ color: headerTextColor }}>{link.label}</a>
                     ))}
+                    {socialDisplay.showInHeader && visibleSocials.length > 0 && (
+                      <div className="py-2">
+                        <SocialIcons links={socialLinks} display={socialDisplay} color={headerTextColor} />
+                      </div>
+                    )}
                     {headerSettings.ctaVisible && headerSettings.ctaText && (
-                      <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
+                      <a href={headerSettings.ctaLink || "#"} className="block w-full text-center px-4 py-3 min-h-[44px] rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
                         {headerSettings.ctaText}
                       </a>
                     )}
@@ -217,6 +325,7 @@ export default function SitePreview() {
                 )}
               </header>
             )}
+
             {/* Hero logo injection */}
             {sections?.map((section) => {
               if ((section.section_type === "cover" || section.section_type === "hero") && logoSettings?.heroLogoEnabled) {
@@ -224,13 +333,11 @@ export default function SitePreview() {
                 if (heroUrl) {
                   return (
                     <div key={`hero-logo-${section.id}`}>
-                      <div className="flex justify-center pt-8">
-                        <img
-                          src={heroUrl}
-                          alt="Hero logo"
+                      <div className="flex justify-center pt-8 px-5">
+                        <img src={heroUrl} alt="Hero logo"
                           style={{
-                            height: device === "mobile" ? logoSettings.heroLogoSize * 0.8 : logoSettings.heroLogoSize,
-                            objectFit: "contain" as const,
+                            height: device === "mobile" ? logoSettings.heroLogoSize * 0.7 : logoSettings.heroLogoSize,
+                            maxWidth: "100%", objectFit: "contain" as const,
                             ...(logoSettings.addShadow ? { filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" } : {}),
                             ...(logoSettings.addWhiteBorder ? { padding: 4, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 6 } : {}),
                           }}
@@ -243,22 +350,29 @@ export default function SitePreview() {
               }
               return renderSection(section);
             })}
-            {/* Footer */}
+
+            {/* ═══ FOOTER ═══ */}
             {footerSettings.visible && (
-              <footer className="py-8 px-4 text-sm" style={{ backgroundColor: footerSettings.bgColor, color: "#e2e8f0" }}>
-                <div className={`max-w-5xl mx-auto grid gap-6`} style={{ gridTemplateColumns: `repeat(${footerSettings.columns}, 1fr)` }}>
+              <footer className="py-8 px-5 sm:px-6 lg:px-8 text-sm" style={{ backgroundColor: footerBg, color: footerTextColor }}>
+                <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {footerSettings.showLogo && logoSettings?.headerLogoUrl && (
                     <div className="flex items-start">
-                      <img src={logoSettings.headerLogoUrl} alt="Logo" style={{ height: 40, objectFit: "contain" as const }} />
+                      <img src={logoSettings.headerLogoUrl} alt="Logo" style={{ height: 40, objectFit: "contain" as const }} className="max-w-full" />
                     </div>
                   )}
-                  <div className={footerSettings.showLogo ? "" : `col-span-${footerSettings.columns}`}>
-                    <p className="opacity-70">{copyrightText}</p>
+                  <div>
+                    <p style={{ opacity: 0.7 }}>{copyrightText}</p>
                   </div>
+                  {socialDisplay.showInFooter && visibleSocials.length > 0 && (
+                    <div>
+                      <p className="font-medium mb-2" style={{ opacity: 0.9 }}>Follow Us</p>
+                      <SocialIcons links={socialLinks} display={socialDisplay} color={footerTextColor} />
+                    </div>
+                  )}
                 </div>
                 {footerSettings.showBackToTop && (
                   <div className="flex justify-center mt-6">
-                    <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-1 text-xs opacity-60 hover:opacity-100 transition-opacity" style={{ color: "#e2e8f0" }}>
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-1 text-xs hover:opacity-100 transition-opacity" style={{ color: footerTextColor, opacity: 0.6 }}>
                       <ArrowUp className="h-3 w-3" /> Back to Top
                     </button>
                   </div>
