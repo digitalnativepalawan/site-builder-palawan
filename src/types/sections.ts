@@ -92,20 +92,20 @@ export function parseSectionData(data: Json): SectionData {
 }
 
 export const SECTION_TYPES = [
-  { type: "cover", label: "🖼️ Cover / Banner", desc: "Big background image with headline & CTA" },
-  { type: "text_block", label: "✍️ Text Section", desc: "Headline + body text" },
-  { type: "photo", label: "📷 Photo", desc: "Single image with optional caption" },
-  { type: "bullet_list", label: "📋 Bullet List", desc: "List of items with optional icons" },
-  { type: "pricing", label: "💰 Pricing Table", desc: "Plans with features & prices" },
-  { type: "faq", label: "❓ Q&A / FAQ", desc: "Accordion-style questions & answers" },
-  { type: "two_columns", label: "📰 Two Columns", desc: "Side-by-side content" },
-  { type: "key_numbers", label: "📊 Key Numbers", desc: "Big stats with labels" },
-  { type: "number_cards", label: "🔢 Number Cards", desc: "Numbered step cards" },
-  { type: "timeline", label: "📅 Timeline", desc: "Chronological events" },
-  { type: "youtube", label: "▶️ Video", desc: "YouTube URL or uploaded video" },
-  { type: "contact_form", label: "📬 Contact Form", desc: "Name, email, message form" },
-  { type: "separator", label: "➖ Separator", desc: "Horizontal divider line" },
-  { type: "cta", label: "🎯 Call to Action", desc: "Headline + button with bg color" },
+  { type: "cover", label: "Cover / Banner", desc: "Big background image with headline & CTA" },
+  { type: "text_block", label: "Text Section", desc: "Headline + body text" },
+  { type: "photo", label: "Photo", desc: "Single image with optional caption" },
+  { type: "bullet_list", label: "Bullet List", desc: "List of items with optional icons" },
+  { type: "pricing", label: "Pricing Table", desc: "Plans with features & prices" },
+  { type: "faq", label: "Q&A / FAQ", desc: "Accordion-style questions & answers" },
+  { type: "two_columns", label: "Two Columns", desc: "Side-by-side content" },
+  { type: "key_numbers", label: "Key Numbers", desc: "Big stats with labels" },
+  { type: "number_cards", label: "Number Cards", desc: "Numbered step cards" },
+  { type: "timeline", label: "Timeline", desc: "Chronological events" },
+  { type: "youtube", label: "Video", desc: "YouTube URL or uploaded video" },
+  { type: "contact_form", label: "Contact Form", desc: "Name, email, message form" },
+  { type: "separator", label: "Separator", desc: "Horizontal divider line" },
+  { type: "cta", label: "Call to Action", desc: "Headline + button with bg color" },
 ] as const;
 
 export const SECTION_DEFAULTS: Record<string, SectionData> = {
@@ -128,10 +128,9 @@ export const SECTION_DEFAULTS: Record<string, SectionData> = {
 export function sectionLabel(type: string): string {
   const found = SECTION_TYPES.find((s) => s.type === type);
   if (found) return found.label;
-  // Legacy compat
-  if (type === "hero") return "🖼️ Cover / Banner";
-  if (type === "image_gallery") return "📷 Image Gallery";
-  if (type === "split_layout") return "📰 Two Columns";
-  if (type === "grid_cards") return "🔢 Number Cards";
+  if (type === "hero") return "Cover / Banner";
+  if (type === "image_gallery") return "Image Gallery";
+  if (type === "split_layout") return "Two Columns";
+  if (type === "grid_cards") return "Number Cards";
   return type;
 }
