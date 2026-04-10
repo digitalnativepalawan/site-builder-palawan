@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, GripVertical, Eye, Loader2, Save, ChevronUp, ChevronDown, Settings } from "lucide-react";
+import {
+  ArrowLeft, Plus, Trash2, GripVertical, Eye, Loader2, Save, ChevronUp, ChevronDown, Settings,
+  LayoutTemplate, AlignLeft, Image, List, CreditCard, HelpCircle, Columns2, Hash, Grid3x3, Clock, Youtube, Mail, Minus, Megaphone,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Json } from "@/integrations/supabase/types";
 import { parseSectionData, sectionLabel, SECTION_TYPES, SECTION_DEFAULTS } from "@/types/sections";
 import type { SectionData, Section } from "@/types/sections";
