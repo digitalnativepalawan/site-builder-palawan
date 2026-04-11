@@ -7,37 +7,42 @@ type Style = { bg: string; text: string; accent: string; headingFont: string; bo
 type DeviceMode = "desktop" | "tablet" | "mobile";
 type Props = { data: SectionData; style: Style; device?: DeviceMode };
 type PropsNoStyle = { data: SectionData; device?: DeviceMode };
+const mob = (d?: DeviceMode) => d === "mobile";
 
-const isMob = (d?: DeviceMode) => d === "mobile";
-const isDesk = (d?: DeviceMode) => d === "desktop" || !d;
-
-/* helper: extract YouTube embed URL */
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
-  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vi = url.match(/vimeo\.com\/(\d+)/);
+  if (vi) return `https://player.vimeo.com/video/${vi[1]}`;
   return null;
 }
 
-/* ═══ 1. COVER / BANNER ═══ */
+/* ═══ 1. COVER — full-screen hero with photo ═══ */
 export function CoverSection({ data, style, device }: Props) {
   const hasBg = !!data.backgroundImage;
-  const mob = isMob(device);
+  const m = mob(device);
   return (
-    <section
-      className={`relative py-12 px-5 ${!mob ? "sm:px-6 lg:px-8 sm:py-24 lg:py-32" : ""} ${!hasBg ? style.bg : ""}`}
-      style={hasBg ? { backgroundImage: `url(${data.backgroundImage})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-    >
-      {hasBg && <div className="absolute inset-0 bg-black/40" />}
-      <div className={`relative mx-auto max-w-3xl text-left ${!mob ? "sm:text-center" : ""} ${hasBg ? "text-white" : style.text}`}>
-        <h1 className={`text-[28px] ${!mob ? "sm:text-4xl lg:text-6xl" : ""} font-bold ${style.headingFont} mb-4`}>{data.headline}</h1>
-        {data.subheadline && <p className={`text-base ${!mob ? "sm:text-xl" : ""} opacity-70 mb-8`}>{data.subheadline}</p>}
-        {data.body && <p className={`text-base opacity-60 max-w-[65ch] ${!mob ? "sm:mx-auto" : ""} mb-8`}>{data.body}</p>}
-        <div className={`flex flex-col ${!mob ? "sm:flex-row sm:justify-center" : ""} flex-wrap gap-4`}>
-          {data.buttonText && <a href={data.buttonUrl || "#"} className={`inline-block w-full ${!mob ? "sm:w-auto" : ""} text-center px-8 py-3 min-h-[44px] rounded-lg font-medium transition-colors ${style.accent}`}>{data.buttonText}</a>}
-          {data.buttonText2 && <a href={data.buttonUrl2 || "#"} className={`inline-block w-full ${!mob ? "sm:w-auto" : ""} text-center px-8 py-3 min-h-[44px] rounded-lg font-medium border border-current transition-colors hover:opacity-80`}>{data.buttonText2}</a>}
+    <section className="relative flex items-center justify-center overflow-hidden"
+      style={{ minHeight: m ? "70vh" : "92vh", backgroundImage: hasBg ? `url(${data.backgroundImage})` : undefined, backgroundSize: "cover", backgroundPosition: "center", backgroundColor: hasBg ? undefined : "var(--site-primary, #1E40AF)" }}>
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%)" }} />
+      <div className="relative z-10 text-white px-6 py-16 max-w-4xl mx-auto text-center w-full">
+        <h1 style={{ fontFamily: style.headingFont, textShadow: "0 2px 20px rgba(0,0,0,0.5)", letterSpacing: "-0.02em", fontSize: m ? "2rem" : "4.5rem", fontWeight: 800, marginBottom: "1rem" }}>
+          {data.headline}
+        </h1>
+        {data.subheadline && <p style={{ fontSize: m ? "1.1rem" : "1.5rem", opacity: 0.92, marginBottom: "0.75rem", fontWeight: 300 }}>{data.subheadline}</p>}
+        {data.body && <p style={{ fontSize: m ? "0.95rem" : "1.1rem", opacity: 0.8, maxWidth: "600px", margin: "0 auto 2rem", lineHeight: 1.7 }}>{data.body}</p>}
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", flexDirection: m ? "column" : "row", alignItems: "center" }}>
+          {data.buttonText && (
+            <a href={data.buttonUrl || "#"} style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "16px 36px", borderRadius: "8px", fontWeight: 700, fontSize: "1rem", textDecoration: "none", transition: "opacity 0.2s", minWidth: m ? "100%" : "auto", display: "inline-block", textAlign: "center" }}>
+              {data.buttonText}
+            </a>
+          )}
+          {data.buttonText2 && (
+            <a href={data.buttonUrl2 || "#"} style={{ border: "2px solid white", color: "white", padding: "16px 36px", borderRadius: "8px", fontWeight: 600, fontSize: "1rem", textDecoration: "none", minWidth: m ? "100%" : "auto", display: "inline-block", textAlign: "center" }}>
+              {data.buttonText2}
+            </a>
+          )}
         </div>
       </div>
     </section>
@@ -46,16 +51,13 @@ export function CoverSection({ data, style, device }: Props) {
 
 /* ═══ 2. TEXT SECTION ═══ */
 export function TextSection({ data, style, device }: Props) {
-  const mob = isMob(device);
-  const bgClass = data.background === "light-gray" ? "bg-muted/50" : "";
-  const align = data.alignment === "center" ? `text-left ${!mob ? "sm:text-center" : ""}` : "text-left";
-  const maxW = data.width === "narrow" ? "max-w-[800px]" : "max-w-4xl";
+  const m = mob(device);
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""} ${bgClass}`}>
-      <div className={`mx-auto ${maxW} ${align}`}>
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-4`}>{data.headline}</h2>}
-        {data.body && <div className={`text-base ${!mob ? "sm:text-lg" : ""} leading-relaxed ${style.text} opacity-80 whitespace-pre-wrap`}>{data.body}</div>}
-        {data.buttonText && <a href={data.buttonUrl || "#"} className={`inline-block w-full ${!mob ? "sm:w-auto" : ""} text-center mt-6 px-6 py-3 min-h-[44px] rounded-lg font-medium transition-colors ${style.accent}`}>{data.buttonText}</a>}
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.5rem", fontWeight: 700, marginBottom: "1.25rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        {data.body && <p style={{ fontSize: m ? "1rem" : "1.1rem", lineHeight: 1.8, opacity: 0.85, whiteSpace: "pre-wrap" }}>{data.body}</p>}
+        {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", marginTop: "1.5rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>{data.buttonText}</a>}
       </div>
     </section>
   );
@@ -63,66 +65,78 @@ export function TextSection({ data, style, device }: Props) {
 
 /* ═══ 3. PHOTO ═══ */
 export function PhotoSection({ data, device }: PropsNoStyle) {
-  const mob = isMob(device);
+  const m = mob(device);
   if (!data.imageUrl) return null;
-  const sizeClass = mob ? "max-w-full" : data.size === "small" ? "max-w-sm" : data.size === "medium" ? "max-w-xl" : "max-w-4xl";
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className={`mx-auto ${sizeClass}`}>
-        <img src={data.imageUrl} alt={data.imageAlt || data.caption || ""} loading="lazy" className="w-full h-auto rounded-lg max-w-full" />
-        {data.caption && <p className={`text-sm text-muted-foreground mt-2 text-left ${!mob ? "sm:text-center" : ""}`}>{data.caption}</p>}
+    <section style={{ padding: m ? "2rem 1.5rem" : "4rem 2rem" }}>
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <img src={data.imageUrl} alt={data.caption || ""} loading="lazy" style={{ width: "100%", borderRadius: "12px", objectFit: "cover" }} />
+        {data.caption && <p style={{ fontSize: "0.9rem", opacity: 0.6, marginTop: "0.75rem", textAlign: "center" }}>{data.caption}</p>}
       </div>
     </section>
   );
 }
 
-/* ═══ 4. BULLET LIST ═══ */
+/* ═══ 4. BULLET LIST — icon grid ═══ */
 export function BulletListSection({ data, style, device }: Props) {
-  const mob = isMob(device);
+  const m = mob(device);
   const items = data.items || [];
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-4xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-6`}>{data.headline}</h2>}
-        <ul className={`space-y-3 ${!mob && data.listLayout === "two-col" ? "sm:columns-2 sm:gap-8" : ""}`}>
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "rgba(0,0,0,0.02)" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "1rem" }}>
           {items.map((item, i) => (
-            <li key={i} className={`flex items-start gap-2 ${style.text}`}>
-              <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-              <span className={`text-base ${!mob ? "sm:text-lg" : ""}`}>{item.text}</span>
-            </li>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", backgroundColor: "#fff", borderRadius: "10px", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <span style={{ color: "var(--site-primary, #1E40AF)", fontSize: "1.1rem" }}>✓</span>
+              <span style={{ fontSize: m ? "0.85rem" : "0.95rem", fontWeight: 500 }}>{item.text}</span>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ═══ 5. PRICING TABLE ═══ */
+/* ═══ 5. PRICING — room cards with photos ═══ */
 export function PricingSection({ data, style, device }: Props) {
-  const mob = isMob(device);
+  const m = mob(device);
   const plans = data.plans || [];
   if (!plans.length) return null;
-  const gridClass = mob
-    ? "grid-cols-1"
-    : plans.length === 1 ? "sm:max-w-md sm:mx-auto" : plans.length === 2 ? "sm:grid-cols-2 sm:max-w-3xl sm:mx-auto" : "sm:grid-cols-2 lg:grid-cols-3";
+  const cols = plans.length === 1 ? "1fr" : plans.length === 2 ? "1fr 1fr" : m ? "1fr" : "repeat(3, 1fr)";
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-6xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-8 text-left ${!mob ? "sm:text-center" : ""}`}>{data.headline}</h2>}
-        <div className={`grid grid-cols-1 ${gridClass} gap-6`}>
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : cols, gap: "1.5rem" }}>
           {plans.map((plan, i) => (
-            <div key={i} className={`rounded-xl border p-6 flex flex-col ${plan.recommended ? "ring-2 ring-primary shadow-lg relative" : "shadow-sm"}`}>
-              {plan.recommended && <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">Recommended</span>}
-              <h3 className={`text-xl font-bold ${style.headingFont} ${style.text} mb-1`}>{plan.name}</h3>
-              <p className={`text-3xl font-bold ${style.text} mb-4`}>{plan.price}</p>
-              <ul className="space-y-2 flex-1 mb-6">
-                {(plan.features || []).filter(Boolean).map((f, j) => (
-                  <li key={j} className={`text-sm ${style.text} opacity-70 flex items-start gap-2`}>
-                    <span className="text-primary mt-0.5">✓</span> {f}
-                  </li>
-                ))}
-              </ul>
-              {plan.buttonText && <a href={plan.buttonUrl || "#"} className={`block text-center w-full px-6 py-3 min-h-[44px] rounded-lg font-medium transition-colors ${style.accent}`}>{plan.buttonText}</a>}
+            <div key={i} style={{ borderRadius: "16px", overflow: "hidden", boxShadow: plan.recommended ? "0 8px 32px rgba(0,0,0,0.15)" : "0 2px 12px rgba(0,0,0,0.08)", border: plan.recommended ? "2px solid var(--site-primary, #1E40AF)" : "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", position: "relative" }}>
+              {plan.recommended && <div style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", textAlign: "center", padding: "6px", fontSize: "0.8rem", fontWeight: 700 }}>⭐ Most Popular</div>}
+              {/* Room photo */}
+              {plan.imageUrl ? (
+                <img src={plan.imageUrl} alt={plan.name} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: "100%", height: "180px", backgroundColor: "var(--site-primary, #1E40AF)", opacity: 0.15, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: "3rem" }}>🏨</span>
+                </div>
+              )}
+              <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                <h3 style={{ fontFamily: style.headingFont, fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.5rem" }}>{plan.name}</h3>
+                {plan.description && <p style={{ fontSize: "0.9rem", opacity: 0.7, marginBottom: "1rem", lineHeight: 1.6 }}>{plan.description}</p>}
+                <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--site-primary, #1E40AF)", marginBottom: "1rem" }}>{plan.price}<span style={{ fontSize: "0.9rem", fontWeight: 400, opacity: 0.6 }}>/night</span></div>
+                <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.5rem", flex: 1 }}>
+                  {(plan.features || []).filter(Boolean).map((f, j) => (
+                    <li key={j} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem", marginBottom: "6px", opacity: 0.8 }}>
+                      <span style={{ color: "var(--site-primary, #1E40AF)", fontWeight: 700 }}>✓</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                {plan.buttonText && (
+                  <a href={plan.buttonUrl || "#"} style={{ display: "block", textAlign: "center", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px", borderRadius: "8px", fontWeight: 600, textDecoration: "none", fontSize: "0.95rem" }}>
+                    {plan.buttonText}
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -133,18 +147,18 @@ export function PricingSection({ data, style, device }: Props) {
 
 /* ═══ 6. FAQ ═══ */
 export function FaqSection({ data, style, device }: Props) {
-  const mob = isMob(device);
+  const m = mob(device);
   const items = data.faqItems || [];
   if (!items.length) return null;
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-3xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-8 text-left ${!mob ? "sm:text-center" : ""}`}>{data.headline}</h2>}
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "rgba(0,0,0,0.02)" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
         <Accordion type="single" collapsible className="w-full">
           {items.map((item, i) => (
-            <AccordionItem key={i} value={`faq-${i}`}>
-              <AccordionTrigger className={`text-left ${style.text} text-base ${!mob ? "sm:text-lg" : ""}`}>{item.question}</AccordionTrigger>
-              <AccordionContent className={`${style.text} opacity-80 text-base whitespace-pre-wrap`}>{item.answer}</AccordionContent>
+            <AccordionItem key={i} value={`faq-${i}`} style={{ borderBottom: "1px solid rgba(0,0,0,0.1)" }}>
+              <AccordionTrigger style={{ fontSize: m ? "1rem" : "1.05rem", fontWeight: 600, textAlign: "left", padding: "1.25rem 0" }}>{item.question}</AccordionTrigger>
+              <AccordionContent style={{ fontSize: "0.95rem", lineHeight: 1.7, opacity: 0.8, paddingBottom: "1.25rem", whiteSpace: "pre-wrap" }}>{item.answer}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
@@ -153,36 +167,33 @@ export function FaqSection({ data, style, device }: Props) {
   );
 }
 
-/* ═══ 7. TWO COLUMNS ═══ */
-export function TwoColumnsSection({ data, style, device }: Props) {
-  const mob = isMob(device);
+/* ═══ 7. REVIEWS ═══ */
+export function ReviewsSection({ data, style, device }: Props) {
+  const m = mob(device);
+  const reviews = data.reviews || [];
+  if (!reviews.length) return null;
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-5xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-8`}>{data.headline}</h2>}
-        <div className={`grid grid-cols-1 ${!mob ? "sm:grid-cols-2" : ""} gap-8`}>
-          <div className={`${style.text} opacity-80 text-base ${!mob ? "sm:text-lg" : ""} whitespace-pre-wrap`}>{data.leftContent}</div>
-          <div className={`${style.text} opacity-80 text-base ${!mob ? "sm:text-lg" : ""} whitespace-pre-wrap`}>{data.rightContent}</div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══ 8. KEY NUMBERS ═══ */
-export function KeyNumbersSection({ data, style, device }: Props) {
-  const mob = isMob(device);
-  const numbers = data.numbers || [];
-  if (!numbers.length) return null;
-  return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-5xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-8 text-left ${!mob ? "sm:text-center" : ""}`}>{data.headline}</h2>}
-        <div className={`grid grid-cols-1 ${!mob ? `sm:grid-cols-2 ${numbers.length > 2 ? "lg:grid-cols-4" : ""}` : ""} gap-6 text-left ${!mob ? "sm:text-center" : ""}`}>
-          {numbers.map((n, i) => (
-            <div key={i}>
-              <p className={`text-4xl ${!mob ? "sm:text-5xl" : ""} font-bold ${style.text}`}>{n.value}</p>
-              <p className={`text-sm ${!mob ? "sm:text-base" : ""} ${style.text} opacity-60 mt-1`}>{n.label}</p>
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : reviews.length === 1 ? "1fr" : reviews.length === 2 ? "1fr 1fr" : "repeat(3, 1fr)", gap: "1.5rem" }}>
+          {reviews.map((rv, i) => (
+            <div key={i} style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "1.75rem", boxShadow: "0 2px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div style={{ color: "var(--site-primary, #f59e0b)", fontSize: "1.1rem", letterSpacing: "2px" }}>{"★".repeat(parseInt(rv.rating) || 5)}</div>
+              <p style={{ fontSize: "0.95rem", lineHeight: 1.7, opacity: 0.8, fontStyle: "italic" }}>"{rv.reviewText}"</p>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "auto" }}>
+                {rv.photoUrl ? (
+                  <img src={rv.photoUrl} alt={rv.guestName} style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ width: "44px", height: "44px", borderRadius: "50%", backgroundColor: "var(--site-primary, #1E40AF)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: "1.1rem", flexShrink: 0 }}>
+                    {(rv.guestName || "G").charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <p style={{ fontWeight: 700, fontSize: "0.95rem" }}>{rv.guestName}</p>
+                  {rv.dateOfStay && <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>{rv.dateOfStay}</p>}
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -191,22 +202,21 @@ export function KeyNumbersSection({ data, style, device }: Props) {
   );
 }
 
-/* ═══ 9. NUMBER CARDS ═══ */
-export function NumberCardsSection({ data, style, device }: Props) {
-  const mob = isMob(device);
-  const cards = data.numberCards || [];
-  if (!cards.length) return null;
-  const cols = data.columns || 3;
-  const colsClass = mob ? "" : cols === 2 ? "sm:grid-cols-2" : cols === 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4";
+/* ═══ 8. GALLERY ═══ */
+export function GallerySection({ data, device }: PropsNoStyle) {
+  const m = mob(device);
+  const images = data.images || [];
+  if (!images.length) return null;
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-6xl">
-        <div className={`grid grid-cols-1 ${colsClass} gap-6`}>
-          {cards.map((card, i) => (
-            <div key={i} className="rounded-xl border bg-card p-6 shadow-sm">
-              <span className={`text-3xl font-bold ${style.text} opacity-30`}>{card.number}</span>
-              <h3 className={`text-lg font-bold ${style.headingFont} ${style.text} mt-2 mb-1`}>{card.title}</h3>
-              <p className={`text-sm ${style.text} opacity-70`}>{card.description}</p>
+    <section style={{ padding: m ? "2rem 1.5rem" : "4rem 2rem" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", textAlign: "center" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "8px" }}>
+          {images.slice(0, 8).map((img: any, i: number) => (
+            <div key={i} style={{ aspectRatio: "1", overflow: "hidden", borderRadius: "8px", backgroundColor: "#f0f0f0" }}>
+              <img src={img.url || img} alt={img.alt || ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", cursor: "pointer" }}
+                onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+                onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")} />
             </div>
           ))}
         </div>
@@ -215,131 +225,192 @@ export function NumberCardsSection({ data, style, device }: Props) {
   );
 }
 
-/* ═══ 10. TIMELINE ═══ */
-export function TimelineSection({ data, style, device }: Props) {
-  const mob = isMob(device);
-  const events = data.events || [];
-  if (!events.length) return null;
+/* ═══ 9. CONTACT with phone, WhatsApp, map ═══ */
+export function ContactFormSection({ data, style, device }: Props) {
+  const m = mob(device);
+  const [submitted, setSubmitted] = useState(false);
+  const whatsapp = data.whatsapp?.replace(/[^0-9]/g, "");
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-3xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-8 text-left ${!mob ? "sm:text-center" : ""}`}>{data.headline}</h2>}
-        <div className="relative border-l-2 border-primary/30 pl-6 space-y-8 ml-4">
-          {events.map((ev, i) => (
-            <div key={i} className="relative">
-              <div className="absolute -left-[31px] top-1 h-4 w-4 rounded-full bg-primary border-2 border-background" />
-              <span className={`text-sm font-bold ${style.text} opacity-50`}>{ev.year}</span>
-              <h3 className={`text-lg font-bold ${style.headingFont} ${style.text}`}>{ev.title}</h3>
-              <p className={`text-sm ${style.text} opacity-70 mt-1`}>{ev.description}</p>
-            </div>
-          ))}
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "0.5rem", textAlign: m ? "left" : "center" }}>{data.headline}</h2>}
+        <p style={{ textAlign: m ? "left" : "center", opacity: 0.85, marginBottom: "3rem" }}>We'd love to hear from you</p>
+
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: "3rem" }}>
+          {/* Contact info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            {data.email && (
+              <a href={`mailto:${data.email}`} style={{ display: "flex", alignItems: "center", gap: "12px", color: "#fff", textDecoration: "none", opacity: 0.9 }}>
+                <span style={{ fontSize: "1.25rem" }}>✉️</span>
+                <span>{data.email}</span>
+              </a>
+            )}
+            {data.phone && (
+              <a href={`tel:${data.phone}`} style={{ display: "flex", alignItems: "center", gap: "12px", color: "#fff", textDecoration: "none", opacity: 0.9 }}>
+                <span style={{ fontSize: "1.25rem" }}>📞</span>
+                <span>{data.phone}</span>
+              </a>
+            )}
+            {whatsapp && (
+              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "10px", backgroundColor: "#25D366", color: "#fff", padding: "12px 24px", borderRadius: "8px", fontWeight: 700, textDecoration: "none", width: "fit-content" }}>
+                <span style={{ fontSize: "1.1rem" }}>💬</span> WhatsApp Us
+              </a>
+            )}
+            {data.address && (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", opacity: 0.9 }}>
+                <span style={{ fontSize: "1.25rem" }}>📍</span>
+                <span style={{ lineHeight: 1.6 }}>{data.address}</span>
+              </div>
+            )}
+            {data.googleMapsLink && (
+              <a href={data.googleMapsLink} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "#fff", opacity: 0.8, textDecoration: "underline", fontSize: "0.9rem" }}>
+                View on Google Maps →
+              </a>
+            )}
+          </div>
+
+          {/* Form */}
+          <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem" }}>
+            {submitted ? (
+              <div style={{ textAlign: "center", color: "#22c55e", padding: "2rem" }}>
+                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✅</div>
+                <p style={{ fontWeight: 700, fontSize: "1.1rem", color: "#111" }}>Message sent!</p>
+                <p style={{ color: "#666", marginTop: "0.5rem" }}>We'll get back to you shortly.</p>
+              </div>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); setSubmitted(true); }} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <input required placeholder="Your name" style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", color: "#111" }} />
+                <input required type="email" placeholder="Email address" style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", color: "#111" }} />
+                <input placeholder="Phone / WhatsApp" style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", color: "#111" }} />
+                <textarea required placeholder="Your message" rows={4} style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", resize: "none", color: "#111" }} />
+                <button type="submit" style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "14px", borderRadius: "8px", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "1rem" }}>
+                  Send Message
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* ═══ 11. YOUTUBE / VIDEO ═══ */
+/* ═══ 10. YOUTUBE ═══ */
 export function YoutubeSection({ data, style, device }: Props) {
-  const mob = isMob(device);
+  const m = mob(device);
   const embedUrl = data.videoUrl ? getEmbedUrl(data.videoUrl) : null;
-  const hasVideo = embedUrl || data.videoFileUrl;
-  if (!hasVideo) return null;
+  if (!embedUrl && !data.videoFileUrl) return null;
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-4xl">
-        {data.videoTitle && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-6 text-left ${!mob ? "sm:text-center" : ""}`}>{data.videoTitle}</h2>}
-        <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">
-          {embedUrl ? (
-            <iframe src={embedUrl} title={data.videoTitle || "Video"} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
-          ) : data.videoFileUrl ? (
-            <video src={data.videoFileUrl} controls className="w-full h-full object-contain" />
-          ) : null}
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        {data.videoTitle && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "1.5rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.videoTitle}</h2>}
+        <AspectRatio ratio={16 / 9} style={{ borderRadius: "16px", overflow: "hidden" }}>
+          {embedUrl
+            ? <iframe src={embedUrl} title={data.videoTitle || "Video"} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
+            : <video src={data.videoFileUrl} controls className="w-full h-full object-contain" />}
         </AspectRatio>
       </div>
     </section>
   );
 }
 
-/* ═══ 12. CONTACT FORM ═══ */
-export function ContactFormSection({ data, style, device }: Props) {
-  const mob = isMob(device);
-  const [submitted, setSubmitted] = useState(false);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
+/* ═══ LEGACY / REMAINING SECTIONS ═══ */
+export function TwoColumnsSection({ data, style, device }: Props) {
+  const m = mob(device);
   return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-xl">
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-3xl" : ""} font-bold ${style.headingFont} ${style.text} mb-6 text-left ${!mob ? "sm:text-center" : ""}`}>{data.headline}</h2>}
-        {submitted ? (
-          <p className={`text-left ${!mob ? "sm:text-center" : ""} text-lg ${style.text}`}>{data.successMessage || "Thanks! We'll be in touch."}</p>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input required placeholder="Name" className="w-full min-h-[44px] rounded-lg border bg-background px-4 py-2" />
-            <input required type="email" placeholder="Email" className="w-full min-h-[44px] rounded-lg border bg-background px-4 py-2" />
-            <textarea required placeholder="Message" rows={4} className="w-full rounded-lg border bg-background px-4 py-2" />
-            <button type="submit" className={`w-full min-h-[44px] rounded-lg font-medium transition-colors ${style.accent}`}>
-              {data.submitText || "Send Message"}
-            </button>
-          </form>
-        )}
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: "2.5rem" }}>
+          <div style={{ fontSize: "1rem", lineHeight: 1.8, opacity: 0.8, whiteSpace: "pre-wrap" }}>{data.leftContent}</div>
+          <div style={{ fontSize: "1rem", lineHeight: 1.8, opacity: 0.8, whiteSpace: "pre-wrap" }}>{data.rightContent}</div>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ═══ 13. SEPARATOR ═══ */
-export function SeparatorSection({ data, device }: PropsNoStyle) {
-  const mob = isMob(device);
-  const widthClass = data.separatorWidth === "small" ? "max-w-xs" : data.separatorWidth === "full" ? "max-w-full" : "max-w-lg";
-  const colorClass = data.separatorColor === "brand" ? "border-primary" : "border-muted-foreground/20";
+export function KeyNumbersSection({ data, style, device }: Props) {
+  const m = mob(device);
+  const numbers = data.numbers || [];
+  if (!numbers.length) return null;
   return (
-    <section className={`py-6 px-5 ${!mob ? "sm:px-4" : ""}`}>
-      <hr className={`mx-auto ${widthClass} ${colorClass} border-t`} />
-    </section>
-  );
-}
-
-/* ═══ 14. CALL TO ACTION ═══ */
-export function CtaSection({ data, style, device }: Props) {
-  const mob = isMob(device);
-  const bgClass = data.background === "brand" ? "bg-primary text-primary-foreground" : data.background === "light-gray" ? "bg-muted/50" : "";
-  return (
-    <section className={`py-12 ${!mob ? "sm:py-20" : ""} px-5 ${!mob ? "sm:px-6 lg:px-8" : ""} ${bgClass}`}>
-      <div className={`mx-auto max-w-3xl text-left ${!mob ? "sm:text-center" : ""}`}>
-        {data.headline && <h2 className={`text-[28px] ${!mob ? "sm:text-4xl" : ""} font-bold ${style.headingFont} ${data.background === "brand" ? "" : style.text} mb-4`}>{data.headline}</h2>}
-        {data.subheadline && <p className={`text-base ${!mob ? "sm:text-lg" : ""} ${data.background === "brand" ? "opacity-80" : `${style.text} opacity-60`} mb-8`}>{data.subheadline}</p>}
-        {data.buttonText && (
-          <a href={data.buttonUrl || "#"} className={`inline-block w-full ${!mob ? "sm:w-auto" : ""} text-center px-8 py-3 min-h-[44px] rounded-lg font-medium transition-colors ${data.background === "brand" ? "bg-background text-foreground hover:bg-background/90" : style.accent}`}>
-            {data.buttonText}
-          </a>
-        )}
-      </div>
-    </section>
-  );
-}
-
-/* ═══ IMAGE GALLERY (legacy compat) ═══ */
-export function ImageGallerySection({ data, device }: PropsNoStyle) {
-  const mob = isMob(device);
-  if (!data.images?.length) return null;
-  const colsClass = mob
-    ? "grid-cols-1"
-    : data.layout === "single" ? "grid-cols-1 max-w-2xl" : data.layout === "2-col" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
-  return (
-    <section className={`py-12 px-5 ${!mob ? "sm:px-6 lg:px-8" : ""}`}>
-      <div className="mx-auto max-w-6xl">
-        <div className={`grid ${colsClass} gap-4 ${data.layout === "single" || mob ? "mx-auto" : ""}`}>
-          {data.images.map((img, i) => (
-            <div key={i} className="overflow-hidden rounded-lg">
-              <img src={img.url} alt={img.alt} loading="lazy" className="w-full aspect-square object-cover hover:scale-105 transition-transform duration-300 max-w-full h-auto" />
-              {img.caption && <p className="text-sm text-muted-foreground p-2">{img.caption}</p>}
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "rgba(0,0,0,0.02)" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : `repeat(${Math.min(numbers.length, 4)}, 1fr)`, gap: "2rem", textAlign: "center" }}>
+          {numbers.map((n, i) => (
+            <div key={i}>
+              <div style={{ fontSize: m ? "2.5rem" : "3.5rem", fontWeight: 800, color: "var(--site-primary, #1E40AF)" }}>{n.value}</div>
+              <div style={{ fontSize: "0.95rem", opacity: 0.65, marginTop: "0.25rem" }}>{n.label}</div>
             </div>
           ))}
         </div>
       </div>
     </section>
   );
+}
+
+export function NumberCardsSection({ data, style, device }: Props) {
+  const m = mob(device);
+  const cards = data.numberCards || [];
+  if (!cards.length) return null;
+  return (
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(3, 1fr)", gap: "1.5rem" }}>
+        {cards.map((card, i) => (
+          <div key={i} style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: "2.5rem", fontWeight: 800, opacity: 0.2 }}>{card.number}</div>
+            <h3 style={{ fontFamily: style.headingFont, fontSize: "1.15rem", fontWeight: 700, margin: "0.5rem 0 0.25rem" }}>{card.title}</h3>
+            <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>{card.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function TimelineSection({ data, style, device }: Props) {
+  const m = mob(device);
+  const events = data.events || [];
+  if (!events.length) return null;
+  return (
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+      <div style={{ maxWidth: "700px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ borderLeft: "3px solid var(--site-primary, #1E40AF)", paddingLeft: "2rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
+          {events.map((ev, i) => (
+            <div key={i} style={{ position: "relative" }}>
+              <div style={{ position: "absolute", left: "-2.65rem", top: "4px", width: "14px", height: "14px", borderRadius: "50%", backgroundColor: "var(--site-primary, #1E40AF)", border: "3px solid #fff", boxShadow: "0 0 0 2px var(--site-primary, #1E40AF)" }} />
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, opacity: 0.5 }}>{ev.year}</span>
+              <h3 style={{ fontFamily: style.headingFont, fontSize: "1.1rem", fontWeight: 700 }}>{ev.title}</h3>
+              <p style={{ fontSize: "0.9rem", opacity: 0.7, marginTop: "0.25rem" }}>{ev.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function SeparatorSection({ data }: PropsNoStyle) {
+  return <div style={{ padding: "1rem 2rem" }}><hr style={{ border: "none", borderTop: "1px solid rgba(0,0,0,0.1)", maxWidth: "600px", margin: "0 auto" }} /></div>;
+}
+
+export function CtaSection({ data, style, device }: Props) {
+  const m = mob(device);
+  const isBrand = data.background === "brand";
+  return (
+    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: isBrand ? "var(--site-primary, #1E40AF)" : "transparent" }}>
+      <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.5rem", fontWeight: 700, marginBottom: "1rem", color: isBrand ? "#fff" : "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        {data.subheadline && <p style={{ fontSize: "1.1rem", opacity: 0.8, marginBottom: "2rem", color: isBrand ? "#fff" : undefined }}>{data.subheadline}</p>}
+        {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", padding: "16px 40px", borderRadius: "8px", fontWeight: 700, textDecoration: "none", backgroundColor: isBrand ? "#fff" : "var(--site-primary, #1E40AF)", color: isBrand ? "var(--site-primary, #1E40AF)" : "#fff" }}>{data.buttonText}</a>}
+      </div>
+    </section>
+  );
+}
+
+export function ImageGallerySection({ data, device }: PropsNoStyle) {
+  return <GallerySection data={data} device={device} />;
 }
