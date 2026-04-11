@@ -70,12 +70,28 @@ export function CoverSection({ data, style, device }: Props) {
 /* ═══ 2. TEXT SECTION ═══ */
 export function TextSection({ data, style, device }: Props) {
   const m = isMob(device);
+  const hasImage = !!data.imageUrl;
   return (
     <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
-      <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: m ? "left" : "center" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.8rem", fontWeight: 700, marginBottom: "1.25rem", color: "var(--site-heading, inherit)", lineHeight: 1.2 }}>{data.headline}</h2>}
-        {data.body && <p style={{ fontSize: m ? "1rem" : "1.15rem", lineHeight: 1.85, opacity: 0.8, whiteSpace: "pre-wrap" }}>{data.body}</p>}
-        {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", marginTop: "2rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>{data.buttonText}</a>}
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {hasImage && !m ? (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}>
+            <div>
+              {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: "2.5rem", fontWeight: 700, marginBottom: "1.25rem", color: "var(--site-heading, inherit)", lineHeight: 1.2 }}>{data.headline}</h2>}
+              {data.body && <p style={{ fontSize: "1.1rem", lineHeight: 1.85, opacity: 0.75 }}>{data.body}</p>}
+              {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", marginTop: "2rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "13px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>{data.buttonText}</a>}
+            </div>
+            <div>
+              <img src={data.imageUrl} alt={data.headline || ""} style={{ width: "100%", borderRadius: "16px", objectFit: "cover", aspectRatio: "4/3", boxShadow: "0 8px 40px rgba(0,0,0,0.12)" }} />
+            </div>
+          </div>
+        ) : (
+          <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: m ? "left" : "center" }}>
+            {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.8rem", fontWeight: 700, marginBottom: "1.25rem", color: "var(--site-heading, inherit)", lineHeight: 1.2 }}>{data.headline}</h2>}
+            {data.body && <p style={{ fontSize: m ? "1rem" : "1.15rem", lineHeight: 1.85, opacity: 0.78, whiteSpace: "pre-wrap" }}>{data.body}</p>}
+            {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", marginTop: "2rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>{data.buttonText}</a>}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -219,21 +235,40 @@ export function ImageGallerySection({ data, device }: PropsNoStyle) {
   const m = isMob(device);
   const images = data.images || [];
   if (!images.length) return null;
+  const [main, ...rest] = images;
   return (
-    <section style={{ padding: m ? "2rem 1.5rem" : "4rem 2rem" }}>
-      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2rem", textAlign: "center" }}>{data.headline}</h2>}
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "10px" }}>
-          {images.slice(0, 8).map((img: any, i: number) => (
-            <div key={i} style={{ aspectRatio: "1", overflow: "hidden", borderRadius: "10px", backgroundColor: "#f0f0f0" }}>
-              <img src={img.url || img} alt={img.alt || ""} loading="lazy"
-                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s", cursor: "pointer" }}
+    <section style={{ padding: m ? "0" : "0", overflow: "hidden" }}>
+      {data.headline && (
+        <div style={{ padding: m ? "3rem 1.5rem 1.5rem" : "4rem 2rem 2rem", textAlign: "center" }}>
+          <h2 style={{ fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700 }}>{data.headline}</h2>
+        </div>
+      )}
+      {!m ? (
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gridTemplateRows: "300px 300px", gap: "6px" }}>
+          {/* Main big image */}
+          <div style={{ gridRow: "1 / 3", overflow: "hidden" }}>
+            <img src={(main as any)?.url || main} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s", cursor: "pointer" }}
+              onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.04)")}
+              onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")} />
+          </div>
+          {/* Smaller images */}
+          {rest.slice(0, 4).map((img: any, i: number) => (
+            <div key={i} style={{ overflow: "hidden" }}>
+              <img src={img?.url || img} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s", cursor: "pointer" }}
                 onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.06)")}
                 onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")} />
             </div>
           ))}
         </div>
-      </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+          {images.slice(0, 6).map((img: any, i: number) => (
+            <div key={i} style={{ aspectRatio: i === 0 ? "2/1" : "1", overflow: "hidden", gridColumn: i === 0 ? "1 / 3" : undefined }}>
+              <img src={img?.url || img} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

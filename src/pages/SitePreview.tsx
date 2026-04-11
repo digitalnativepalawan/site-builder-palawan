@@ -82,6 +82,25 @@ function SocialIcons({ links, display, color }: { links: SocialLink[]; display: 
   );
 }
 
+
+function stripNonDigits(s: string): string {
+  return s.split("").filter(c => Number.isInteger(Number(c)) && c !== " ").join("");
+}
+
+function FloatingWhatsApp({ phone }: { phone: string }) {
+  if (!phone) return null;
+  const digits = stripNonDigits(phone);
+  if (!digits) return null;
+  const href = "https://wa.me/" + digits;
+  return (
+    <a href={href} target="_blank" rel="noreferrer"
+      style={{ position: "fixed", bottom: "24px", right: "24px", width: "56px", height: "56px", borderRadius: "50%", backgroundColor: "#25D366", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", boxShadow: "0 4px 20px rgba(0,0,0,0.25)", zIndex: 999, textDecoration: "none" }}
+      title="Chat on WhatsApp">
+      💬
+    </a>
+  );
+}
+
 export default function SitePreview() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
@@ -317,18 +336,18 @@ export default function SitePreview() {
                         <span style={{ color: headerTextColor, fontWeight: 700, fontSize: 18 }}>{identity?.siteTitle || site.site_name}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-5">
                       {navLinks.map((link, i) => (
-                        <a key={i} href={link.url} className="text-sm hover:opacity-70 transition-opacity" style={{ color: headerTextColor }}>{link.label}</a>
+                        <a key={i} href={link.url} className="text-sm font-medium hover:opacity-70 transition-opacity" style={{ color: headerTextColor }}>{link.label}</a>
                       ))}
                       {socialDisplay.showInHeader && visibleSocials.length > 0 && (
                         <SocialIcons links={socialLinks} display={socialDisplay} color={headerTextColor} />
                       )}
-                      {headerSettings.ctaVisible && headerSettings.ctaText && (
-                        <a href={headerSettings.ctaLink || "#"} className="px-4 py-1.5 rounded text-sm font-medium text-white" style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
-                          {headerSettings.ctaText}
-                        </a>
-                      )}
+                      <a href={(identity as any)?.email ? "mailto:" + (identity as any).email : "#"}
+                        className="px-5 py-2 rounded-lg text-sm font-bold text-white transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: colors?.primary || "#3b82f6" }}>
+                        Book Now
+                      </a>
                     </div>
                   </div>
                 )}
@@ -433,6 +452,9 @@ export default function SitePreview() {
                 )}
               </footer>
             )}
+            {/* Floating WhatsApp Button */}
+            <FloatingWhatsApp phone={String((identity as any)?.whatsapp || "")} />
+
           </div>
         </div>
       </div>
