@@ -129,10 +129,11 @@ export default function Dashboard() {
           </div>
 
           {/* Add New Resort Button */}
-          <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer" className="hidden sm:block">
+          <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" className="min-h-[44px] gap-2">
               <Globe className="h-4 w-4" />
-              Add New Resort
+              <span className="hidden sm:inline">Add New Resort</span>
+              <span className="sm:hidden">Resort</span>
             </Button>
           </a>
 
