@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Resort</title>
+</head>
+<body>
+  <h1>Add a Resort</h1>
+  <form id="resortForm">
+    <label for="resortName">Resort Name</label><br>
+    <input type="text" id="resortName" name="resortName" required><br><br>
+
+    <label for="description">Description</label><br>
+    <textarea id="description" name="description" rows="6" cols="50" required></textarea><br><br>
+
+    <label for="photos">Photos</label><br>
+    <input type="file" id="photos" name="photos" multiple accept="image/*"><br><br>
+
+    <label for="amenities">Amenities</label><br>
+    <input type="text" id="amenities" name="amenities" placeholder="pool, wifi, spa, gym"><br><br>
+
+    <label for="contactEmail">Contact Email</label><br>
+    <input type="email" id="contactEmail" name="contactEmail" required><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <p id="status"></p>
+
+  <script>
+    const SUPABASE_URL = 'https://kektzjtsdpgduvvjfrig.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtla3R6anRzZHBnZHV2dmpmcmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTE0OTcsImV4cCI6MjA5MTMyNzQ5N30.5Rk5LBsICzHxiynctLJSh4iveZrxYTn-QYTsNr0dVqg';
+    const BUCKET = 'resort-assets';
+
+    async function uploadFile(file) {
+      const ext = file.name.split('.').pop() || 'bin';
+      const path = `resort-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': file.type || 'application/octet-stream'
+        },
+        body: file
+      });
+      if (!resp.ok) throw new Error(`Upload failed: ${await resp.text()}`);
+      return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+    }
+
+    document.getElementById('resortForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const status = document.getElementById('status');
+      status.textContent = 'Uploading photos & submitting…';
+
+      try {
+        // Upload photos
+        const photoUrls = [];
+        const photoInput = document.getElementById('photos');
+        for (const file of photoInput.files) {
+          const url = await uploadFile(file);
+          photoUrls.push(url);
+        }
+
+        // Build payload matching the existing resort_submissions schema
+        const data = {
+          basicInfo: {
+            resortName: document.getElementById('resortName').value.trim(),
+            shortDescription: document.getElementById('description').value.trim(),
+            fullDescription: document.getElementById('description').value.trim()
+          },
+          media: {
+            heroImages: photoUrls.length > 0 ? photoUrls : []
+          },
+          amenities: document.getElementById('amenities').value.trim()
+            .split(',')
+            .map(a => a.trim())
+            .filter(Boolean),
+          location: {
+            contactEmail: document.getElementById('contactEmail').value.trim()
+          },
+          publishing: { publishImmediately: true }
+        };
+
+        // Submit to Supabase
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/resort_submissions`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({ data: data, status: 'building' })
+        });
+
+        if (!resp.ok) throw new Error(await resp.text());
+
+        status.textContent = 'Submitted! Your site is being built.';
+        document.getElementById('resortForm').reset();
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

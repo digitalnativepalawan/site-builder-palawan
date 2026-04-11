@@ -128,6 +128,14 @@ export default function Dashboard() {
             <h1 className="font-heading text-xl font-bold sm:text-2xl">My Sites</h1>
           </div>
 
+          {/* Add New Resort Button */}
+          <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer" className="hidden sm:block">
+            <Button variant="outline" className="min-h-[44px] gap-2">
+              <Globe className="h-4 w-4" />
+              Add New Resort
+            </Button>
+          </a>
+
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
               <Button className="min-h-[44px] gap-2">
@@ -137,6 +145,11 @@ export default function Dashboard() {
               </Button>
             </DialogTrigger>
             <DialogContent className="mx-4 max-w-md">
+              {/* Resort form link inside dialog */}
+              <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer"
+                 className="text-sm text-muted-foreground hover:text-primary transition-colors block mb-2">
+                🏖️ Submit resort details to automatically build your website
+              </a>
               <DialogHeader>
                 <DialogTitle className="font-heading">Create New Site</DialogTitle>
               </DialogHeader>

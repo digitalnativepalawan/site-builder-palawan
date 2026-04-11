@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resort Website Builder — Submission Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1E40AF;
+  --primary-hover: #1e3a8a;
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --success: #059669;
+  --danger: #dc2626;
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
+
+/* Progress Bar */
+.progress-wrap {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.progress-bar-outer {
+  height: 6px; background: var(--border); border-radius: 99px; overflow: hidden;
+}
+.progress-bar-inner {
+  height: 100%; background: var(--primary); border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.progress-text {
+  font-size: 13px; color: var(--muted); margin-top: 4px; text-align: center;
+}
+.step-dots {
+  display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;
+  margin-top: 8px;
+}
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--border); transition: all 0.3s; cursor: pointer; border: none;
+}
+.dot.completed { background: var(--success); }
+.dot.active { background: var(--primary); transform: scale(1.3); }
+
+/* Layout */
+.container {
+  max-width: 720px; margin: 0 auto; padding: 24px 16px 80px;
+}
+.step { display: none; animation: fadeIn 0.3s ease; }
+.step.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Cards */
+.section-card {
+  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
+  padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.section-title {
+  font-size: 20px; font-weight: 700; margin-bottom: 4px; color: var(--primary);
+}
+.section-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+
+/* Fields */
+.field { margin-bottom: 16px; position: relative; }
+.field label, .group-label {
+  display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px;
+}
+.field .hint { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="number"],
+.field input[type="date"],
+.field input[type="url"],
+.field textarea,
+.field select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 15px; font-family: inherit;
+  transition: border 0.2s, box-shadow 0.2s; background: #fff;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(30,64,175,0.12);
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field.error input, .field.error textarea, .field.error select {
+  border-color: var(--danger); box-shadow: 0 0 0 2px rgba(220,38,38,0.12);
+}
+.field .error-msg { font-size: 12px; color: var(--danger); margin-top: 2px; display: none; }
+.field.error .error-msg { display: block; }
+.char-count { font-size: 12px; color: var(--muted); text-align: right; margin-top: 2px; }
+.char-count.warn { color: #d97706; }
+.char-count.over { color: var(--danger); font-weight: 600; }
+
+/* Checkbox Grid */
+.check-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px;
+}
+.check-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.check-item input { accent-color: var(--primary); width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Color Grid */
+.color-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;
+}
+.color-item { text-align: center; }
+.color-item input[type="color"] {
+  width: 100%; height: 44px; border: 2px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; padding: 2px; background: #fff;
+}
+.color-item input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.color-item input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+.color-label { font-size: 12px; font-weight: 600; margin-top: 4px; color: var(--muted); }
+
+/* File Upload Area */
+.upload-area {
+  border: 2px dashed var(--border); border-radius: var(--radius); padding: 16px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: #fafbfc;
+}
+.upload-area:hover { border-color: var(--primary); background: #f0f4ff; }
+.upload-area .icon { font-size: 28px; margin-bottom: 4px; }
+.upload-area .label { font-size: 13px; color: var(--muted); }
+.upload-area input[type="file"] { display: none; }
+
+/* File List */
+.file-list { margin-top: 8px; }
+.file-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 10px; background: #f1f5f9; border-radius: 6px;
+  margin-bottom: 4px; font-size: 13px;
+}
+.file-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-item .remove {
+  color: var(--danger); cursor: pointer; font-weight: 700; border: none;
+  background: none; font-size: 16px; flex-shrink: 0; padding: 0 4px;
+}
+
+/* Repeatable Groups */
+.group {
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 12px; background: #f8fafc; position: relative;
+}
+.group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.group-title { font-weight: 700; font-size: 15px; }
+.group-remove {
+  background: none; border: none; color: var(--danger); cursor: pointer;
+  font-size: 18px; padding: 4px 8px; border-radius: 4px; line-height: 1;
+}
+.group-remove:hover { background: #fef2f2; }
+
+/* Buttons */
+.btn-row {
+  display: flex; justify-content: space-between; gap: 12px; margin-top: 24px;
+}
+.btn {
+  padding: 12px 28px; border-radius: var(--radius); font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.2s; min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-secondary:hover { background: #f8fafc; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { background: #047857; }
+.btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-add {
+  background: transparent; color: var(--primary); border: 1px dashed var(--primary);
+  width: 100%; padding: 10px; border-radius: var(--radius); cursor: pointer;
+  font-size: 14px; font-weight: 600; font-family: inherit; min-height: 44px;
+}
+.btn-add:hover { background: #f0f4ff; }
+.btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Upload Progress Overlay */
+.upload-overlay {
+  display: none; position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.4); justify-content: center; align-items: center;
+}
+.upload-overlay.active { display: flex; }
+.upload-overlay .card {
+  background: var(--card); padding: 32px; border-radius: var(--radius);
+  text-align: center; min-width: 300px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.spinner {
+  width: 40px; height: 40px; border: 4px solid var(--border);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Thank-you screen */
+.thank-you { display: none; text-align: center; padding: 60px 20px; animation: fadeIn 0.5s ease; }
+.thank-you.active { display: block; }
+.thank-you .check-mark { font-size: 64px; margin-bottom: 16px; }
+.thank-you h2 { font-size: 28px; margin-bottom: 8px; }
+.thank-you p { color: var(--muted); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .container { padding: 16px 12px 60px; }
+  .section-card { padding: 16px; }
+  .color-grid { grid-template-columns: repeat(2, 1fr); }
+  .check-grid { grid-template-columns: 1fr; }
+  .btn-row { flex-direction: column-reverse; }
+  .btn { width: 100%; }
+  .section-title { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:7.7%"></div></div>
+  <div class="progress-text" id="progressText">Step 1 of 13 — Basic Info</div>
+  <div class="step-dots" id="stepDots"></div>
+</div>
+
+<!-- Upload Progress Overlay -->
+<div class="upload-overlay" id="uploadOverlay">
+  <div class="card">
+    <div class="spinner"></div>
+    <div id="uploadStatus">Uploading files &amp; submitting…</div>
+  </div>
+</div>
+
+<div class="container">
+<form id="resortForm" novalidate>
+
+<!-- ════════════ STEP 1 — Basic Info ════════════ -->
+<div class="step active" data-step="1">
+  <div class="section-card">
+    <div class="section-title">Basic Info</div>
+    <div class="section-desc">Tell us about your resort.</div>
+    <div class="field" data-required>
+      <label>Resort Name</label>
+      <input type="text" id="resortName" required placeholder="e.g., Port Barton Beach Resort">
+      <div class="error-msg">Resort name is required.</div>
+    </div>
+    <div class="field">
+      <label>Tagline</label>
+      <input type="text" id="tagline" placeholder="e.g., Your Paradise in Palawan">
+    </div>
+    <div class="field" data-required>
+      <label>Short Description</label>
+      <div class="hint">Max 200 characters — used for SEO and previews.</div>
+      <textarea id="shortDesc" maxlength="200" rows="3" required placeholder="A beautiful beachfront resort with crystal-clear waters…"></textarea>
+      <div class="char-count" id="shortDescCount">0 / 200</div>
+      <div class="error-msg">Short description is required.</div>
+    </div>
+    <div class="field" data-required>
+      <label>Full Description</label>
+      <div class="hint">Your full resort story — history, what makes it special, etc.</div>
+      <textarea id="fullDesc" rows="5" required placeholder="Welcome to our beachfront resort…"></textarea>
+      <div class="error-msg">Full description is required.</div>
+    </div>
+    <div class="field">
+      <label>Year Established</label>
+      <input type="number" id="yearEstablished" min="1900" max="2099" placeholder="e.g., 2015">
+    </div>
+    <div class="field">
+      <label>Number of Rooms</label>
+      <input type="number" id="numRooms" min="1" placeholder="e.g., 24">
+    </div>
+  </div>
+  <div class="btn-row">
+    <div></div>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 2 — Media ════════════ -->
+<div class="step" data-step="2">
+  <div class="section-card">
+    <div class="section-title">Media &amp; Branding</div>
+    <div class="section-desc">Upload high-quality photos for your website.</div>
+
+    <div class="field" data-required>
+      <label>Hero Images (up to 5)</label>
+      <div class="hint">Best wide-angle shots — these become the hero carousel.</div>
+      <div class="upload-area" onclick="this.querySelector('input').click()">
+        <div class="icon">🖼️</div>
+        <div class="label">Click to upload hero images (PNG, JPG, WEBP)</div>
+        <input type="file" id="heroImages" multiple accept="image/*" onchange="handleFiles(this)">
+      </div>
+      <div class="file-list" id="heroImagesList"></div>
+      <div class="error-msg">At least one hero image is required.</div>
+    </div>
+
+    <div class="field">
+      <label>Gallery Images (up to 20)</label>
+      <div class="hint">Rooms, beach, activities, food, aerial, etc.</div>
+      <div class="upload-area" onclick="this.querySelector('input').click()">
+        <div class="icon">📸</div>
+        <div class="label">Click to upload gallery images</div>
+        <input type="file" id="galleryImages" multiple accept="image/*" onchange="handleFiles(this)">
+      </div>
+      <div class="file-list" id="galleryImagesList"></div>
+    </div>
+
+    <div class="field" data-required>
+      <label>Logo</label>
+      <div class="upload-area" onclick="this.querySelector('input').click()">
+        <div class="icon">🏢</div>
+        <div class="label">Upload logo (PNG with transparent background preferred)</div>
+        <input type="file" id="logoUpload" accept="image/*" onchange="handleFiles(this)">
+      </div>
+      <div class="file-list" id="logoUploadList"></div>
+      <div class="error-msg">Logo is required.</div>
+    </div>
+
+    <div class="field">
+      <label>Favicon (optional)</label>
+      <div class="upload-area" onclick="this.querySelector('input').click()">
+        <div class="icon">⭐</div>
+        <div class="label">Upload favicon (32x32px PNG)</div>
+        <input type="file" id="faviconUpload" accept="image/*" onchange="handleFiles(this)">
+      </div>
+      <div class="file-list" id="faviconUploadList"></div>
+    </div>
+
+    <div class="field">
+      <label>Video Tour URL</label>
+      <input type="url" id="videoUrl" placeholder="https://youtube.com/watch?v=…">
+    </div>
+    <div class="field">
+      <label>Drone / Background Video URL</label>
+      <input type="url" id="droneVideoUrl" placeholder="https://youtube.com/watch?v=…">
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 3 — Amenities ════════════ -->
+<div class="step" data-step="3">
+  <div class="section-card">
+    <div class="section-title">Amenities</div>
+    <div class="section-desc">Select all that apply to your resort.</div>
+    <div class="field check-grid" data-required>
+      <label class="group-label" style="grid-column:1/-1;">Facilities &amp; Services</label>
+      <div class="check-item"><input type="checkbox" id="am1" value="Beachfront"> <label for="am1">Beachfront</label></div>
+      <div class="check-item"><input type="checkbox" id="am2" value="Swimming Pool"> <label for="am2">Swimming Pool</label></div>
+      <div class="check-item"><input type="checkbox" id="am3" value="Restaurant"> <label for="am3">Restaurant</label></div>
+      <div class="check-item"><input type="checkbox" id="am4" value="Bar / Lounge"> <label for="am4">Bar / Lounge</label></div>
+      <div class="check-item"><input type="checkbox" id="am5" value="Room Service"> <label for="am5">Room Service</label></div>
+      <div class="check-item"><input type="checkbox" id="am6" value="Free WiFi"> <label for="am6">Free WiFi</label></div>
+      <div class="check-item"><input type="checkbox" id="am7" value="Parking"> <label for="am7">Parking</label></div>
+      <div class="check-item"><input type="checkbox" id="am8" value="Airport Transfer"> <label for="am8">Airport Transfer</label></div>
+      <div class="check-item"><input type="checkbox" id="am9" value="Laundry Service"> <label for="am9">Laundry Service</label></div>
+      <div class="check-item"><input type="checkbox" id="am10" value="Massage / Spa"> <label for="am10">Massage / Spa</label></div>
+      <div class="check-item"><input type="checkbox" id="am11" value="Kayaking"> <label for="am11">Kayaking</label></div>
+      <div class="check-item"><input type="checkbox" id="am12" value="Island Hopping"> <label for="am12">Island Hopping</label></div>
+      <div class="check-item"><input type="checkbox" id="am13" value="Scuba Diving"> <label for="am13">Scuba Diving</label></div>
+      <div class="check-item"><input type="checkbox" id="am14" value="Snorkeling"> <label for="am14">Snorkeling</label></div>
+      <div class="check-item"><input type="checkbox" id="am15" value="Conference Room"> <label for="am15">Conference Room</label></div>
+      <div class="check-item"><input type="checkbox" id="am16" value="Family Rooms"> <label for="am16">Family Rooms</label></div>
+      <div class="check-item"><input type="checkbox" id="am17" value="Pet Friendly"> <label for="am17">Pet Friendly</label></div>
+      <div class="check-item"><input type="checkbox" id="am18" value="Wheelchair Accessible"> <label for="am18">Wheelchair Accessible</label></div>
+      <div class="check-item"><input type="checkbox" id="am19" value="24-hour Front Desk"> <label for="am19">24-hour Front Desk</label></div>
+      <div class="check-item"><input type="checkbox" id="am20" value="Concierge"> <label for="am20">Concierge</label></div>
+      <div class="error-msg" style="grid-column:1/-1;">Select at least one amenity.</div>
+    </div>
+    <div class="field">
+      <label>Custom Amenities</label>
+      <div class="hint">One per line, for any amenities not listed above.</div>
+      <textarea id="customAmenities" rows="3" placeholder="e.g.&#10;Private Chef&#10;Yoga Classes&#10;Diving Center"></textarea>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 4 — Room Types ════════════ -->
+<div class="step" data-step="4">
+  <div class="section-card">
+    <div class="section-title">Room Types</div>
+    <div class="section-desc">Describe each room category. At least one is required — up to 6.</div>
+    <div id="roomGroups"></div>
+    <button type="button" class="btn-add" id="addRoomBtn" onclick="addRoomGroup()">+ Add Room Type</button>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 5 — Location & Contact ════════════ -->
+<div class="step" data-step="5">
+  <div class="section-card">
+    <div class="section-title">Location &amp; Contact</div>
+    <div class="section-desc">Help guests find and reach you.</div>
+    <div class="field" data-required>
+      <label>Google Maps Embed Link</label>
+      <input type="text" id="mapsLink" required placeholder="https://maps.google.com/… or embed URL">
+      <div class="error-msg">Google Maps link is required.</div>
+    </div>
+    <div class="field" data-required>
+      <label>Full Address</label>
+      <textarea id="fullAddress" rows="2" required placeholder="Barangay, Municipality, Province, ZIP"></textarea>
+      <div class="error-msg">Address is required.</div>
+    </div>
+    <div class="field" data-required>
+      <label>Nearest Airport</label>
+      <input type="text" id="nearestAirport" required placeholder="e.g., Puerto Princesa International Airport">
+      <div class="error-msg">Nearest airport is required.</div>
+    </div>
+    <div class="field">
+      <label>Distance to Airport</label>
+      <input type="text" id="distAirport" placeholder="e.g., 45 minutes by van">
+    </div>
+    <div class="field">
+      <label>Distance to Town Center</label>
+      <input type="text" id="distTown" placeholder="e.g., 5 minutes by tricycle">
+    </div>
+    <div style="margin: 16px 0; border-top: 1px solid var(--border); padding-top: 16px;">
+      <div class="field" data-required>
+        <label>Contact Email</label>
+        <input type="email" id="contactEmail" required placeholder="info@yourresort.com">
+        <div class="error-msg">Valid email is required.</div>
+      </div>
+      <div class="field" data-required>
+        <label>Phone Number</label>
+        <input type="text" id="phone" required placeholder="+63 XXX XXX XXXX">
+        <div class="error-msg">Phone number is required.</div>
+      </div>
+      <div class="field">
+        <label>WhatsApp Number</label>
+        <input type="text" id="whatsapp" placeholder="+63 XXX XXX XXXX">
+      </div>
+      <div class="field">
+        <label>Facebook Page</label>
+        <input type="text" id="facebook" placeholder="https://facebook.com/yourpage">
+      </div>
+      <div class="field">
+        <label>Instagram Handle</label>
+        <input type="text" id="instagram" placeholder="@yourresort">
+      </div>
+      <div class="field">
+        <label>TikTok Handle</label>
+        <input type="text" id="tiktok" placeholder="@yourresort">
+      </div>
+      <div class="field">
+        <label>Twitter / X Handle (optional)</label>
+        <input type="text" id="twitter" placeholder="@yourresort">
+      </div>
+      <div class="field">
+        <label>YouTube Channel (optional)</label>
+        <input type="text" id="youtube" placeholder="https://youtube.com/@yourchannel">
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 6 — FAQ ════════════ -->
+<div class="step" data-step="6">
+  <div class="section-card">
+    <div class="section-title">Frequently Asked Questions</div>
+    <div class="section-desc">Add up to 8 Q&amp;As guests commonly ask. At least one is required.</div>
+    <div id="faqGroups"></div>
+    <button type="button" class="btn-add" id="addFaqBtn" onclick="addFaqGroup()">+ Add FAQ</button>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 7 — Guest Reviews ════════════ -->
+<div class="step" data-step="7">
+  <div class="section-card">
+    <div class="section-title">Guest Reviews</div>
+    <div class="section-desc">Share testimonials to display on your site. At least one is required — up to 6.</div>
+    <div id="reviewGroups"></div>
+    <button type="button" class="btn-add" id="addReviewBtn" onclick="addReviewGroup()">+ Add Review</button>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 8 — Color Palette ════════════ -->
+<div class="step" data-step="8">
+  <div class="section-card">
+    <div class="section-title">Color Palette</div>
+    <div class="section-desc">Customise your site colors. Leave defaults if unsure.</div>
+    <div class="color-grid">
+      <div class="color-item">
+        <input type="color" id="colorPrimary" value="#1E40AF">
+        <div class="color-label">Primary</div>
+      </div>
+      <div class="color-item">
+        <input type="color" id="colorSecondary" value="#64748b">
+        <div class="color-label">Secondary</div>
+      </div>
+      <div class="color-item">
+        <input type="color" id="colorBg" value="#ffffff">
+        <div class="color-label">Background</div>
+      </div>
+      <div class="color-item">
+        <input type="color" id="colorText" value="#1e293b">
+        <div class="color-label">Text</div>
+      </div>
+      <div class="color-item">
+        <input type="color" id="colorHeading" value="#0f172a">
+        <div class="color-label">Heading</div>
+      </div>
+      <div class="color-item">
+        <input type="color" id="colorAccent" value="#059669">
+        <div class="color-label">Accent</div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 9 — Typography ════════════ -->
+<div class="step" data-step="9">
+  <div class="section-card">
+    <div class="section-title">Typography</div>
+    <div class="section-desc">Choose your font pairings.</div>
+    <div class="field">
+      <label>Heading Font</label>
+      <select id="headingFont">
+        <option value="Poppins">Poppins</option>
+        <option value="Montserrat">Montserrat</option>
+        <option value="Playfair Display">Playfair Display</option>
+        <option value="Lora">Lora</option>
+        <option value="Merriweather">Merriweather</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Body Font</label>
+      <select id="bodyFont">
+        <option value="Inter" selected>Inter</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Lato">Lato</option>
+        <option value="Source Sans Pro">Source Sans Pro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Font Scale</label>
+      <select id="fontScale">
+        <option value="compact">Compact</option>
+        <option value="comfortable" selected>Comfortable</option>
+        <option value="relaxed">Relaxed</option>
+      </select>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 10 — Layout & Design ════════════ -->
+<div class="step" data-step="10">
+  <div class="section-card">
+    <div class="section-title">Layout &amp; Design</div>
+    <div class="section-desc">Fine-tune the overall appearance.</div>
+    <div class="field">
+      <label>Layout Style</label>
+      <select id="layoutStyle">
+        <option value="full-width">Full Width</option>
+        <option value="boxed">Boxed</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Content Width</label>
+      <select id="contentWidth">
+        <option value="800px">800px</option>
+        <option value="1200px" selected>1200px</option>
+        <option value="1400px">1400px</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Border Radius</label>
+      <select id="borderRadius">
+        <option value="0px">None</option>
+        <option value="4px" selected>Slight (4px)</option>
+        <option value="8px">Medium (8px)</option>
+        <option value="12px">Large (12px)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Button Style</label>
+      <select id="buttonStyle">
+        <option value="filled">Filled</option>
+        <option value="outline">Outline</option>
+        <option value="ghost">Ghost</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Header Style</label>
+      <select id="headerStyle">
+        <option value="solid">Solid</option>
+        <option value="transparent">Transparent</option>
+        <option value="blur" selected>Blur</option>
+      </select>
+    </div>
+    <div class="check-item" style="margin-bottom: 12px;">
+      <input type="checkbox" id="headerSticky" checked> <label for="headerSticky">Header Sticky</label>
+    </div>
+    <div class="field">
+      <label>Footer Columns</label>
+      <select id="footerCols">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Show Social Icons In</label>
+      <select id="socialIn">
+        <option value="header">Header</option>
+        <option value="footer">Footer</option>
+        <option value="both" selected>Both</option>
+      </select>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 11 — Social Media Toggles ════════════ -->
+<div class="step" data-step="11">
+  <div class="section-card">
+    <div class="section-title">Social Media Toggles</div>
+    <div class="section-desc">Which social icons should appear on your site?</div>
+    <div class="check-grid">
+      <div class="check-item"><input type="checkbox" id="socialFacebook" checked> <label for="socialFacebook">Show Facebook</label></div>
+      <div class="check-item"><input type="checkbox" id="socialInstagram" checked> <label for="socialInstagram">Show Instagram</label></div>
+      <div class="check-item"><input type="checkbox" id="socialTwitter"> <label for="socialTwitter">Show Twitter / X</label></div>
+      <div class="check-item"><input type="checkbox" id="socialTiktok"> <label for="socialTiktok">Show TikTok</label></div>
+      <div class="check-item"><input type="checkbox" id="socialYoutube"> <label for="socialYoutube">Show YouTube</label></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 12 — SEO & Metadata ════════════ -->
+<div class="step" data-step="12">
+  <div class="section-card">
+    <div class="section-title">SEO &amp; Metadata</div>
+    <div class="section-desc">Search-engine settings. Defaults will be auto-filled from Basic Info if left blank.</div>
+    <div class="field">
+      <label>Meta Title</label>
+      <input type="text" id="metaTitle" placeholder="Auto-filled from Resort Name">
+    </div>
+    <div class="field">
+      <label>Meta Description</label>
+      <textarea id="metaDesc" rows="3" placeholder="Auto-filled from Short Description"></textarea>
+    </div>
+    <div class="field">
+      <label>Meta Keywords (optional)</label>
+      <input type="text" id="metaKeywords" placeholder="resort, palawan, beach, hotel…">
+    </div>
+    <div class="field">
+      <label>Google Analytics ID (optional)</label>
+      <input type="text" id="gaId" placeholder="G-XXXXXXXXXX">
+    </div>
+    <div class="field">
+      <label>Custom CSS (optional)</label>
+      <textarea id="customCSS" rows="4" placeholder="/* Your custom CSS here */"></textarea>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-primary" onclick="nextStep()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ STEP 13 — Publishing ════════════ -->
+<div class="step" data-step="13">
+  <div class="section-card">
+    <div class="section-title">Publishing</div>
+    <div class="section-desc">Final settings before we build your site.</div>
+    <div class="check-item" style="margin-bottom: 16px;">
+      <input type="checkbox" id="publishImmediately" checked>
+      <label for="publishImmediately"><strong>Publish Immediately</strong> — build and go live automatically</label>
+    </div>
+    <div class="field">
+      <label>Schedule Publish Date (optional)</label>
+      <input type="date" id="scheduleDate">
+    </div>
+    <div class="field">
+      <label>Custom Subdomain (optional)</label>
+      <input type="text" id="customSubdomain" placeholder="e.g., port-barton-resort (leave blank to auto-generate)">
+    </div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn btn-secondary" onclick="prevStep()">← Back</button>
+    <button type="button" class="btn btn-success" id="submitBtn" onclick="submitForm()">Submit &amp; Build Site 🚀</button>
+  </div>
+</div>
+
+</form>
+
+<!-- Thank-you -->
+<div class="thank-you" id="thankYou">
+  <div class="check-mark">✅</div>
+  <h2>Submission Received!</h2>
+  <p id="thankYouMsg">Your resort data has been saved. A complete website will be generated — you will receive the link shortly.</p>
+</div>
+</div>
+
+<script>
+// ═════════════════════════════════════════
+// CONFIG
+// ═════════════════════════════════════════
+const SUPABASE_URL = 'https://kektzjtsdpgduvvjfrig.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtla3R6anRzZHBnZHV2dmpmcmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTE0OTcsImV4cCI6MjA5MTMyNzQ5N30.5Rk5LBsICzHxiynctLJSh4iveZrxYTn-QYTsNr0dVqg';
+const STORAGE_BUCKET = 'resort-assets';
+
+const API_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+};
+
+const TOTAL_STEPS = 13;
+const STEP_NAMES = [
+  'Basic Info', 'Media', 'Amenities', 'Room Types', 'Location & Contact',
+  'FAQ', 'Guest Reviews', 'Color Palette', 'Typography', 'Layout & Design',
+  'Social Toggles', 'SEO & Metadata', 'Publishing'
+];
+
+let currentStep = 1;
+const uploadedFiles = {};  // { inputId: [File, File, ...] }
+
+// ═════════════════════════════════════════
+// STEP NAVIGATION
+// ═════════════════════════════════════════
+function updateProgress() {
+  const pct = ((currentStep) / TOTAL_STEPS * 100).toFixed(1) + '%';
+  document.getElementById('progressBar').style.width = pct;
+  document.getElementById('progressText').textContent = `Step ${currentStep} of ${TOTAL_STEPS} — ${STEP_NAMES[currentStep - 1]}`;
+
+  // Dots
+  const dotsWrap = document.getElementById('stepDots');
+  dotsWrap.innerHTML = '';
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i < currentStep ? ' completed' : '') + (i === currentStep ? ' active' : '');
+    d.setAttribute('aria-label', `Go to step ${i}`);
+    d.setAttribute('type', 'button');
+    if (i < currentStep) d.onclick = () => goToStep(i);
+    dotsWrap.appendChild(d);
+  }
+
+  // Show/hide steps
+  document.querySelectorAll('.step').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.step) === currentStep);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToStep(n) {
+  clearErrors();
+  currentStep = n;
+  if (n === 12) prefillSeo();
+  updateProgress();
+}
+
+function validateCurrentStep() {
+  let valid = true;
+  const stepEl = document.querySelector(`.step[data-step="${currentStep}"]`);
+  stepEl.querySelectorAll('.field[data-required]').forEach(f => {
+    const inp = f.querySelector('input, textarea, select');
+    // For checkbox grids, check if any checkbox is checked
+    if (f.classList.contains('check-grid')) {
+      const hasChecked = f.querySelectorAll('input:checked').length > 0;
+      if (!hasChecked) { f.classList.add('error'); valid = false; }
+      else { f.classList.remove('error'); }
+    }
+    // For file lists, check if files were uploaded
+    else if (f.querySelector('.file-list')) {
+      // Check if there are any file items in the list
+      const listEl = f.querySelector('.file-list');
+      if (!listEl || listEl.children.length === 0) {
+        // Check if we have a hero image field
+        if (/^hero|logo/i.test(f.querySelector('label')?.textContent || '')) {
+          f.classList.add('error'); valid = false;
+        } else {
+          f.classList.remove('error');
+        }
+      } else {
+        f.classList.remove('error');
+      }
+    }
+    else if (inp && !inp.value.trim()) {
+      f.classList.add('error'); valid = false;
+    } else {
+      f.classList.remove('error');
+    }
+  });
+  return valid;
+}
+
+function clearErrors() {
+  document.querySelectorAll('.field.error').forEach(f => f.classList.remove('error'));
+}
+
+function nextStep() {
+  if (currentStep >= TOTAL_STEPS) return;
+  if (!validateCurrentStep()) {
+    // Shake animation for visual feedback
+    const stepEl = document.querySelector(`.step[data-step="${currentStep}"]`);
+    const firstError = stepEl.querySelector('.field.error');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+  clearErrors();
+  currentStep++;
+  updateProgress();
+}
+
+function prevStep() {
+  if (currentStep <= 1) return;
+  clearErrors();
+  currentStep--;
+  updateProgress();
+}
+
+function prefillSeo() {
+  const name = document.getElementById('resortName')?.value.trim();
+  const short = document.getElementById('shortDesc')?.value.trim();
+  const metaTitle = document.getElementById('metaTitle');
+  const metaDesc = document.getElementById('metaDesc');
+  if (name && !metaTitle.value.trim()) metaTitle.value = name;
+  if (short && !metaDesc.value.trim()) metaDesc.value = short;
+}
+
+// ═════════════════════════════════════════
+// FILE HANDLING
+// ═════════════════════════════════════════
+function handleFiles(input) {
+  const inputId = input.id;
+  if (!inputId) return;
+  const files = input.files;
+  if (!files || files.length === 0) return;
+
+  if (!uploadedFiles[inputId]) uploadedFiles[inputId] = [];
+
+  Array.from(files).forEach(f => {
+    // Prevent duplicates by filename + size
+    const isDup = uploadedFiles[inputId].some(existing =>
+      existing.name === f.name && existing.size === f.size
+    );
+    if (!isDup) uploadedFiles[inputId].push(f);
+  });
+
+  // Reset input value so same file can be re-selected if needed
+  input.value = '';
+  renderFileList(inputId);
+}
+
+function renderFileList(inputId) {
+  const list = document.getElementById(inputId + 'List');
+  if (!list) return;
+  list.innerHTML = '';
+  const files = uploadedFiles[inputId] || [];
+  files.forEach((f, idx) => {
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    const size = (f.size / 1024 / 1024).toFixed(2) + ' MB';
+    item.innerHTML = `
+      <span>📄 ${f.name} (${size})</span>
+      <button type="button" class="remove" onclick="removeFile('${inputId}', ${idx})" title="Remove file">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function removeFile(inputId, idx) {
+  if (uploadedFiles[inputId]) {
+    uploadedFiles[inputId].splice(idx, 1);
+    renderFileList(inputId);
+  }
+}
+
+// ═════════════════════════════════════════
+// REPEATABLE GROUPS
+// ═════════════════════════════════════════
+let roomCount = 0;
+let faqCount = 0;
+let reviewCount = 0;
+
+function addRoomGroup() {
+  roomCount++;
+  if (roomCount > 6) return;
+  const container = document.getElementById('roomGroups');
+  const id = roomCount;
+  const html = `
+    <div class="group" id="room_${id}">
+      <div class="group-header">
+        <span class="group-title">Room Type ${id}</span>
+        <button type="button" class="group-remove" onclick="removeRoomGroup(this)" title="Remove">✕</button>
+      </div>
+      <div class="field">
+        <label>Room Name</label>
+        <input type="text" class="rm-name" placeholder="e.g., Deluxe Ocean View">
+      </div>
+      <div class="field">
+        <label>Price per Night (PHP)</label>
+        <input type="number" class="rm-price" placeholder="e.g., 5000">
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea class="rm-desc" rows="2" placeholder="Spacious room with ocean views…"></textarea>
+      </div>
+      <div class="field">
+        <label>Max Guests</label>
+        <input type="number" class="rm-maxguests" min="1" placeholder="e.g., 2">
+      </div>
+      <div class="field">
+        <label>Bed Type</label>
+        <select class="rm-bed">
+          <option value="King">King</option>
+          <option value="Queen" selected>Queen</option>
+          <option value="Twin">Twin</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Room Size (sq m)</label>
+        <input type="number" class="rm-size" min="1" placeholder="e.g., 35">
+      </div>
+      <div class="field">
+        <label>Room Amenities</label>
+        <div class="check-grid">
+          <div class="check-item"><input type="checkbox" class="rm-ac" data-am="AC"> <label>AC</label></div>
+          <div class="check-item"><input type="checkbox" class="rm-tv" data-am="TV"> <label>TV</label></div>
+          <div class="check-item"><input type="checkbox" class="rm-minibar" data-am="Mini-bar"> <label>Mini-bar</label></div>
+          <div class="check-item"><input type="checkbox" class="rm-safe" data-am="Safe"> <label>Safe</label></div>
+          <div class="check-item"><input type="checkbox" class="rm-balcony" data-am="Balcony"> <label>Balcony</label></div>
+          <div class="check-item"><input type="checkbox" class="rm-ocean" data-am="Ocean View"> <label>Ocean View</label></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Room Image</label>
+        <div class="upload-area" onclick="this.querySelector('input').click()">
+          <div class="icon">🖼️</div>
+          <div class="label">Click to upload room image</div>
+          <input type="file" id="roomFile_${id}" accept="image/*" onchange="handleFiles(this)">
+        </div>
+        <div class="file-list" id="roomFile_${id}List"></div>
+      </div>
+    </div>`;
+  container.insertAdjacentHTML('beforeend', html);
+  document.getElementById('addRoomBtn').disabled = roomCount >= 6;
+}
+
+function removeRoomGroup(btn) {
+  btn.closest('.group').remove();
+  document.getElementById('addRoomBtn').disabled = false;
+}
+
+function addFaqGroup() {
+  faqCount++;
+  if (faqCount > 8) return;
+  const container = document.getElementById('faqGroups');
+  const html = `
+    <div class="group" data-faq="${faqCount}">
+      <div class="group-header">
+        <span class="group-title">FAQ ${faqCount}</span>
+        <button type="button" class="group-remove" onclick="removeFaqGroup(this)" title="Remove">✕</button>
+      </div>
+      <div class="field">
+        <label>Question</label>
+        <input type="text" class="faq-q" placeholder="e.g., What is the check-in time?">
+      </div>
+      <div class="field">
+        <label>Answer</label>
+        <textarea class="faq-a" rows="2" placeholder="e.g., Check-in is at 2:00 PM."></textarea>
+      </div>
+    </div>`;
+  container.insertAdjacentHTML('beforeend', html);
+  document.getElementById('addFaqBtn').disabled = faqCount >= 8;
+}
+
+function removeFaqGroup(btn) {
+  btn.closest('.group').remove();
+  document.getElementById('addFaqBtn').disabled = false;
+}
+
+function addReviewGroup() {
+  reviewCount++;
+  if (reviewCount > 6) return;
+  const container = document.getElementById('reviewGroups');
+  const id = reviewCount;
+  const html = `
+    <div class="group" data-review="${id}">
+      <div class="group-header">
+        <span class="group-title">Guest Review ${id}</span>
+        <button type="button" class="group-remove" onclick="removeReviewGroup(this)" title="Remove">✕</button>
+      </div>
+      <div class="field">
+        <label>Guest Name</label>
+        <input type="text" class="rv-name" placeholder="e.g., Maria Santos">
+      </div>
+      <div class="field">
+        <label>Review Text</label>
+        <textarea class="rv-text" rows="2" placeholder="Absolutely stunning resort!"></textarea>
+      </div>
+      <div class="field">
+        <label>Rating (1–5)</label>
+        <input type="number" class="rv-rating" min="1" max="5" value="5" placeholder="5">
+      </div>
+      <div class="field">
+        <label>Date of Stay</label>
+        <input type="date" class="rv-date">
+      </div>
+      <div class="field">
+        <label>Guest Photo (optional)</label>
+        <div class="upload-area" onclick="this.querySelector('input').click()">
+          <div class="icon">📷</div>
+          <div class="label">Click to upload</div>
+          <input type="file" id="reviewFile_${id}" accept="image/*" onchange="handleFiles(this)">
+        </div>
+        <div class="file-list" id="reviewFile_${id}List"></div>
+      </div>
+    </div>`;
+  container.insertAdjacentHTML('beforeend', html);
+  document.getElementById('addReviewBtn').disabled = reviewCount >= 6;
+}
+
+function removeReviewGroup(btn) {
+  btn.closest('.group').remove();
+  document.getElementById('addReviewBtn').disabled = false;
+}
+
+// ═════════════════════════════════════════
+// COLLECT FORM DATA
+// ═════════════════════════════════════════
+function collectData() {
+  // Amenities
+  const amenities = [];
+  for (let i = 1; i <= 20; i++) {
+    const cb = document.getElementById('am' + i);
+    if (cb && cb.checked) amenities.push(cb.value);
+  }
+  const customAm = document.getElementById('customAmenities')?.value.trim();
+  if (customAm) {
+    amenities.push(...customAm.split('\n').map(s => s.trim()).filter(Boolean));
+  }
+
+  // Room types
+  const rooms = [];
+  document.querySelectorAll('#roomGroups .group').forEach((g, idx) => {
+    const roomAmen = [];
+    g.querySelectorAll('input[type="checkbox"][data-am]').forEach(cb => {
+      if (cb.checked) roomAmen.push(cb.dataset.am);
+    });
+    const roomFileId = g.querySelector('.rm-file, input[id^="roomFile_"]')?.id;
+    rooms.push({
+      name: g.querySelector('.rm-name')?.value.trim() || '',
+      price: g.querySelector('.rm-price')?.value || '',
+      description: g.querySelector('.rm-desc')?.value.trim() || '',
+      maxGuests: g.querySelector('.rm-maxguests')?.value || '',
+      bedType: g.querySelector('.rm-bed')?.value || '',
+      size: g.querySelector('.rm-size')?.value || '',
+      amenities: roomAmen,
+      _fileId: roomFileId
+    });
+  });
+
+  // FAQs
+  const faqs = [];
+  document.querySelectorAll('#faqGroups .group').forEach(g => {
+    const q = g.querySelector('.faq-q')?.value.trim();
+    const a = g.querySelector('.faq-a')?.value.trim();
+    if (q || a) faqs.push({ question: q || '', answer: a || '' });
+  });
+
+  // Reviews
+  const reviews = [];
+  document.querySelectorAll('#reviewGroups .group').forEach(g => {
+    const rvFileId = g.querySelector('input[id^="reviewFile_"]')?.id;
+    reviews.push({
+      guestName: g.querySelector('.rv-name')?.value.trim() || '',
+      reviewText: g.querySelector('.rv-text')?.value.trim() || '',
+      rating: g.querySelector('.rv-rating')?.value || '',
+      dateOfStay: g.querySelector('.rv-date')?.value || '',
+      _fileId: rvFileId
+    });
+  });
+
+  // Social toggles
+  const socialToggles = {
+    facebook: document.getElementById('socialFacebook')?.checked || false,
+    instagram: document.getElementById('socialInstagram')?.checked || false,
+    twitter: document.getElementById('socialTwitter')?.checked || false,
+    tiktok: document.getElementById('socialTiktok')?.checked || false,
+    youtube: document.getElementById('socialYoutube')?.checked || false
+  };
+
+  // SEO pre-fill
+  let metaTitle = document.getElementById('metaTitle')?.value.trim() || '';
+  let metaDesc = document.getElementById('metaDesc')?.value.trim() || '';
+  const resortName = document.getElementById('resortName')?.value.trim() || '';
+  const shortDesc = document.getElementById('shortDesc')?.value.trim() || '';
+  if (!metaTitle && resortName) metaTitle = resortName;
+  if (!metaDesc && shortDesc) metaDesc = shortDesc;
+
+  const locEl = (id) => document.getElementById(id)?.value.trim() || '';
+
+  return {
+    basicInfo: {
+      resortName,
+      tagline: document.getElementById('tagline')?.value.trim() || '',
+      shortDescription: shortDesc,
+      fullDescription: document.getElementById('fullDesc')?.value.trim() || '',
+      yearEstablished: document.getElementById('yearEstablished')?.value || '',
+      numberOfRooms: document.getElementById('numRooms')?.value || ''
+    },
+    media: {
+      videoUrl: locEl('videoUrl'),
+      droneVideoUrl: locEl('droneVideoUrl')
+    },
+    amenities,
+    roomTypes: rooms,
+    location: {
+      googleMapsLink: locEl('mapsLink'),
+      fullAddress: locEl('fullAddress'),
+      nearestAirport: locEl('nearestAirport'),
+      distanceToAirport: locEl('distAirport'),
+      distanceToTownCenter: locEl('distTown'),
+      contactEmail: locEl('contactEmail'),
+      phone: locEl('phone'),
+      whatsapp: locEl('whatsapp'),
+      facebook: locEl('facebook'),
+      instagram: locEl('instagram'),
+      tiktok: locEl('tiktok'),
+      twitter: locEl('twitter'),
+      youtube: locEl('youtube')
+    },
+    faqs,
+    reviews,
+    colorPalette: {
+      primary: document.getElementById('colorPrimary').value,
+      secondary: document.getElementById('colorSecondary').value,
+      background: document.getElementById('colorBg').value,
+      text: document.getElementById('colorText').value,
+      heading: document.getElementById('colorHeading').value,
+      accent: document.getElementById('colorAccent').value
+    },
+    typography: {
+      headingFont: document.getElementById('headingFont').value,
+      bodyFont: document.getElementById('bodyFont').value,
+      fontScale: document.getElementById('fontScale').value
+    },
+    layout: {
+      layoutStyle: document.getElementById('layoutStyle').value,
+      contentWidth: document.getElementById('contentWidth').value,
+      borderRadius: document.getElementById('borderRadius').value,
+      buttonStyle: document.getElementById('buttonStyle').value,
+      headerStyle: document.getElementById('headerStyle').value,
+      headerSticky: document.getElementById('headerSticky').checked,
+      footerColumns: parseInt(document.getElementById('footerCols').value) || 3,
+      showSocialIn: document.getElementById('socialIn').value
+    },
+    socialToggles,
+    seo: {
+      metaTitle,
+      metaDescription: metaDesc,
+      metaKeywords: locEl('metaKeywords'),
+      googleAnalyticsId: locEl('gaId'),
+      customCSS: document.getElementById('customCSS')?.value || ''
+    },
+    publishing: {
+      publishImmediately: document.getElementById('publishImmediately').checked,
+      scheduleDate: document.getElementById('scheduleDate')?.value || '',
+      customSubdomain: locEl('customSubdomain')
+    }
+  };
+}
+
+// ═════════════════════════════════════════
+// UPLOAD FILES TO SUPABASE STORAGE
+// ═════════════════════════════════════════
+async function uploadToStorage(file) {
+  const ext = file.name.split('.').pop() || 'bin';
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const url = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`;
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Upload failed for ${file.name}: ${err}`);
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+}
+
+async function uploadAllFiles(data) {
+  const totalFiles = Object.values(uploadedFiles).reduce((sum, arr) => sum + arr.length, 0);
+  let uploadedCount = 0;
+  const urlMap = {};
+
+  if (totalFiles === 0) return data;
+
+  const statusEl = document.getElementById('uploadStatus');
+  statusEl.textContent = `Uploading 0 / ${totalFiles} files…`;
+
+  for (const [inputId, files] of Object.entries(uploadedFiles)) {
+    urlMap[inputId] = [];
+    for (const file of files) {
+      try {
+        const publicUrl = await uploadToStorage(file);
+        urlMap[inputId].push(publicUrl);
+        uploadedCount++;
+        statusEl.textContent = `Uploading ${uploadedCount} / ${totalFiles} files…`;
+      } catch (e) {
+        console.error(`Upload failed: ${file.name}`, e);
+        uploadedCount++;
+      }
+    }
+  }
+
+  // Merge URLs into data
+  if (urlMap.heroImages?.length) data.media.heroImages = urlMap.heroImages;
+  if (urlMap.galleryImages?.length) data.media.galleryImages = urlMap.galleryImages;
+  if (urlMap.logoUpload?.length) data.media.logoUrl = urlMap.logoUpload[0];
+  if (urlMap.faviconUpload?.length) data.media.faviconUrl = urlMap.faviconUpload[0];
+
+  // Room images
+  data.roomTypes.forEach(room => {
+    if (room._fileId && urlMap[room._fileId]?.length) {
+      room.imageUrl = urlMap[room._fileId][0];
+    }
+    delete room._fileId;
+  });
+
+  // Review photos
+  data.reviews.forEach(rv => {
+    if (rv._fileId && urlMap[rv._fileId]?.length) {
+      rv.photoUrl = urlMap[rv._fileId][0];
+    }
+    delete rv._fileId;
+  });
+
+  return data;
+}
+
+// ═════════════════════════════════════════
+// SUBMIT
+// ═════════════════════════════════════════
+async function submitForm() {
+  // Validate remaining steps
+  for (let s = currentStep; s <= TOTAL_STEPS; s++) {
+    currentStep = s;
+    if (!validateCurrentStep()) { updateProgress(); return; }
+    clearErrors();
+  }
+  updateProgress();
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  document.getElementById('uploadOverlay').classList.add('active');
+  document.getElementById('uploadStatus').textContent = 'Uploading files & submitting…';
+
+  try {
+    // Collect all data
+    const data = collectData();
+
+    // Upload files
+    await uploadAllFiles(data);
+
+    // Submit to Supabase
+    document.getElementById('uploadStatus').textContent = 'Saving submission…';
+
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/resort_submissions`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        data: data,
+        status: data.publishing.publishImmediately ? 'pending' : 'draft'
+      })
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`Server error: ${resp.status} - ${errText}`);
+    }
+
+    const result = await resp.json();
+    console.log('✅ Submission created:', result);
+
+    // Show thank-you
+    document.getElementById('resortForm').style.display = 'none';
+    document.querySelector('.progress-wrap').style.display = 'none';
+    const ty = document.getElementById('thankYou');
+    ty.classList.add('active');
+
+    if (data.publishing.publishImmediately) {
+      document.getElementById('thankYouMsg').textContent =
+        `Your resort "${data.basicInfo.resortName}" is being built! You will receive the live URL shortly.`;
+    } else {
+      document.getElementById('thankYouMsg').textContent =
+        `Your resort data has been saved as draft. We will build your site and notify you for review.`;
+    }
+
+  } catch (e) {
+    console.error('Submission failed:', e);
+    alert('Submission failed: ' + e.message);
+    document.getElementById('uploadOverlay').classList.remove('active');
+    btn.disabled = false;
+    btn.textContent = 'Submit & Build Site 🚀';
+  }
+}
+
+// ═════════════════════════════════════════
+// INIT
+// ═════════════════════════════════════════
+updateProgress();
+
+// Add default groups
+addRoomGroup();
+addFaqGroup();
+addReviewGroup();
+
+// Character counter
+const shortDescEl = document.getElementById('shortDesc');
+if (shortDescEl) {
+  shortDescEl.addEventListener('input', function() {
+    const countEl = document.getElementById('shortDescCount');
+    const len = this.value.length;
+    const max = 200;
+    countEl.textContent = `${len} / ${max}`;
+    countEl.className = 'char-count' + (len >= max ? ' over' : len > max * 0.8 ? ' warn' : '');
+  });
+}
+
+// Clear error on input/change
+document.querySelectorAll('.field input, .field textarea, .field select').forEach(el => {
+  const handler = () => el.closest('.field')?.classList.remove('error');
+  el.addEventListener('input', handler);
+  el.addEventListener('change', handler);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
+    e.preventDefault();
+    nextStep();
+  }
+});
+</script>
+</body>
+</html>
