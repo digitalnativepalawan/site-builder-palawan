@@ -7,7 +7,7 @@ type Style = { bg: string; text: string; accent: string; headingFont: string; bo
 type DeviceMode = "desktop" | "tablet" | "mobile";
 type Props = { data: SectionData; style: Style; device?: DeviceMode };
 type PropsNoStyle = { data: SectionData; device?: DeviceMode };
-const mob = (d?: DeviceMode) => d === "mobile";
+const isMob = (d?: DeviceMode) => d === "mobile";
 
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -18,28 +18,46 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-/* ═══ 1. COVER — full-screen hero with photo ═══ */
+/* ═══ 1. COVER — full screen hero ═══ */
 export function CoverSection({ data, style, device }: Props) {
   const hasBg = !!data.backgroundImage;
-  const m = mob(device);
+  const m = isMob(device);
   return (
-    <section className="relative flex items-center justify-center overflow-hidden"
-      style={{ minHeight: m ? "70vh" : "92vh", backgroundImage: hasBg ? `url(${data.backgroundImage})` : undefined, backgroundSize: "cover", backgroundPosition: "center", backgroundColor: hasBg ? undefined : "var(--site-primary, #1E40AF)" }}>
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%)" }} />
-      <div className="relative z-10 text-white px-6 py-16 max-w-4xl mx-auto text-center w-full">
-        <h1 style={{ fontFamily: style.headingFont, textShadow: "0 2px 20px rgba(0,0,0,0.5)", letterSpacing: "-0.02em", fontSize: m ? "2rem" : "4.5rem", fontWeight: 800, marginBottom: "1rem" }}>
-          {data.headline}
-        </h1>
-        {data.subheadline && <p style={{ fontSize: m ? "1.1rem" : "1.5rem", opacity: 0.92, marginBottom: "0.75rem", fontWeight: 300 }}>{data.subheadline}</p>}
-        {data.body && <p style={{ fontSize: m ? "0.95rem" : "1.1rem", opacity: 0.8, maxWidth: "600px", margin: "0 auto 2rem", lineHeight: 1.7 }}>{data.body}</p>}
-        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", flexDirection: m ? "column" : "row", alignItems: "center" }}>
+    <section style={{
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: m ? "80vh" : "95vh",
+      backgroundImage: hasBg ? `url(${data.backgroundImage})` : undefined,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundColor: hasBg ? undefined : "var(--site-primary, #1E40AF)",
+      overflow: "hidden",
+    }}>
+      {/* gradient overlay */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)" }} />
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center", color: "#fff", padding: m ? "2rem 1.5rem" : "3rem 2rem", maxWidth: "900px", width: "100%" }}>
+        <h1 style={{
+          fontFamily: style.headingFont,
+          fontSize: m ? "2.2rem" : "4.5rem",
+          fontWeight: 800,
+          color: "#ffffff",
+          lineHeight: 1.1,
+          marginBottom: "1rem",
+          textShadow: "0 2px 24px rgba(0,0,0,0.5)",
+          letterSpacing: "-0.02em",
+        }}>{data.headline}</h1>
+        {data.subheadline && <p style={{ fontSize: m ? "1.1rem" : "1.5rem", color: "rgba(255,255,255,0.92)", marginBottom: "0.75rem", fontWeight: 300, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{data.subheadline}</p>}
+        {data.body && <p style={{ fontSize: m ? "0.95rem" : "1.1rem", color: "rgba(255,255,255,0.82)", maxWidth: "600px", margin: "0 auto 2rem", lineHeight: 1.7 }}>{data.body}</p>}
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
           {data.buttonText && (
-            <a href={data.buttonUrl || "#"} style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "16px 36px", borderRadius: "8px", fontWeight: 700, fontSize: "1rem", textDecoration: "none", transition: "opacity 0.2s", minWidth: m ? "100%" : "auto", display: "inline-block", textAlign: "center" }}>
+            <a href={data.buttonUrl || "#"} style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: m ? "14px 28px" : "16px 40px", borderRadius: "8px", fontWeight: 700, fontSize: m ? "1rem" : "1.1rem", textDecoration: "none", display: "inline-block", boxShadow: "0 4px 16px rgba(0,0,0,0.3)" }}>
               {data.buttonText}
             </a>
           )}
           {data.buttonText2 && (
-            <a href={data.buttonUrl2 || "#"} style={{ border: "2px solid white", color: "white", padding: "16px 36px", borderRadius: "8px", fontWeight: 600, fontSize: "1rem", textDecoration: "none", minWidth: m ? "100%" : "auto", display: "inline-block", textAlign: "center" }}>
+            <a href={data.buttonUrl2 || "#"} style={{ border: "2px solid rgba(255,255,255,0.8)", color: "#fff", padding: m ? "14px 28px" : "16px 40px", borderRadius: "8px", fontWeight: 600, fontSize: m ? "1rem" : "1.1rem", textDecoration: "none", display: "inline-block" }}>
               {data.buttonText2}
             </a>
           )}
@@ -51,13 +69,13 @@ export function CoverSection({ data, style, device }: Props) {
 
 /* ═══ 2. TEXT SECTION ═══ */
 export function TextSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
-      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.5rem", fontWeight: 700, marginBottom: "1.25rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
-        {data.body && <p style={{ fontSize: m ? "1rem" : "1.1rem", lineHeight: 1.8, opacity: 0.85, whiteSpace: "pre-wrap" }}>{data.body}</p>}
-        {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", marginTop: "1.5rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>{data.buttonText}</a>}
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
+      <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: m ? "left" : "center" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.8rem", fontWeight: 700, marginBottom: "1.25rem", color: "var(--site-heading, inherit)", lineHeight: 1.2 }}>{data.headline}</h2>}
+        {data.body && <p style={{ fontSize: m ? "1rem" : "1.15rem", lineHeight: 1.85, opacity: 0.8, whiteSpace: "pre-wrap" }}>{data.body}</p>}
+        {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", marginTop: "2rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>{data.buttonText}</a>}
       </div>
     </section>
   );
@@ -65,30 +83,30 @@ export function TextSection({ data, style, device }: Props) {
 
 /* ═══ 3. PHOTO ═══ */
 export function PhotoSection({ data, device }: PropsNoStyle) {
-  const m = mob(device);
+  const m = isMob(device);
   if (!data.imageUrl) return null;
   return (
     <section style={{ padding: m ? "2rem 1.5rem" : "4rem 2rem" }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <img src={data.imageUrl} alt={data.caption || ""} loading="lazy" style={{ width: "100%", borderRadius: "12px", objectFit: "cover" }} />
-        {data.caption && <p style={{ fontSize: "0.9rem", opacity: 0.6, marginTop: "0.75rem", textAlign: "center" }}>{data.caption}</p>}
+        <img src={data.imageUrl} alt={data.caption || ""} loading="lazy" style={{ width: "100%", borderRadius: "16px", objectFit: "cover", boxShadow: "0 4px 24px rgba(0,0,0,0.1)" }} />
+        {data.caption && <p style={{ fontSize: "0.9rem", opacity: 0.55, marginTop: "0.75rem", textAlign: "center" }}>{data.caption}</p>}
       </div>
     </section>
   );
 }
 
-/* ═══ 4. BULLET LIST — icon grid ═══ */
+/* ═══ 4. BULLET LIST — amenities grid ═══ */
 export function BulletListSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const items = data.items || [];
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "rgba(0,0,0,0.02)" }}>
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "1rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem", backgroundColor: "rgba(0,0,0,0.025)" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "12px" }}>
           {items.map((item, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", backgroundColor: "#fff", borderRadius: "10px", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)" }}>
-              <span style={{ color: "var(--site-primary, #1E40AF)", fontSize: "1.1rem" }}>✓</span>
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 16px", backgroundColor: "#fff", borderRadius: "10px", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <span style={{ color: "var(--site-primary, #1E40AF)", fontSize: "1rem", fontWeight: 700, flexShrink: 0 }}>✓</span>
               <span style={{ fontSize: m ? "0.85rem" : "0.95rem", fontWeight: 500 }}>{item.text}</span>
             </div>
           ))}
@@ -98,44 +116,38 @@ export function BulletListSection({ data, style, device }: Props) {
   );
 }
 
-/* ═══ 5. PRICING — room cards with photos ═══ */
+/* ═══ 5. PRICING — room cards ═══ */
 export function PricingSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const plans = data.plans || [];
   if (!plans.length) return null;
-  const cols = plans.length === 1 ? "1fr" : plans.length === 2 ? "1fr 1fr" : m ? "1fr" : "repeat(3, 1fr)";
+  const single = plans.length === 1;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : cols, gap: "1.5rem" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : single ? "minmax(auto, 480px)" : plans.length === 2 ? "1fr 1fr" : "repeat(3, 1fr)", gap: "1.5rem", justifyContent: single ? "center" : undefined, margin: single ? "0 auto" : undefined, maxWidth: single ? "480px" : undefined }}>
           {plans.map((plan, i) => (
-            <div key={i} style={{ borderRadius: "16px", overflow: "hidden", boxShadow: plan.recommended ? "0 8px 32px rgba(0,0,0,0.15)" : "0 2px 12px rgba(0,0,0,0.08)", border: plan.recommended ? "2px solid var(--site-primary, #1E40AF)" : "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", position: "relative" }}>
-              {plan.recommended && <div style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", textAlign: "center", padding: "6px", fontSize: "0.8rem", fontWeight: 700 }}>⭐ Most Popular</div>}
-              {/* Room photo */}
+            <div key={i} style={{ borderRadius: "16px", overflow: "hidden", boxShadow: plan.recommended ? "0 8px 40px rgba(0,0,0,0.15)" : "0 2px 16px rgba(0,0,0,0.08)", border: plan.recommended ? `2px solid var(--site-primary, #1E40AF)` : "1px solid rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", backgroundColor: "#fff" }}>
               {plan.imageUrl ? (
-                <img src={plan.imageUrl} alt={plan.name} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
+                <img src={plan.imageUrl} alt={plan.name} style={{ width: "100%", height: "220px", objectFit: "cover" }} />
               ) : (
-                <div style={{ width: "100%", height: "180px", backgroundColor: "var(--site-primary, #1E40AF)", opacity: 0.15, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: "3rem" }}>🏨</span>
-                </div>
+                <div style={{ width: "100%", height: "180px", backgroundColor: "var(--site-primary, #1E40AF)", opacity: 0.12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "4rem" }}>🏨</div>
               )}
               <div style={{ padding: "1.5rem", flex: 1, display: "flex", flexDirection: "column" }}>
-                <h3 style={{ fontFamily: style.headingFont, fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.5rem" }}>{plan.name}</h3>
-                {plan.description && <p style={{ fontSize: "0.9rem", opacity: 0.7, marginBottom: "1rem", lineHeight: 1.6 }}>{plan.description}</p>}
-                <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--site-primary, #1E40AF)", marginBottom: "1rem" }}>{plan.price}<span style={{ fontSize: "0.9rem", fontWeight: 400, opacity: 0.6 }}>/night</span></div>
+                <h3 style={{ fontFamily: style.headingFont, fontSize: "1.3rem", fontWeight: 700, marginBottom: "0.4rem" }}>{plan.name}</h3>
+                {plan.description && <p style={{ fontSize: "0.9rem", opacity: 0.65, marginBottom: "1rem", lineHeight: 1.6 }}>{plan.description}</p>}
+                <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--site-primary, #1E40AF)", marginBottom: "1rem" }}>
+                  {plan.price}<span style={{ fontSize: "0.85rem", fontWeight: 400, opacity: 0.55 }}>/night</span>
+                </div>
                 <ul style={{ listStyle: "none", padding: 0, marginBottom: "1.5rem", flex: 1 }}>
-                  {(plan.features || []).filter(Boolean).map((f, j) => (
-                    <li key={j} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem", marginBottom: "6px", opacity: 0.8 }}>
-                      <span style={{ color: "var(--site-primary, #1E40AF)", fontWeight: 700 }}>✓</span> {f}
+                  {(plan.features || []).filter(Boolean).map((f: string, j: number) => (
+                    <li key={j} style={{ display: "flex", gap: "8px", fontSize: "0.88rem", marginBottom: "6px", opacity: 0.75 }}>
+                      <span style={{ color: "var(--site-primary, #1E40AF)", fontWeight: 700 }}>✓</span>{f}
                     </li>
                   ))}
                 </ul>
-                {plan.buttonText && (
-                  <a href={plan.buttonUrl || "#"} style={{ display: "block", textAlign: "center", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "12px", borderRadius: "8px", fontWeight: 600, textDecoration: "none", fontSize: "0.95rem" }}>
-                    {plan.buttonText}
-                  </a>
-                )}
+                {plan.buttonText && <a href={plan.buttonUrl || "#"} style={{ display: "block", textAlign: "center", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "13px", borderRadius: "8px", fontWeight: 700, textDecoration: "none" }}>{plan.buttonText}</a>}
               </div>
             </div>
           ))}
@@ -147,18 +159,18 @@ export function PricingSection({ data, style, device }: Props) {
 
 /* ═══ 6. FAQ ═══ */
 export function FaqSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const items = data.faqItems || [];
   if (!items.length) return null;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "rgba(0,0,0,0.02)" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem", backgroundColor: "rgba(0,0,0,0.025)" }}>
       <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
-        <Accordion type="single" collapsible className="w-full">
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <Accordion type="single" collapsible>
           {items.map((item, i) => (
             <AccordionItem key={i} value={`faq-${i}`} style={{ borderBottom: "1px solid rgba(0,0,0,0.1)" }}>
-              <AccordionTrigger style={{ fontSize: m ? "1rem" : "1.05rem", fontWeight: 600, textAlign: "left", padding: "1.25rem 0" }}>{item.question}</AccordionTrigger>
-              <AccordionContent style={{ fontSize: "0.95rem", lineHeight: 1.7, opacity: 0.8, paddingBottom: "1.25rem", whiteSpace: "pre-wrap" }}>{item.answer}</AccordionContent>
+              <AccordionTrigger style={{ fontSize: m ? "1rem" : "1.05rem", fontWeight: 600, padding: "1.25rem 0", textAlign: "left" }}>{item.question}</AccordionTrigger>
+              <AccordionContent style={{ fontSize: "0.95rem", lineHeight: 1.75, opacity: 0.75, paddingBottom: "1.25rem" }}>{item.answer}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
@@ -167,31 +179,31 @@ export function FaqSection({ data, style, device }: Props) {
   );
 }
 
-/* ═══ 7. REVIEWS ═══ */
-export function ReviewsSection({ data, style, device }: Props) {
-  const m = mob(device);
+/* ═══ 7. REVIEWS (stored as grid_cards) ═══ */
+export function GridCardsSection({ data, style, device }: Props) {
+  const m = isMob(device);
   const reviews = data.reviews || [];
   if (!reviews.length) return null;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : reviews.length === 1 ? "1fr" : reviews.length === 2 ? "1fr 1fr" : "repeat(3, 1fr)", gap: "1.5rem" }}>
-          {reviews.map((rv, i) => (
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : reviews.length === 1 ? "minmax(auto,480px)" : reviews.length === 2 ? "1fr 1fr" : "repeat(3,1fr)", gap: "1.5rem", justifyContent: reviews.length === 1 ? "center" : undefined }}>
+          {reviews.filter((rv: any) => rv.reviewText).map((rv: any, i: number) => (
             <div key={i} style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "1.75rem", boxShadow: "0 2px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ color: "var(--site-primary, #f59e0b)", fontSize: "1.1rem", letterSpacing: "2px" }}>{"★".repeat(parseInt(rv.rating) || 5)}</div>
-              <p style={{ fontSize: "0.95rem", lineHeight: 1.7, opacity: 0.8, fontStyle: "italic" }}>"{rv.reviewText}"</p>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "auto" }}>
+              <div style={{ color: "#f59e0b", fontSize: "1.1rem", letterSpacing: "3px" }}>{"★".repeat(parseInt(rv.rating) || 5)}</div>
+              <p style={{ fontSize: "0.95rem", lineHeight: 1.75, opacity: 0.75, fontStyle: "italic", flex: 1 }}>"{rv.reviewText}"</p>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 {rv.photoUrl ? (
-                  <img src={rv.photoUrl} alt={rv.guestName} style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={rv.photoUrl} alt={rv.guestName} style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
                 ) : (
                   <div style={{ width: "44px", height: "44px", borderRadius: "50%", backgroundColor: "var(--site-primary, #1E40AF)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: "1.1rem", flexShrink: 0 }}>
-                    {(rv.guestName || "G").charAt(0)}
+                    {(rv.guestName || "G").charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div>
                   <p style={{ fontWeight: 700, fontSize: "0.95rem" }}>{rv.guestName}</p>
-                  {rv.dateOfStay && <p style={{ fontSize: "0.8rem", opacity: 0.5 }}>{rv.dateOfStay}</p>}
+                  {rv.dateOfStay && <p style={{ fontSize: "0.8rem", opacity: 0.45 }}>{rv.dateOfStay}</p>}
                 </div>
               </div>
             </div>
@@ -203,19 +215,20 @@ export function ReviewsSection({ data, style, device }: Props) {
 }
 
 /* ═══ 8. GALLERY ═══ */
-export function GallerySection({ data, device }: PropsNoStyle) {
-  const m = mob(device);
+export function ImageGallerySection({ data, device }: PropsNoStyle) {
+  const m = isMob(device);
   const images = data.images || [];
   if (!images.length) return null;
   return (
     <section style={{ padding: m ? "2rem 1.5rem" : "4rem 2rem" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", textAlign: "center" }}>{data.headline}</h2>}
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "8px" }}>
+        {data.headline && <h2 style={{ fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2rem", textAlign: "center" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)", gap: "10px" }}>
           {images.slice(0, 8).map((img: any, i: number) => (
-            <div key={i} style={{ aspectRatio: "1", overflow: "hidden", borderRadius: "8px", backgroundColor: "#f0f0f0" }}>
-              <img src={img.url || img} alt={img.alt || ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", cursor: "pointer" }}
-                onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+            <div key={i} style={{ aspectRatio: "1", overflow: "hidden", borderRadius: "10px", backgroundColor: "#f0f0f0" }}>
+              <img src={img.url || img} alt={img.alt || ""} loading="lazy"
+                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s", cursor: "pointer" }}
+                onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.06)")}
                 onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")} />
             </div>
           ))}
@@ -225,64 +238,62 @@ export function GallerySection({ data, device }: PropsNoStyle) {
   );
 }
 
-/* ═══ 9. CONTACT with phone, WhatsApp, map ═══ */
+/* ═══ 9. CONTACT ═══ */
 export function ContactFormSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const [submitted, setSubmitted] = useState(false);
-  const whatsapp = data.whatsapp?.replace(/[^0-9]/g, "");
+  const whatsapp = (data.whatsapp || "").replace(/[^0-9]/g, "");
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem", backgroundColor: "var(--site-primary, #1E40AF)" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "0.5rem", textAlign: m ? "left" : "center" }}>{data.headline}</h2>}
-        <p style={{ textAlign: m ? "left" : "center", opacity: 0.85, marginBottom: "3rem" }}>We'd love to hear from you</p>
-
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: "3rem" }}>
-          {/* Contact info */}
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "0.5rem", textAlign: "center", color: "#fff" }}>{data.headline}</h2>}
+        <p style={{ textAlign: "center", color: "rgba(255,255,255,0.8)", marginBottom: "3rem", fontSize: "1.05rem" }}>We'd love to hear from you</p>
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: "3rem", alignItems: "start" }}>
+          {/* Contact details */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             {data.email && (
-              <a href={`mailto:${data.email}`} style={{ display: "flex", alignItems: "center", gap: "12px", color: "#fff", textDecoration: "none", opacity: 0.9 }}>
-                <span style={{ fontSize: "1.25rem" }}>✉️</span>
-                <span>{data.email}</span>
+              <a href={`mailto:${data.email}`} style={{ display: "flex", alignItems: "center", gap: "14px", color: "#fff", textDecoration: "none", fontSize: "1rem" }}>
+                <span style={{ fontSize: "1.4rem", width: "32px", textAlign: "center" }}>✉️</span>{data.email}
               </a>
             )}
             {data.phone && (
-              <a href={`tel:${data.phone}`} style={{ display: "flex", alignItems: "center", gap: "12px", color: "#fff", textDecoration: "none", opacity: 0.9 }}>
-                <span style={{ fontSize: "1.25rem" }}>📞</span>
-                <span>{data.phone}</span>
+              <a href={`tel:${data.phone}`} style={{ display: "flex", alignItems: "center", gap: "14px", color: "#fff", textDecoration: "none", fontSize: "1rem" }}>
+                <span style={{ fontSize: "1.4rem", width: "32px", textAlign: "center" }}>📞</span>{data.phone}
               </a>
             )}
             {whatsapp && (
-              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "10px", backgroundColor: "#25D366", color: "#fff", padding: "12px 24px", borderRadius: "8px", fontWeight: 700, textDecoration: "none", width: "fit-content" }}>
-                <span style={{ fontSize: "1.1rem" }}>💬</span> WhatsApp Us
+              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", gap: "10px", backgroundColor: "#25D366", color: "#fff", padding: "13px 24px", borderRadius: "10px", fontWeight: 700, textDecoration: "none", width: "fit-content", fontSize: "1rem", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
+                <span style={{ fontSize: "1.2rem" }}>💬</span> WhatsApp Us
               </a>
             )}
             {data.address && (
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", opacity: 0.9 }}>
-                <span style={{ fontSize: "1.25rem" }}>📍</span>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", color: "rgba(255,255,255,0.85)", fontSize: "1rem" }}>
+                <span style={{ fontSize: "1.4rem", width: "32px", textAlign: "center", flexShrink: 0 }}>📍</span>
                 <span style={{ lineHeight: 1.6 }}>{data.address}</span>
               </div>
             )}
-            {data.googleMapsLink && (
-              <a href={data.googleMapsLink} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "#fff", opacity: 0.8, textDecoration: "underline", fontSize: "0.9rem" }}>
+            {data.googleMapsLink && !data.googleMapsLink.includes("<iframe") && (
+              <a href={data.googleMapsLink} target="_blank" rel="noreferrer"
+                style={{ color: "rgba(255,255,255,0.75)", textDecoration: "underline", fontSize: "0.9rem", marginTop: "0.25rem" }}>
                 View on Google Maps →
               </a>
             )}
           </div>
-
           {/* Form */}
-          <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem" }}>
+          <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
             {submitted ? (
-              <div style={{ textAlign: "center", color: "#22c55e", padding: "2rem" }}>
+              <div style={{ textAlign: "center", padding: "2rem" }}>
                 <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✅</div>
                 <p style={{ fontWeight: 700, fontSize: "1.1rem", color: "#111" }}>Message sent!</p>
-                <p style={{ color: "#666", marginTop: "0.5rem" }}>We'll get back to you shortly.</p>
+                <p style={{ color: "#666", marginTop: "0.5rem", fontSize: "0.95rem" }}>We'll get back to you shortly.</p>
               </div>
             ) : (
               <form onSubmit={e => { e.preventDefault(); setSubmitted(true); }} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <input required placeholder="Your name" style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", color: "#111" }} />
-                <input required type="email" placeholder="Email address" style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", color: "#111" }} />
-                <input placeholder="Phone / WhatsApp" style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", color: "#111" }} />
-                <textarea required placeholder="Your message" rows={4} style={{ padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "0.95rem", resize: "none", color: "#111" }} />
+                <input required placeholder="Your name" style={{ padding: "13px 14px", borderRadius: "8px", border: "1.5px solid #e5e7eb", fontSize: "0.95rem", color: "#111", outline: "none" }} />
+                <input required type="email" placeholder="Email address" style={{ padding: "13px 14px", borderRadius: "8px", border: "1.5px solid #e5e7eb", fontSize: "0.95rem", color: "#111", outline: "none" }} />
+                <input placeholder="Phone / WhatsApp" style={{ padding: "13px 14px", borderRadius: "8px", border: "1.5px solid #e5e7eb", fontSize: "0.95rem", color: "#111", outline: "none" }} />
+                <textarea required placeholder="Your message..." rows={4} style={{ padding: "13px 14px", borderRadius: "8px", border: "1.5px solid #e5e7eb", fontSize: "0.95rem", resize: "none", color: "#111", outline: "none" }} />
                 <button type="submit" style={{ backgroundColor: "var(--site-primary, #1E40AF)", color: "#fff", padding: "14px", borderRadius: "8px", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "1rem" }}>
                   Send Message
                 </button>
@@ -297,14 +308,14 @@ export function ContactFormSection({ data, style, device }: Props) {
 
 /* ═══ 10. YOUTUBE ═══ */
 export function YoutubeSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const embedUrl = data.videoUrl ? getEmbedUrl(data.videoUrl) : null;
   if (!embedUrl && !data.videoFileUrl) return null;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem", backgroundColor: "rgba(0,0,0,0.025)" }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        {data.videoTitle && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "1.5rem", textAlign: m ? "left" : "center", color: "var(--site-heading, inherit)" }}>{data.videoTitle}</h2>}
-        <AspectRatio ratio={16 / 9} style={{ borderRadius: "16px", overflow: "hidden" }}>
+        {data.videoTitle && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.videoTitle}</h2>}
+        <AspectRatio ratio={16 / 9} style={{ borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }}>
           {embedUrl
             ? <iframe src={embedUrl} title={data.videoTitle || "Video"} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
             : <video src={data.videoFileUrl} controls className="w-full h-full object-contain" />}
@@ -314,14 +325,14 @@ export function YoutubeSection({ data, style, device }: Props) {
   );
 }
 
-/* ═══ LEGACY / REMAINING SECTIONS ═══ */
+/* ═══ REMAINING SECTIONS ═══ */
 export function TwoColumnsSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: "2.5rem" }}>
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: "3rem" }}>
           <div style={{ fontSize: "1rem", lineHeight: 1.8, opacity: 0.8, whiteSpace: "pre-wrap" }}>{data.leftContent}</div>
           <div style={{ fontSize: "1rem", lineHeight: 1.8, opacity: 0.8, whiteSpace: "pre-wrap" }}>{data.rightContent}</div>
         </div>
@@ -331,18 +342,18 @@ export function TwoColumnsSection({ data, style, device }: Props) {
 }
 
 export function KeyNumbersSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const numbers = data.numbers || [];
   if (!numbers.length) return null;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: "rgba(0,0,0,0.02)" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem", backgroundColor: "rgba(0,0,0,0.025)" }}>
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2.5rem", textAlign: "center", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
         <div style={{ display: "grid", gridTemplateColumns: m ? "1fr 1fr" : `repeat(${Math.min(numbers.length, 4)}, 1fr)`, gap: "2rem", textAlign: "center" }}>
           {numbers.map((n, i) => (
             <div key={i}>
               <div style={{ fontSize: m ? "2.5rem" : "3.5rem", fontWeight: 800, color: "var(--site-primary, #1E40AF)" }}>{n.value}</div>
-              <div style={{ fontSize: "0.95rem", opacity: 0.65, marginTop: "0.25rem" }}>{n.label}</div>
+              <div style={{ fontSize: "0.95rem", opacity: 0.6, marginTop: "0.25rem" }}>{n.label}</div>
             </div>
           ))}
         </div>
@@ -352,17 +363,17 @@ export function KeyNumbersSection({ data, style, device }: Props) {
 }
 
 export function NumberCardsSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const cards = data.numberCards || [];
   if (!cards.length) return null;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(3, 1fr)", gap: "1.5rem" }}>
         {cards.map((card, i) => (
-          <div key={i} style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)" }}>
-            <div style={{ fontSize: "2.5rem", fontWeight: 800, opacity: 0.2 }}>{card.number}</div>
+          <div key={i} style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+            <div style={{ fontSize: "2.5rem", fontWeight: 800, opacity: 0.18 }}>{card.number}</div>
             <h3 style={{ fontFamily: style.headingFont, fontSize: "1.15rem", fontWeight: 700, margin: "0.5rem 0 0.25rem" }}>{card.title}</h3>
-            <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>{card.description}</p>
+            <p style={{ fontSize: "0.9rem", opacity: 0.65 }}>{card.description}</p>
           </div>
         ))}
       </div>
@@ -371,20 +382,20 @@ export function NumberCardsSection({ data, style, device }: Props) {
 }
 
 export function TimelineSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const events = data.events || [];
   if (!events.length) return null;
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem" }}>
       <div style={{ maxWidth: "700px", margin: "0 auto" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.25rem", fontWeight: 700, marginBottom: "2.5rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.5rem", fontWeight: 700, marginBottom: "2.5rem", color: "var(--site-heading, inherit)" }}>{data.headline}</h2>}
         <div style={{ borderLeft: "3px solid var(--site-primary, #1E40AF)", paddingLeft: "2rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
           {events.map((ev, i) => (
             <div key={i} style={{ position: "relative" }}>
               <div style={{ position: "absolute", left: "-2.65rem", top: "4px", width: "14px", height: "14px", borderRadius: "50%", backgroundColor: "var(--site-primary, #1E40AF)", border: "3px solid #fff", boxShadow: "0 0 0 2px var(--site-primary, #1E40AF)" }} />
-              <span style={{ fontSize: "0.85rem", fontWeight: 700, opacity: 0.5 }}>{ev.year}</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, opacity: 0.45 }}>{ev.year}</span>
               <h3 style={{ fontFamily: style.headingFont, fontSize: "1.1rem", fontWeight: 700 }}>{ev.title}</h3>
-              <p style={{ fontSize: "0.9rem", opacity: 0.7, marginTop: "0.25rem" }}>{ev.description}</p>
+              <p style={{ fontSize: "0.9rem", opacity: 0.65, marginTop: "0.25rem" }}>{ev.description}</p>
             </div>
           ))}
         </div>
@@ -393,24 +404,20 @@ export function TimelineSection({ data, style, device }: Props) {
   );
 }
 
-export function SeparatorSection({ data }: PropsNoStyle) {
-  return <div style={{ padding: "1rem 2rem" }}><hr style={{ border: "none", borderTop: "1px solid rgba(0,0,0,0.1)", maxWidth: "600px", margin: "0 auto" }} /></div>;
+export function SeparatorSection({ }: PropsNoStyle) {
+  return <div style={{ padding: "1rem 2rem" }}><hr style={{ border: "none", borderTop: "1px solid rgba(0,0,0,0.08)", maxWidth: "600px", margin: "0 auto" }} /></div>;
 }
 
 export function CtaSection({ data, style, device }: Props) {
-  const m = mob(device);
+  const m = isMob(device);
   const isBrand = data.background === "brand";
   return (
-    <section style={{ padding: m ? "3rem 1.5rem" : "5rem 2rem", backgroundColor: isBrand ? "var(--site-primary, #1E40AF)" : "transparent" }}>
+    <section style={{ padding: m ? "3.5rem 1.5rem" : "6rem 2rem", backgroundColor: isBrand ? "var(--site-primary, #1E40AF)" : "transparent" }}>
       <div style={{ maxWidth: "700px", margin: "0 auto", textAlign: "center" }}>
-        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.75rem" : "2.5rem", fontWeight: 700, marginBottom: "1rem", color: isBrand ? "#fff" : "var(--site-heading, inherit)" }}>{data.headline}</h2>}
+        {data.headline && <h2 style={{ fontFamily: style.headingFont, fontSize: m ? "1.8rem" : "2.8rem", fontWeight: 700, marginBottom: "1rem", color: isBrand ? "#fff" : "var(--site-heading, inherit)" }}>{data.headline}</h2>}
         {data.subheadline && <p style={{ fontSize: "1.1rem", opacity: 0.8, marginBottom: "2rem", color: isBrand ? "#fff" : undefined }}>{data.subheadline}</p>}
         {data.buttonText && <a href={data.buttonUrl || "#"} style={{ display: "inline-block", padding: "16px 40px", borderRadius: "8px", fontWeight: 700, textDecoration: "none", backgroundColor: isBrand ? "#fff" : "var(--site-primary, #1E40AF)", color: isBrand ? "var(--site-primary, #1E40AF)" : "#fff" }}>{data.buttonText}</a>}
       </div>
     </section>
   );
-}
-
-export function ImageGallerySection({ data, device }: PropsNoStyle) {
-  return <GallerySection data={data} device={device} />;
 }

@@ -9,7 +9,7 @@ import type { SiteSettingsData, SocialLink, SocialDisplaySettings } from "@/type
 import { defaultHeaderSettings, defaultFooterSettings, defaultSocialDisplay } from "@/types/settings";
 import {
   CoverSection, TextSection, PhotoSection, BulletListSection, PricingSection,
-  FaqSection, ReviewsSection, GallerySection, TwoColumnsSection, KeyNumbersSection, NumberCardsSection,
+  FaqSection, GridCardsSection, TwoColumnsSection, KeyNumbersSection, NumberCardsSection,
   TimelineSection, YoutubeSection, ContactFormSection, SeparatorSection,
   CtaSection, ImageGallerySection,
 } from "@/components/preview/SectionRenderers";
@@ -234,8 +234,7 @@ export default function SitePreview() {
       case "number_cards": return <NumberCardsSection key={section.id} data={data} style={style} device={device} />;
       case "timeline": return <TimelineSection key={section.id} data={data} style={style} device={device} />;
       case "youtube": return <YoutubeSection key={section.id} data={data} style={style} device={device} />;
-      case "reviews": return <ReviewsSection key={section.id} data={data} style={style} device={device} />;
-      case "gallery": return <GallerySection key={section.id} data={data} device={device} />;
+      case "grid_cards": return <GridCardsSection key={section.id} data={data} style={style} device={device} />;
       case "contact_form": return <ContactFormSection key={section.id} data={data} style={style} device={device} />;
       case "separator": return <SeparatorSection key={section.id} data={data} device={device} />;
       case "cta": return <CtaSection key={section.id} data={data} style={style} device={device} />;
