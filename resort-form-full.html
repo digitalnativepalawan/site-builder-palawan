@@ -1225,7 +1225,7 @@ async function uploadToStorage(file) {
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'x-upsert': 'true'
+      'Content-Type': file.type || 'application/octet-stream'
     },
     body: file
   });
@@ -1316,6 +1316,9 @@ async function submitForm() {
     // Submit to Supabase
     document.getElementById('uploadStatus').textContent = 'Saving submission…';
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/resort_submissions`, {
       method: 'POST',
       headers: {
@@ -1327,8 +1330,11 @@ async function submitForm() {
       body: JSON.stringify({
         data: data,
         status: data.publishing.publishImmediately ? 'pending' : 'draft'
-      })
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (!resp.ok) {
       const errText = await resp.text();
@@ -1337,6 +1343,9 @@ async function submitForm() {
 
     const result = await resp.json();
     console.log('✅ Submission created:', result);
+
+    // Hide overlay first
+    document.getElementById('uploadOverlay').classList.remove('active');
 
     // Show thank-you
     document.getElementById('resortForm').style.display = 'none';

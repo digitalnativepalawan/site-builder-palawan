@@ -128,12 +128,12 @@ export default function Dashboard() {
             <h1 className="font-heading text-xl font-bold sm:text-2xl">My Sites</h1>
           </div>
 
-          {/* Add New Resort Button */}
+          {/* Build Resort Website (Auto) Button */}
           <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" className="min-h-[44px] gap-2">
               <Globe className="h-4 w-4" />
-              <span className="hidden sm:inline">Add New Resort</span>
-              <span className="sm:hidden">Resort</span>
+              <span className="hidden lg:inline">Build Resort Website (Auto)</span>
+              <span className="lg:hidden">Build Resort</span>
             </Button>
           </a>
 
@@ -141,8 +141,8 @@ export default function Dashboard() {
             <DialogTrigger asChild>
               <Button className="min-h-[44px] gap-2">
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Create Site</span>
-                <span className="sm:hidden">New</span>
+                <span className="hidden lg:inline">Build Custom Site (Manual)</span>
+                <span className="lg:hidden">Manual Build</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="mx-4 max-w-md">
@@ -194,10 +194,17 @@ export default function Dashboard() {
             <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
               <Globe className="h-16 w-16 text-muted-foreground/30 mb-4" />
               <h2 className="font-heading text-xl font-semibold mb-2">No sites yet</h2>
-              <p className="text-muted-foreground mb-6">Create your first site to get started</p>
-              <Button onClick={() => setCreateOpen(true)} className="min-h-[44px] gap-2">
-                <Plus className="h-4 w-4" /> Create Your First Site
-              </Button>
+              <p className="text-muted-foreground mb-6">Build a site automatically with our resort form, or create one manually</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer">
+                  <Button className="min-h-[44px] gap-2">
+                    <Globe className="h-4 w-4" /> Build Resort Website (Auto)
+                  </Button>
+                </a>
+                <Button variant="outline" onClick={() => setCreateOpen(true)} className="min-h-[44px] gap-2">
+                  <Plus className="h-4 w-4" /> Build Custom Site (Manual)
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
