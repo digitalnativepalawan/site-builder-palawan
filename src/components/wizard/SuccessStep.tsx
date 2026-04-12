@@ -34,11 +34,9 @@ export function SuccessStep({ submissionId }: { submissionId: string | null }) {
     setTimeout(() => popConfetti(), 300);
   }, []);
 
-  // Fetch the generated site URL (placeholder for now)
   useEffect(() => {
     if (!submissionId) return;
-    // TODO: once the rendering pipeline is live, swap this for a real query
-    setSiteUrl(`/preview/${submissionId}`);
+    setSiteUrl(`/resort/${submissionId}`);
   }, [submissionId]);
 
   const handlePreview = () => {
@@ -83,10 +81,12 @@ export function SuccessStep({ submissionId }: { submissionId: string | null }) {
 
       {/* Action buttons */}
       <div className="space-y-3 max-w-xs mx-auto">
-        <Button size="lg" onClick={handlePreview} className="h-14 text-base gap-2 w-full">
-          <Eye className="w-5 h-5" />
-          Preview My Site
-        </Button>
+        {submissionId && (
+          <Button size="lg" onClick={handlePreview} className="h-14 text-base gap-2 w-full">
+            <Eye className="w-5 h-5" />
+            Preview My Site
+          </Button>
+        )}
         <Button variant="outline" size="lg" onClick={handleDashboard} className="h-14 text-base gap-2 w-full">
           <LayoutDashboard className="w-5 h-5" />
           Go to Dashboard

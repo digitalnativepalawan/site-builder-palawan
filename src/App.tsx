@@ -1,20 +1,30 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Toaster } from "sonner";
+import { useState } from "react";
 
-import { WizardProvider } from "@/context/wizard-context";
+import { WizardProvider, useWizard } from "@/context/wizard-context";
 import { IdentityStep } from "@/components/wizard/IdentityStep";
 import { MediaStep } from "@/components/wizard/MediaStep";
 import { AmenityStep } from "@/components/wizard/AmenityStep";
 import { SuccessStep } from "@/components/wizard/SuccessStep";
-import { useWizard } from "@/context/wizard-context";
+import ResortLandingPage from "@/pages/ResortLandingPage";
+import AdminDashboard from "@/pages/AdminDashboard";
 import { Button } from "@/components/ui/button";
 
+// ─── Wizard (Home page) ───────────────────────────────
 function WizardContent() {
   const [step, setStep] = useState(1);
   const { submissionId } = useWizard();
+  const navigate = useNavigate();
 
-  const goNext = () => setStep((s) => s + 1);  // no cap - step 4 = success
+  const goNext = () => {
+    if (step < 3) {
+      setStep((s) => s + 1);
+    } else {
+      setStep(4);
+    }
+  };
   const goBack = () => setStep((s) => Math.max(s - 1, 1));
 
   const stepLabels = ["Identity", "Media", "Amenities", "Done"];
@@ -58,11 +68,21 @@ function WizardContent() {
   );
 }
 
+// ─── App with BrowserRouter + all routes ──────────────
 export default function App() {
   return (
-    <WizardProvider>
-      <WizardContent />
-      <Toaster position="top-center" richColors />
-    </WizardProvider>
+    <BrowserRouter>
+      <WizardProvider>
+        <Routes>
+          {/* Wizard */}
+          <Route path="/" element={<WizardContent />} />
+          {/* Resort landing page */}
+          <Route path="/resort/:submissionId" element={<ResortLandingPage />} />
+          {/* Admin dashboard */}
+          <Route path="/dashboard" element={<AdminDashboard />} />
+        </Routes>
+        <Toaster position="top-center" richColors />
+      </WizardProvider>
+    </BrowserRouter>
   );
 }
