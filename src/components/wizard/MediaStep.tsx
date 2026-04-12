@@ -161,7 +161,7 @@ export function MediaStep({ onStepComplete }: MediaStepProps) {
 
         {/* Gallery Grid */}
         <section className="space-y-2">
-          <Label>Gallery (up to 6)</label>
+          <Label>Gallery (up to 6)</Label>
           <div className="grid grid-cols-3 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <label key={i} className="relative aspect-square rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/20 cursor-pointer hover:border-primary/50 transition-colors overflow-hidden">

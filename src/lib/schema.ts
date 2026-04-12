@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const basicInfoSchema = z.object({
+export const identitySchema = z.object({
   resortName: z.string().min(2, "At least 2 characters").max(120, "Too long"),
   resortOwner: z.string().min(2, "At least 2 characters"),
   email: z.string().email("Valid email required"),
@@ -9,7 +9,11 @@ export const basicInfoSchema = z.object({
     message: "Select a resort type",
   }),
 });
-export type BasicInfoValues = z.infer<typeof basicInfoSchema>;
+export type IdentityValues = z.infer<typeof identitySchema>;
+
+// Alias for compatibility with components expecting basicInfoSchema
+export { identitySchema as basicInfoSchema };
+export type { IdentityValues as BasicInfoValues };
 
 export const mediaSchema = z.object({
   heroImages: z.array(z.string().url("Must be a valid URL")).optional().default([]),
