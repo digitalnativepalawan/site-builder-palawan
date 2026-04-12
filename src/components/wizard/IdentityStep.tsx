@@ -9,7 +9,6 @@ import { useWizard } from "@/context/wizard-context";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 
 const RESORT_TYPES = [
   { value: "boutique", label: "Boutique Hotel" },
@@ -124,17 +123,24 @@ export function IdentityStep({ onStepComplete }: IdentityStepProps) {
 
         <div>
           <Label htmlFor="resortType" required>Resort Type</Label>
-          <Select
-            id="resortType"
-            error={errors.resortType?.message}
-            defaultValue=""
-            {...register("resortType")}
-          >
-            <option value="" disabled>Select resort type</option>
-            {RESORT_TYPES.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </Select>
+          <div className="w-full">
+            <select
+              id="resortType"
+              className={`flex h-11 w-full appearance-none rounded-lg border border-input bg-background px-4 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjYgOSAxMiAxNSAxOCA5Ii8+PC9zdmc+')] bg-no-repeat bg-[right_1rem_center] bg-[length:1rem] ${
+                errors.resortType ? "border-red-400 focus-visible:ring-red-400" : ""
+              }`}
+              defaultValue={""}
+              {...register("resortType")}
+            >
+              <option value="" disabled>Select resort type</option>
+              {RESORT_TYPES.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            {errors.resortType && (
+              <p className="mt-1.5 text-sm font-medium text-red-500">{errors.resortType.message}</p>
+            )}
+          </div>
         </div>
 
         <div className="pt-4">
