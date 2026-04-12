@@ -21,3 +21,17 @@ export const mediaSchema = z.object({
   logoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).default(""),
 });
 export type MediaValues = z.infer<typeof mediaSchema>;
+
+export const amenitiesSchema = z.object({
+  tags: z.array(z.string()).optional().default([]),
+  features: z.array(z.string()).optional().default([]),
+  roomDetails: z.object({
+    ac: z.boolean().default(false),
+    hotWater: z.boolean().default(false),
+    wifi: z.string().optional().default(""),
+    breakfast: z.boolean().default(false),
+    totalRooms: z.coerce.number().min(0).optional().default(0),
+  }),
+  dining: z.array(z.string()).optional().default([]),
+});
+export type AmenitiesValues = z.infer<typeof amenitiesSchema>;
