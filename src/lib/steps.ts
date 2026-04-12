@@ -1,0 +1,15 @@
+export const stepTitles: Record<number, { title: string; subtitle: string }> = {
+  1: { title: "Identity", subtitle: "Resort owner & basic information" },
+  2: { title: "Overview", subtitle: "Describe your resort" },
+  3: { title: "Location", subtitle: "Address & geolocation" },
+  4: { title: "Details", subtitle: "Rooms, staff & pricing" },
+  5: { title: "Amenities", subtitle: "Features & facilities" },
+  6: { title: "Room Types", subtitle: "Inventory & pricing per room" },
+  7: { title: "Services", subtitle: "Activities & guest services" },
+  8: { title: "Policies", subtitle: "Rules & cancellation terms" },
+  9: { title: "Media", subtitle: "Photos & branding assets" },
+  10: { title: "Contacts", subtitle: "Key personnel & contacts" },
+  11: { title: "Social & Web", subtitle: "Online presence" },
+  12: { title: "Booking", subtitle: "Availability & reservations" },
+  13: { title: "Review", subtitle: "Confirm & submit" },
+};
