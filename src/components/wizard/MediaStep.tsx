@@ -28,22 +28,59 @@ interface MediaStepProps {
   onStepComplete: () => void;
 }
 
-// ─── Magic Link placeholder scraper ──────────────────────────
+const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif|avif)(\?|$)/i;
+
+function isDirectImageUrl(url: string): boolean {
+  try {
+    return IMAGE_EXT.test(url) || IMAGE_EXT.test(new URL(url).pathname);
+  } catch {
+    return IMAGE_EXT.test(url);
+  }
+}
+
+function proxyUrl(u: string): string {
+  return `https://images.weserv.nl/?url=${encodeURIComponent(u)}`;
+}
+
+// ─── Magic Link: proxy scrape ────────────────────────────────
 async function scrapeImagesFromUrl(url: string): Promise<string[]> {
-  // Placeholder — replace with Cloud Function call later
   console.log("[Magic Link] Scraping:", url);
-  await new Promise((r) => setTimeout(r, 1500)); // simulate network
-  // Return dummy images so the user sees the flow working
-  return [
-    `https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=500&fit=crop`,
-    `https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=500&fit=crop`,
-    `https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=500&fit=crop`,
-  ];
+  const proxyUrl_str = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  const resp = await fetch(proxyUrl_str);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const html = await resp.text();
+
+  const imgSrcRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+  const sources: string[] = [];
+  let match;
+  while ((match = imgSrcRegex.exec(html)) !== null) {
+    sources.push(match[1]);
+  }
+
+  const base = new URL(url);
+  const resolved = sources
+    .map((src) => {
+      try { return new URL(src, base).href; } catch { return null; }
+    })
+    .filter((u): u is string => !!u)
+    .filter((u) => IMAGE_EXT.test(u) || /\.(jpg|jpeg|png|webp|gif|avif)(\?|$)/i.test(u));
+
+  return [...new Set(resolved)];
 }
 
 // ─── Component ───────────────────────────────────────────────
 export function MediaStep({ onStepComplete }: MediaStepProps) {
   const { submissionId, saveStepData } = useWizard();
+
+  // RLS guard: must have an anchored submission from Step 1
+  if (!submissionId) {
+    return (
+      <div className="w-full max-w-3xl mx-auto text-center py-12">
+        <p className="text-lg font-semibold text-destructive">No submission found.</p>
+        <p className="text-sm text-muted-foreground mt-2">Complete Step 1 (Identity) before uploading media.</p>
+      </div>
+    );
+  }
   const [uploading, setUploading] = useState(false);
 
   // Gallery state
@@ -142,9 +179,18 @@ export function MediaStep({ onStepComplete }: MediaStepProps) {
     if (!magicUrl.trim()) { toast.info("Paste a URL first"); return; }
     try {
       setMagicLoading(true);
-      const urls = await scrapeImagesFromUrl(magicUrl);
-      addUrls(urls);
-      toast.success(`Found ${urls.length} images from link!`);
+      // If it's a direct image URL, skip scraper — just add it
+      if (isDirectImageUrl(magicUrl.trim())) {
+        const proxied = proxyUrl(magicUrl.trim());
+        addUrls([proxied]);
+        toast.success("Image added via proxy!");
+      } else {
+        const urls = await scrapeImagesFromUrl(magicUrl);
+        // Proxy each URL through weserv.nl so the browser can display them
+        const proxied = urls.map((u) => proxyUrl(u));
+        addUrls(proxied);
+        toast.success(`Found ${proxied.length} images from link!`);
+      }
     } catch {
       toast.error("Could not extract images from URL");
     } finally {
@@ -156,10 +202,9 @@ export function MediaStep({ onStepComplete }: MediaStepProps) {
   const addByUrl = (id: string) => {
     const url = urlInputs[id]?.trim();
     if (!url) return;
-    try {
-      new URL(url); // validate
-    } catch {
-      toast.error("Not a valid URL");
+    // Accept any string that looks like a URL or path — relaxed validation
+    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("/")) {
+      toast.error("URL must start with http://, https://, or /");
       return;
     }
     setGallery((prev) => prev.map((i) => i.id === id ? { ...i, url, file: undefined } : i));

@@ -16,9 +16,9 @@ export { identitySchema as basicInfoSchema };
 export type { IdentityValues as BasicInfoValues };
 
 export const mediaSchema = z.object({
-  heroImages: z.array(z.string().url("Must be a valid URL")).optional().default([]),
-  galleryImages: z.array(z.string().url("Must be a valid URL")).optional().default([]),
-  logoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")).default(""),
+  heroImages: z.array(z.string().min(1, "Must be a non-empty URL")).optional().default([]),
+  galleryImages: z.array(z.string().min(1, "Must be a non-empty URL")).optional().default([]),
+  logoUrl: z.string().min(1, "Must be a non-empty URL").optional().or(z.literal("")).default(""),
 });
 export type MediaValues = z.infer<typeof mediaSchema>;
 
