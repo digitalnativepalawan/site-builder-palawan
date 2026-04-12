@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { IdentityValues } from "@/lib/schema";
+import type { BasicInfoValues } from "@/lib/schema";
 
 interface WizardContextValue {
   submissionId: string | null;
-  anchorSubmission: (values: IdentityValues) => Promise<string>;
   allData: Record<string, unknown>;
-  setStepData: (key: string, values: Record<string, unknown>) => void;
+  anchorSubmission: (values: BasicInfoValues) => Promise<string>;
+  saveStepData: (stepKey: string, values: Record<string, unknown>) => Promise<void>;
 }
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -16,14 +16,10 @@ export function WizardProvider({ children }: { children: ReactNode }) {
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [allData, setAllData] = useState<Record<string, unknown>>({});
 
-  // PERSISTENCE LAW: immediate upsert on Step 1 Next
-  const anchorSubmission = useCallback(async (values: IdentityValues) => {
+  const anchorSubmission = useCallback(async (values: BasicInfoValues) => {
     const { data, error } = await supabase
       .from("resort_submissions")
-      .upsert(
-        { data: { basicInfo: values } },
-        { onConflict: "id" } // if we re-pass an id later
-      )
+      .insert({ data: { basicInfo: values } })
       .select("id")
       .maybeSingle();
 
@@ -31,17 +27,25 @@ export function WizardProvider({ children }: { children: ReactNode }) {
       toast.error("Could not save your progress. Please try again.");
       throw error ?? new Error("No data returned");
     }
-
     setSubmissionId(data.id);
     return data.id;
   }, []);
 
-  const setStepData = useCallback((key: string, values: Record<string, unknown>) => {
-    setAllData((prev) => ({ ...prev, [key]: values }));
-  }, []);
+  const saveStepData = useCallback(async (stepKey: string, values: Record<string, unknown>) => {
+    if (!submissionId) throw new Error("No submission anchored");
+    const merged = { ...allData, [stepKey]: values };
+    const { error } = await supabase
+      .from("resort_submissions")
+      .upsert({ id: submissionId, data: merged });
+    if (error) {
+      toast.error("Failed to save step. Please try again.");
+      throw error;
+    }
+    setAllData(merged);
+  }, [submissionId, allData]);
 
   return (
-    <WizardContext.Provider value={{ submissionId, anchorSubmission, allData, setStepData }}>
+    <WizardContext.Provider value={{ submissionId, allData, anchorSubmission, saveStepData }}>
       {children}
     </WizardContext.Provider>
   );
