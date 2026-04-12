@@ -1,8 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { Loader2, ImagePlus, Upload, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Loader2, ImagePlus, Upload, Trash2, Link as LinkIcon,
+  Crown, Monitor, Sparkles, X, Plus,
+} from "lucide-react";
 
 import { mediaSchema, type MediaValues } from "@/lib/schema";
 import { useWizard } from "@/context/wizard-context";
@@ -12,82 +15,189 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type ImageRole = "hero-1" | "hero-2" | "logo" | "gallery-only";
+
+interface GalleryImage {
+  id: string;
+  file?: File;
+  url: string;
+  role: ImageRole;
+}
+
 interface MediaStepProps {
   onStepComplete: () => void;
 }
 
+// ─── Magic Link placeholder scraper ──────────────────────────
+async function scrapeImagesFromUrl(url: string): Promise<string[]> {
+  // Placeholder — replace with Cloud Function call later
+  console.log("[Magic Link] Scraping:", url);
+  await new Promise((r) => setTimeout(r, 1500)); // simulate network
+  // Return dummy images so the user sees the flow working
+  return [
+    `https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=500&fit=crop`,
+    `https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=500&fit=crop`,
+    `https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=500&fit=crop`,
+  ];
+}
+
+// ─── Component ───────────────────────────────────────────────
 export function MediaStep({ onStepComplete }: MediaStepProps) {
   const { submissionId, saveStepData } = useWizard();
   const [uploading, setUploading] = useState(false);
 
-  // Local file state
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [heroFiles, setHeroFiles] = useState<File[]>([]);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  // Gallery state
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [magicUrl, setMagicUrl] = useState("");
+  const [magicLoading, setMagicLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
-  // Public URL state (populated after upload or manual URL entry)
-  const [logoUrl, setLogoUrl] = useState("");
-  const [heroUrls, setHeroUrls] = useState<string[]>([]);
-  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  // URL input mode for individual slots
+  const [urlMode, setUrlMode] = useState<Record<string, boolean>>({});
+  const [urlInputs, setUrlInputs] = useState<Record<string, string>>({});
+
+  const dropRef = useRef<HTMLDivElement>(null);
+  const bulkFileRef = useRef<HTMLInputElement>(null);
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    getValues,
   } = useForm<MediaValues>({
     resolver: zodResolver(mediaSchema),
     defaultValues: { heroImages: [], galleryImages: [], logoUrl: "" },
     mode: "onBlur",
   });
 
-  const handleFileSelect = (setter: (f: File | File[]) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (files.length) setter(files.length === 1 ? files[0] : files);
+  // ── Helpers ──
+  const uid = () => crypto.randomUUID();
+
+  const addFiles = useCallback((files: File[]) => {
+    setGallery((prev) => [
+      ...prev,
+      ...files.map((f) => ({ id: uid(), file: f, url: URL.createObjectURL(f), role: "gallery-only" as ImageRole })),
+    ]);
+  }, []);
+
+  const addUrls = useCallback((urls: string[]) => {
+    setGallery((prev) => [
+      ...prev,
+      ...urls.filter(Boolean).map((u) => ({ id: uid(), url: u, role: "gallery-only" as ImageRole })),
+    ]);
+  }, []);
+
+  const removeImage = (id: string) => {
+    setGallery((prev) => {
+      const img = prev.find((i) => i.id === id);
+      if (img?.file?.type.startsWith("blob:")) URL.revokeObjectURL(img.url);
+      return prev.filter((i) => i.id !== id);
+    });
   };
 
-  const createPreview = (file: File) => URL.createObjectURL(file);
+  const cycleRole = (id: string) => {
+    setGallery((prev) =>
+      prev.map((i) => {
+        if (i.id !== id) return i;
+        const cycle: Record<ImageRole, ImageRole> = {
+          "gallery-only": "hero-1",
+          "hero-1": "hero-2",
+          "hero-2": "logo",
+          logo: "gallery-only",
+        };
+        return { ...i, role: cycle[i.role] };
+      })
+    );
+  };
 
-  const uploadToSupabase = useCallback(async () => {
-    if (!submissionId) throw new Error("Missing submission ID");
+  const roleBadge = (role: ImageRole) => {
+    switch (role) {
+      case "hero-1":
+        return { label: "Hero 1", icon: Crown, color: "bg-amber-500 text-white" };
+      case "hero-2":
+        return { label: "Hero 2", icon: Monitor, color: "bg-blue-500 text-white" };
+      case "logo":
+        return { label: "Logo", icon: Sparkles, color: "bg-violet-500 text-white" };
+      default:
+        return { label: "Gallery", icon: null, color: "bg-muted text-muted-foreground" };
+    }
+  };
 
-    const uploaded: MediaValues = { heroImages: [], galleryImages: [], logoUrl: "" };
-    const bucket = supabase.storage.from("resort-assets");
+  // ── Drag & Drop ──
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    else setDragActive(false);
+  };
 
-    // Helper: upload single file
-    const uploadOne = async (file: File, type: "logo" | "hero" | "gallery") => {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${submissionId}/${type}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await bucket.upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data } = bucket.getPublicUrl(path);
-      return data.publicUrl;
-    };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
+    if (files.length) addFiles(files);
+  };
 
-    // Upload logo
-    if (logoFile) uploaded.logoUrl = await uploadOne(logoFile, "logo");
-    else uploaded.logoUrl = getValues("logoUrl");
+  // ── Magic Link ──
+  const handleMagicLink = async () => {
+    if (!magicUrl.trim()) { toast.info("Paste a URL first"); return; }
+    try {
+      setMagicLoading(true);
+      const urls = await scrapeImagesFromUrl(magicUrl);
+      addUrls(urls);
+      toast.success(`Found ${urls.length} images from link!`);
+    } catch {
+      toast.error("Could not extract images from URL");
+    } finally {
+      setMagicLoading(false);
+    }
+  };
 
-    // Upload heroes
-    if (heroFiles.length) {
-      for (const f of heroFiles) uploaded.heroImages!.push(await uploadOne(f, "hero"));
-    } else uploaded.heroImages = getValues("heroImages");
+  // ── URL paste for individual slot ──
+  const addByUrl = (id: string) => {
+    const url = urlInputs[id]?.trim();
+    if (!url) return;
+    try {
+      new URL(url); // validate
+    } catch {
+      toast.error("Not a valid URL");
+      return;
+    }
+    setGallery((prev) => prev.map((i) => i.id === id ? { ...i, url, file: undefined } : i));
+    setUrlMode((prev) => ({ ...prev, [id]: false }));
+    setUrlInputs((prev) => ({ ...prev, [id]: "" }));
+  };
 
-    // Upload gallery
-    if (galleryFiles.length) {
-      for (const f of galleryFiles) uploaded.galleryImages!.push(await uploadOne(f, "gallery"));
-    } else uploaded.galleryImages = getValues("galleryImages");
-
-    return mediaSchema.parse(uploaded);
-  }, [submissionId, logoFile, heroFiles, galleryFiles, getValues]);
-
+  // ── Submit ──
   const onSubmit = handleSubmit(async () => {
+    if (!submissionId) { toast.error("No submission anchored"); return; }
+    if (!gallery.length) { toast.info("Add at least one image"); return; }
+
     try {
       setUploading(true);
-      const payload = await uploadToSupabase();
+      const bucket = supabase.storage.from("resort-assets");
+
+      const uploaded: GalleryImage[] = [];
+      for (const img of gallery) {
+        let finalUrl = img.url;
+        if (img.file) {
+          const ext = img.file.name.split(".").pop() ?? "jpg";
+          const path = `${submissionId}/${img.id}.${ext}`;
+          const { error } = await bucket.upload(path, img.file, { upsert: true });
+          if (error) throw error;
+          finalUrl = bucket.getPublicUrl(path).data.publicUrl;
+        }
+        uploaded.push({ ...img, url: finalUrl });
+      }
+
+      const heroImages = uploaded.filter((i) => i.role.startsWith("hero")).map((i) => i.url);
+      const logoUrl = uploaded.find((i) => i.role === "logo")?.url ?? "";
+      const galleryImages = uploaded.filter((i) => !i.role.startsWith("hero") && i.role !== "logo").map((i) => i.url);
+
+      const payload: MediaValues = { heroImages: heroImages.length ? heroImages : ["", ""], galleryImages, logoUrl };
+      mediaSchema.parse(payload);
+
       await saveStepData("media", payload as unknown as Record<string, unknown>);
-      toast.success("Media saved successfully!");
+      toast.success("Media saved!");
       onStepComplete();
     } catch (err: any) {
       console.error(err);
@@ -97,93 +207,164 @@ export function MediaStep({ onStepComplete }: MediaStepProps) {
     }
   });
 
+  // ── Ensure at least 2 preview slots if gallery empty ──
+  const displayImages = gallery.length ? gallery : [
+    { id: "slot-1", url: "", role: "gallery-only" as ImageRole },
+    { id: "slot-2", url: "", role: "gallery-only" as ImageRole },
+  ];
+
   return (
     <motion.div
       initial={{ x: 40, opacity: 0 }}
       animate={{ x: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 30 } }}
       exit={{ x: -40, opacity: 0 }}
-      className="w-full max-w-2xl mx-auto space-y-8"
+      className="w-full max-w-3xl mx-auto space-y-8"
     >
       <div className="text-center space-y-3">
         <h1 className="text-2xl font-heading font-semibold tracking-tight">Media & Branding</h1>
-        <p className="text-sm text-muted-foreground">Step 2 — Showcase your resort's visual identity.</p>
+        <p className="text-sm text-muted-foreground">Step 2 — Drag, paste, or import. Assign roles with one click.</p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-8" noValidate>
-        {/* Logo */}
-        <section className="space-y-2">
-          <Label>Brand Logo</Label>
-          <div className="flex items-center gap-4">
-            {logoFile ? (
-              <img src={createPreview(logoFile)} alt="Logo" className="h-20 w-20 rounded-lg object-cover border" />
-            ) : logoUrl ? (
-              <img src={logoUrl} alt="Logo URL" className="h-20 w-20 rounded-lg object-cover border" />
-            ) : (
-              <div className="h-20 w-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/30">
-                <ImagePlus className="w-6 h-6 text-muted-foreground" />
-              </div>
-            )}
-            <div className="flex-1">
-              <input type="file" accept="image/*" onChange={handleFileSelect(setLogoFile)} className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-              <Input placeholder="Or paste image URL..." className="mt-2" {...register("logoUrl")} />
-            </div>
-          </div>
-          {errors.logoUrl && <p className="text-xs text-red-500">{errors.logoUrl.message}</p>}
-        </section>
+      <form onSubmit={onSubmit} className="space-y-6" noValidate>
 
-        {/* Hero Images */}
-        <section className="space-y-2">
-          <Label>Hero Images (1-2 recommended)</Label>
-          <div className="grid grid-cols-2 gap-3">
-            {[0, 1].map((i) => (
-              <label key={i} className="relative aspect-video rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/20 cursor-pointer overflow-hidden group hover:border-primary/50 transition-colors">
-                {heroFiles[i] ? (
-                  <img src={createPreview(heroFiles[i])} className="absolute inset-0 w-full h-full object-cover" />
-                ) : heroUrls[i] ? (
-                  <img src={heroUrls[i]} className="absolute inset-0 w-full h-full object-cover" />
-                ) : (
-                  <div className="text-center">
-                    <Upload className="w-5 h-5 mx-auto text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground mt-1">Hero {i + 1}</span>
-                  </div>
-                )}
-                {heroFiles[i] && (
-                  <button type="button" onClick={() => setHeroFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white hover:bg-red-500 transition"><Trash2 className="w-3 h-3" /></button>
-                )}
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) setHeroFiles(prev => { const next = [...prev]; next[i] = f; return next; });
-                }} />
-              </label>
-            ))}
+        {/* ── Magic Link ── */}
+        <div className="rounded-xl border border-border p-4 bg-gradient-to-r from-primary/[0.03] to-accent/[0.03]">
+          <Label className="flex items-center gap-2 text-xs uppercase tracking-widest mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-primary" /> Magic Import
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Paste Airbnb, Booking.com, or website URL…"
+              value={magicUrl}
+              onChange={(e) => setMagicUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleMagicLink())}
+              className="flex-1"
+            />
+            <Button type="button" onClick={handleMagicLink} disabled={magicLoading || !magicUrl.trim()} variant="default">
+              {magicLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LinkIcon className="w-4 h-4" />}
+              Import
+            </Button>
           </div>
-        </section>
+        </div>
 
-        {/* Gallery Grid */}
-        <section className="space-y-2">
-          <Label>Gallery (up to 6)</Label>
-          <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <label key={i} className="relative aspect-square rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-muted/20 cursor-pointer hover:border-primary/50 transition-colors overflow-hidden">
-                {galleryFiles[i] ? (
-                  <img src={createPreview(galleryFiles[i])} className="absolute inset-0 w-full h-full object-cover" />
-                ) : galleryUrls[i] ? (
-                  <img src={galleryUrls[i]} className="absolute inset-0 w-full h-full object-cover" />
-                ) : (
-                  <ImagePlus className="w-5 h-5 text-muted-foreground" />
-                )}
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) setGalleryFiles(prev => { const next = [...prev]; next[i] = f; return next; });
-                }} />
-              </label>
-            ))}
+        {/* ── Drag & Drop Zone ── */}
+        <div
+          ref={dropRef}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          onClick={() => bulkFileRef.current?.click()}
+          className={`relative rounded-xl border-2 border-dashed p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all min-h-[140px]
+            ${dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border hover:border-primary/40 bg-muted/10"}`}
+        >
+          <Upload className={`w-8 h-8 transition-colors ${dragActive ? "text-primary" : "text-muted-foreground/50"}`} />
+          <p className="text-sm font-medium text-center">
+            Drop all your photos here, or <span className="text-primary underline">browse</span>
+          </p>
+          <p className="text-xs text-muted-foreground">Supports JPG, PNG, WebP — up to 20 files</p>
+          <input
+            ref={bulkFileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []).filter((f) => f.type.startsWith("image/"));
+              if (files.length) addFiles(files);
+            }}
+          />
+        </div>
+
+        {/* ── Gallery Grid ── */}
+        <div>
+          <Label className="text-xs uppercase tracking-widest">Your Images</Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
+            <AnimatePresence>
+              {displayImages.map((img, idx) => {
+                const badge = roleBadge(img.role);
+                const isEmpty = !img.url;
+                const isUrlMode = urlMode[img.id];
+
+                return (
+                  <motion.div
+                    key={img.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="group relative aspect-square rounded-xl overflow-hidden border border-border bg-muted/20"
+                  >
+                    {isEmpty ? (
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/40 transition"
+                        onClick={() => setUrlMode((p) => ({ ...p, [img.id]: true }))}
+                      >
+                        <Plus className="w-5 h-5 text-muted-foreground/50" />
+                        <span className="text-[10px] text-muted-foreground/60">Add image</span>
+                      </div>
+                    ) : (
+                      <img src={img.url} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
+                    )}
+
+                    {/* Remove */}
+                    {!isEmpty && (
+                      <button
+                        type="button"
+                        onClick={() => removeImage(img.id)}
+                        className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+
+                    {/* Badge — click to cycle role */}
+                    {!isEmpty && (
+                      <button
+                        type="button"
+                        onClick={() => cycleRole(img.id)}
+                        className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold backdrop-blur-sm transition z-10 ${badge.color}`}
+                      >
+                        {badge.icon && <badge.icon className="w-3 h-3" />}
+                        {badge.label}
+                      </button>
+                    )}
+
+                    {/* URL input overlay */}
+                    {isUrlMode && (
+                      <div className="absolute inset-0 bg-background/95 flex flex-col gap-1.5 p-2 z-20">
+                        <input
+                          autoFocus
+                          placeholder="Paste image URL…"
+                          className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                          value={urlInputs[img.id] ?? ""}
+                          onChange={(e) => setUrlInputs((p) => ({ ...p, [img.id]: e.target.value }))}
+                          onKeyDown={(e) => e.key === "Enter" && addByUrl(img.id)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => { setUrlMode((p) => ({ ...p, [img.id]: false })); setUrlInputs((p) => ({ ...p, [img.id]: "" })); }}
+                          className="text-[10px] text-muted-foreground underline self-center"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
-        </section>
+        </div>
 
-        <Button type="submit" className="w-full mt-6" size="lg" disabled={uploading}>
-          {uploading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Uploading…</> : "Save & Continue"}
-        </Button>
+        {errors.heroImages && <p className="text-xs text-red-500">{String(errors.heroImages.message)}</p>}
+
+        {/* ── Submit ── */}
+        <div className="flex items-center gap-2 pt-2">
+          <Button type="submit" className="flex-1" size="lg" disabled={uploading}>
+            {uploading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Uploading…</> : "Save & Continue"}
+          </Button>
+        </div>
       </form>
     </motion.div>
   );
