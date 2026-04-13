@@ -1,169 +1,145 @@
-import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Eye, Edit3, Loader2, Building2, Trash2, Plus } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
-interface ParsedSubmission {
-  id: string;
-  created_at: string;
-  status: string;
-  data: Record<string, any>;
-  resortName: string;
-  resortOwner: string;
-  sectionPct: number;
-}
+const STEPS = ["Identity", "Brand Story", "About Owner", "Media", "Hero Video", "Rooms", "Amenities", "Dining", "FAQ", "Header/Footer", "Contact", "Color Palette", "SEO"];
 
-export default function AdminDashboard() {
+export function FullWizard() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const editId = searchParams.get("edit");
 
-  const { data: submissions, isLoading } = useQuery({
-    queryKey: ["resort-submissions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(!!editId);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // 1. THE FETCH LOGIC (The most likely failure point)
+  useEffect(() => {
+    if (!editId) return;
+
+    async function loadResortData() {
+      console.log("🛠️ Attempting to fetch ID:", editId);
+      try {
+        const { data, error } = await supabase
+          .from("resort_submissions")
+          .select("*")
+          .eq("id", editId)
+          .single();
+
+        if (error) {
+          console.error("❌ Supabase Error:", error);
+          toast.error(`Database error: ${error.message}`);
+          return;
+        }
+
+        if (data && data.data) {
+          console.log("✅ Data Loaded Successfully:", data.data);
+          setFormData(data.data);
+        } else {
+          toast.warning("Resort found, but data is empty.");
+        }
+      } catch (err) {
+        console.error("❌ Fetch Crash:", err);
+        toast.error("Critical error loading data.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadResortData();
+  }, [editId]);
+
+  // 2. THE SAVE LOGIC
+  const handleSave = async () => {
+    if (!editId) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
         .from("resort_submissions")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .update({ data: formData, updated_at: new Date().toISOString() })
+        .eq("id", editId);
+
       if (error) throw error;
-      return data;
-    },
-  });
+      toast.success("Progress synced to cloud");
+    } catch (err: any) {
+      toast.error("Save failed: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("resort_submissions").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Resort deleted");
-      queryClient.invalidateQueries({ queryKey: ["resort-submissions"] });
-    },
-  });
+  const nextStep = () => { handleSave(); setCurrentStep(s => Math.min(s + 1, 13)); window.scrollTo(0,0); };
+  const prevStep = () => setCurrentStep(s => Math.max(s - 1, 1));
 
-  const parsed: ParsedSubmission[] = (submissions || []).map((sub: any) => {
-    const d = sub.data || {};
-    const identity = d.identity || {};
-    const resortName = identity.resortName || "Untitled Resort";
-    
-    // Calculate progress based on existing top-level keys in the data JSON
-    const keys = Object.keys(d).length;
-    const sectionPct = Math.min(Math.round((keys / 13) * 100), 100);
-
-    return {
-      id: sub.id,
-      created_at: sub.created_at,
-      status: sub.status || "draft",
-      data: d,
-      resortName,
-      resortOwner: identity.resortOwner || "—",
-      sectionPct: sectionPct || 8,
-    };
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <Loader2 className="animate-spin h-10 w-10 text-primary" />
+      <p className="mt-4 text-muted-foreground">Pulling your resort data from Supabase...</p>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background p-6 sm:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight">Resort Submissions</h1>
-          </div>
-          <Button onClick={() => navigate("/wizard")} className="rounded-xl shadow-lg">
-            <Plus className="h-4 w-4 mr-2" /> New Resort
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+            <ChevronLeft className="w-4 h-4 mr-1" /> Dashboard
+          </Button>
+          <span className="text-xs font-bold uppercase tracking-tighter">Step {currentStep}: {STEPS[currentStep-1]}</span>
+          <Button size="sm" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
           </Button>
         </div>
+      </header>
 
-        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 text-[10px] uppercase font-bold tracking-widest text-muted-foreground border-b">
-            <div className="col-span-4">Resort</div>
-            <div className="col-span-2">Status</div>
-            <div className="col-span-4">Progress</div>
-            <div className="col-span-2 text-right">Actions</div>
-          </div>
-
-          {parsed.length === 0 ? (
-            <div className="py-20 text-center text-muted-foreground">No resorts found yet.</div>
-          ) : (
-            parsed.map((sub) => (
-              <div key={sub.id} className="grid grid-cols-12 gap-4 px-6 py-5 border-b last:border-0 hover:bg-muted/10 transition-colors items-center">
-                <div className="col-span-4">
-                  <p className="font-bold text-sm">{sub.resortName}</p>
-                  <p className="text-xs text-muted-foreground">{sub.resortOwner}</p>
-                </div>
-                <div className="col-span-2">
-                  <Badge variant="outline" className="capitalize text-[10px] font-bold">
-                    {sub.status}
-                  </Badge>
-                </div>
-                <div className="col-span-4 flex items-center gap-3">
-                  <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: `${sub.sectionPct}%` }} />
-                  </div>
-                  <span className="text-[10px] font-mono font-bold">{sub.sectionPct}%</span>
-                </div>
-                <div className="col-span-2 flex justify-end gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="secondary" 
-                    className="h-9 w-9 p-0 rounded-lg"
-                    onClick={() => {
-                      if (!sub.id) return toast.error("Invalid ID");
-                      console.log("Navigating to:", `/wizard?edit=${sub.id}`);
-                      navigate(`/wizard?edit=${sub.id}`);
-                    }}
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="h-9 w-9 p-0 rounded-lg text-destructive hover:bg-destructive/10"
-                    onClick={() => setDeleteId(sub.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+      <main className="flex-1 max-w-3xl mx-auto w-full p-6">
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+            <h1 className="text-3xl font-bold">Resort Identity</h1>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Resort Name</label>
+                <input 
+                  className="flex h-12 w-full rounded-xl border border-input bg-background px-4 mt-2"
+                  value={formData?.identity?.resortName || ""}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    identity: { ...formData.identity, resortName: e.target.value }
+                  })}
+                />
               </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Delete Modal */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="bg-background rounded-2xl border p-6 max-w-sm w-full animate-in zoom-in-95">
-            <h3 className="text-lg font-bold">Delete Property?</h3>
-            <p className="text-sm text-muted-foreground mt-2 mb-6">This will permanently remove this resort and all associated media.</p>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1">Cancel</Button>
-              <Button 
-                variant="destructive" 
-                onClick={() => {
-                  deleteMutation.mutate(deleteId);
-                  setDeleteId(null);
-                }} 
-                className="flex-1"
-              >
-                Delete
-              </Button>
+              <div>
+                <label className="text-sm font-medium">Owner Name</label>
+                <input 
+                  className="flex h-12 w-full rounded-xl border border-input bg-background px-4 mt-2"
+                  value={formData?.identity?.resortOwner || ""}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    identity: { ...formData.identity, resortOwner: e.target.value }
+                  })}
+                />
+              </div>
             </div>
           </div>
+        )}
+
+        {currentStep > 1 && (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground">Step {currentStep} fields loading...</p>
+          </div>
+        )}
+      </main>
+
+      <footer className="fixed bottom-0 left-0 right-0 border-t bg-background p-4">
+        <div className="max-w-5xl mx-auto flex justify-between">
+          <Button variant="outline" onClick={prevStep} disabled={currentStep === 1}>Back</Button>
+          <Button onClick={nextStep}>{currentStep === 13 ? "Finish" : "Next Step"}</Button>
         </div>
-      )}
+      </footer>
     </div>
   );
 }
