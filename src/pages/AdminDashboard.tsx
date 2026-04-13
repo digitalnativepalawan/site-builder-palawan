@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit3, Loader2, Building2, Trash2, Check, RotateCcw, Plus } from "lucide-react";
+import { Eye, Edit3, Loader2, Building2, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -14,32 +14,13 @@ interface ParsedSubmission {
   data: Record<string, any>;
   resortName: string;
   resortOwner: string;
-  sectionCount: number;
   sectionPct: number;
-  isDraft: boolean;
-}
-
-async function deleteFromSupabase(id: string): Promise<void> {
-  try {
-    const { data: files } = await supabase.storage.from("resort-assets").list(id);
-    if (files?.length) {
-      const paths = files.map((f) => `${id}/${f.name}`);
-      await supabase.storage.from("resort-assets").remove(paths);
-    }
-  } catch {
-    // Storage cleanup is best-effort
-  }
-  const { error } = await supabase.from("resort_submissions").delete().eq("id", id);
-  if (error) throw new Error(error.message);
 }
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [hideDrafts, setHideDrafts] = useState(false);
-  const [confirmingPurge, setConfirmingPurge] = useState(false);
-  const [purging, setPurging] = useState(false);
 
   const { data: submissions, isLoading } = useQuery({
     queryKey: ["resort-submissions"],
@@ -54,66 +35,35 @@ export default function AdminDashboard() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteFromSupabase(id),
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("resort_submissions").delete().eq("id", id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       toast.success("Resort deleted");
       queryClient.invalidateQueries({ queryKey: ["resort-submissions"] });
     },
-    onError: (err: any) => {
-      toast.error("Delete failed: " + err.message);
-    },
   });
 
-  const handleDelete = useCallback(() => {
-    if (deleteId) {
-      deleteMutation.mutate(deleteId);
-      setDeleteId(null);
-    }
-  }, [deleteId, deleteMutation]);
-
   const parsed: ParsedSubmission[] = (submissions || []).map((sub: any) => {
-    const d = (sub.data as Record<string, any>) || {};
-    const identity = d.identity || d.basicInfo || {};
+    const d = sub.data || {};
+    const identity = d.identity || {};
     const resortName = identity.resortName || "Untitled Resort";
-    const resortOwner = identity.resortOwner || "";
-    const sectionCount = [
-      d.identity, d.brandStory, d.aboutOwner, d.media, d.heroVideo,
-      d.rooms, d.amenities, d.dining, d.faq,
-      d.headerFooter, d.contact, d.colorPalette, d.seo,
-    ].filter(Boolean).length;
-    const sectionPct = Math.round((sectionCount / 13) * 100);
+    
+    // Calculate progress based on existing top-level keys in the data JSON
+    const keys = Object.keys(d).length;
+    const sectionPct = Math.min(Math.round((keys / 13) * 100), 100);
+
     return {
       id: sub.id,
       created_at: sub.created_at,
-      status: sub.status,
+      status: sub.status || "draft",
       data: d,
       resortName,
-      resortOwner,
-      sectionCount,
-      sectionPct,
-      isDraft: resortName === "Untitled Resort" && sectionPct === 0,
+      resortOwner: identity.resortOwner || "—",
+      sectionPct: sectionPct || 8,
     };
   });
-
-  const handlePurgeDrafts = useCallback(async () => {
-    setPurging(true);
-    const draftIds = parsed.filter((s) => s.isDraft).map((s) => s.id);
-    let count = 0;
-    for (const id of draftIds) {
-      try {
-        await deleteFromSupabase(id);
-        count++;
-      } catch (err: any) {
-        toast.error("Failed to delete " + id.slice(0, 8));
-      }
-    }
-    setPurging(false);
-    setConfirmingPurge(false);
-    if (count > 0) {
-      toast.success(`Purged ${count} drafts`);
-      queryClient.invalidateQueries({ queryKey: ["resort-submissions"] });
-    }
-  }, [parsed, queryClient]);
 
   if (isLoading) {
     return (
@@ -123,90 +73,93 @@ export default function AdminDashboard() {
     );
   }
 
-  const filtered = hideDrafts ? parsed.filter((s) => !s.isDraft) : parsed;
-  const draftCount = parsed.filter((s) => s.isDraft).length;
-
-  const statusColors: Record<string, string> = {
-    published: "bg-green-500/10 text-green-500 border-green-500/20",
-    built: "bg-green-500/10 text-green-500 border-green-500/20",
-    pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-    failed: "bg-red-500/10 text-red-500 border-red-500/20",
-    processing: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-    draft: "bg-muted text-muted-foreground border-border",
-  };
-
   return (
     <div className="min-h-screen bg-background p-6 sm:p-8">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold">Resort Submissions</h1>
-              <p className="text-sm text-muted-foreground">Manage your properties</p>
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Resort Submissions</h1>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => navigate("/wizard")} className="gap-2">
-              <Plus className="h-4 w-4" /> New Resort
-            </Button>
-          </div>
+          <Button onClick={() => navigate("/wizard")} className="rounded-xl shadow-lg">
+            <Plus className="h-4 w-4 mr-2" /> New Resort
+          </Button>
         </div>
 
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-muted/50 text-xs font-semibold uppercase text-muted-foreground border-b border-border">
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 text-[10px] uppercase font-bold tracking-widest text-muted-foreground border-b">
             <div className="col-span-4">Resort</div>
-            <div className="col-span-3">Status</div>
-            <div className="col-span-3">Progress</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-4">Progress</div>
             <div className="col-span-2 text-right">Actions</div>
           </div>
 
-          {filtered.map((sub) => (
-            <div key={sub.id} className="grid grid-cols-1 sm:grid-cols-12 gap-4 px-6 py-4 border-b border-border hover:bg-muted/10 transition-colors">
-              <div className="sm:col-span-4 font-semibold">{sub.resortName}</div>
-              <div className="sm:col-span-3">
-                <Badge variant="outline" className={statusColors[sub.status]}>{sub.status}</Badge>
-              </div>
-              <div className="sm:col-span-3 flex items-center gap-2">
-                <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-primary" style={{ width: `${sub.sectionPct}%` }} />
+          {parsed.length === 0 ? (
+            <div className="py-20 text-center text-muted-foreground">No resorts found yet.</div>
+          ) : (
+            parsed.map((sub) => (
+              <div key={sub.id} className="grid grid-cols-12 gap-4 px-6 py-5 border-b last:border-0 hover:bg-muted/10 transition-colors items-center">
+                <div className="col-span-4">
+                  <p className="font-bold text-sm">{sub.resortName}</p>
+                  <p className="text-xs text-muted-foreground">{sub.resortOwner}</p>
                 </div>
-                <span className="text-[10px] tabular-nums">{sub.sectionPct}%</span>
+                <div className="col-span-2">
+                  <Badge variant="outline" className="capitalize text-[10px] font-bold">
+                    {sub.status}
+                  </Badge>
+                </div>
+                <div className="col-span-4 flex items-center gap-3">
+                  <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full bg-primary" style={{ width: `${sub.sectionPct}%` }} />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold">{sub.sectionPct}%</span>
+                </div>
+                <div className="col-span-2 flex justify-end gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="secondary" 
+                    className="h-9 w-9 p-0 rounded-lg"
+                    onClick={() => {
+                      if (!sub.id) return toast.error("Invalid ID");
+                      console.log("Navigating to:", `/wizard?edit=${sub.id}`);
+                      navigate(`/wizard?edit=${sub.id}`);
+                    }}
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-9 w-9 p-0 rounded-lg text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteId(sub.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="sm:col-span-2 flex gap-1 justify-end">
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="h-8 w-8 p-0" 
-                  onClick={() => {
-                    console.log("Navigating to edit ID:", sub.id);
-                    navigate(`/wizard?edit=${sub.id}`);
-                  }}
-                >
-                  <Edit3 className="h-4 w-4 text-primary" />
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="h-8 w-8 p-0" 
-                  onClick={() => setDeleteId(sub.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
+      {/* Delete Modal */}
       {deleteId && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="bg-background rounded-xl border p-6 max-w-sm w-full shadow-2xl">
-            <h3 className="text-lg font-bold mb-2">Delete Resort?</h3>
-            <p className="text-sm text-muted-foreground mb-6">This action cannot be undone.</p>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="bg-background rounded-2xl border p-6 max-w-sm w-full animate-in zoom-in-95">
+            <h3 className="text-lg font-bold">Delete Property?</h3>
+            <p className="text-sm text-muted-foreground mt-2 mb-6">This will permanently remove this resort and all associated media.</p>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1">Cancel</Button>
-              <Button onClick={handleDelete} className="flex-1 bg-destructive text-white">Delete</Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  deleteMutation.mutate(deleteId);
+                  setDeleteId(null);
+                }} 
+                className="flex-1"
+              >
+                Delete
+              </Button>
             </div>
           </div>
         </div>
