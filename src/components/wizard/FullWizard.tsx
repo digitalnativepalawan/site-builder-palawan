@@ -1,11 +1,3 @@
-think
-I’ve updated the entire `FullWizard.tsx` file to fix that white screen. The issue was a classic "race condition": the app was trying to render the form fields before Supabase had finished sending back your data.
-
-I added an `isLoading` guard that acts as a shield—it shows a loading spinner until your data is safely "rehydrated" into the form.
-
-Copy and paste this entire block into `src/components/wizard/FullWizard.tsx`:
-
-```typescript
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { toast } from "sonner";
 
-// Steps list for reference
 const STEPS = [
   "Identity", "Brand Story", "About Owner", "Media", "Hero Video",
   "Rooms", "Amenities", "Dining", "FAQ", "Header/Footer", 
@@ -25,13 +16,11 @@ export default function FullWizard() {
   const navigate = useNavigate();
   const editId = searchParams.get("edit");
 
-  // ── STATE ──
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isRehydrating, setIsRehydrating] = useState(!!editId);
   const [isSaving, setIsSaving] = useState(false);
 
-  // ── REHYDRATION ENGINE ──
   useEffect(() => {
     if (editId) {
       const fetchResort = async () => {
@@ -45,7 +34,6 @@ export default function FullWizard() {
           if (error) throw error;
           if (data?.data) {
             setFormData(data.data);
-            console.log("Rehydrated data:", data.data);
           }
         } catch (err) {
           console.error("Rehydration error:", err);
@@ -58,7 +46,6 @@ export default function FullWizard() {
     }
   }, [editId]);
 
-  // ── SAVE LOGIC ──
   const handleSave = async () => {
     if (!editId) return;
     setIsSaving(true);
@@ -77,7 +64,6 @@ export default function FullWizard() {
     }
   };
 
-  // ── NAVIGATION ──
   const nextStep = () => {
     handleSave();
     setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
@@ -89,19 +75,17 @@ export default function FullWizard() {
     window.scrollTo(0, 0);
   };
 
-  // ── RENDER GUARDS ──
   if (isRehydrating) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground animate-pulse">Fetching your resort details...</p>
+        <p className="text-muted-foreground animate-pulse">Fetching resort details...</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Sticky Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
@@ -118,7 +102,6 @@ export default function FullWizard() {
             Save
           </Button>
         </div>
-        {/* Progress Bar */}
         <div className="w-full h-1 bg-muted">
           <div 
             className="h-full bg-primary transition-all duration-500" 
@@ -127,21 +110,19 @@ export default function FullWizard() {
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 max-w-3xl mx-auto w-full p-6 pb-32">
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-8">
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">Resort Identity</h1>
-                <p className="text-muted-foreground">Let's start with the name and ownership details.</p>
+                <p className="text-muted-foreground">Confirm your resort and owner details.</p>
               </div>
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <label className="text-sm font-medium">Resort Name</label>
                   <input 
                     className="flex h-12 w-full rounded-xl border border-input bg-background px-4 py-2"
-                    placeholder="e.g. Palawan Collective"
                     value={formData.identity?.resortName || ""}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -153,7 +134,6 @@ export default function FullWizard() {
                   <label className="text-sm font-medium">Owner Name</label>
                   <input 
                     className="flex h-12 w-full rounded-xl border border-input bg-background px-4 py-2"
-                    placeholder="Your full name"
                     value={formData.identity?.resortOwner || ""}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -170,29 +150,23 @@ export default function FullWizard() {
               <div className="p-4 bg-primary/10 rounded-full">
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
-              <h2 className="text-xl font-semibold">Step {currentStep} Content Pending</h2>
-              <p className="text-muted-foreground max-w-xs">We are currently wiring up the specific fields for the {STEPS[currentStep-1]} section.</p>
+              <h2 className="text-xl font-semibold">Step {currentStep}: {STEPS[currentStep-1]}</h2>
+              <p className="text-muted-foreground">Field configuration in progress...</p>
             </div>
           )}
         </div>
       </main>
 
-      {/* Sticky Navigation Footer */}
       <footer className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-md p-4 z-40">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <Button 
             variant="outline" 
             onClick={prevStep} 
             disabled={currentStep === 1}
-            className="rounded-xl px-6"
           >
             <ChevronLeft className="w-4 h-4 mr-2" /> Back
           </Button>
-          
-          <Button 
-            onClick={nextStep}
-            className="rounded-xl px-8 bg-primary hover:bg-primary/90"
-          >
+          <Button onClick={nextStep}>
             {currentStep === STEPS.length ? "Finish" : "Next Step"} 
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
@@ -201,4 +175,3 @@ export default function FullWizard() {
     </div>
   );
 }
-```
