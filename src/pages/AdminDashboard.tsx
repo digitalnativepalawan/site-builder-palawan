@@ -78,7 +78,7 @@ export default function AdminDashboard() {
     const resortOwner = identity.resortOwner || "";
     const sectionCount = [
       d.identity, d.brandStory, d.aboutOwner, d.media, d.heroVideo,
-      d.rooms, (d.amenity || d.amenities), d.dining, d.faq,
+      d.rooms, d.amenities, d.dining, d.faq,
       d.headerFooter, d.contact, d.colorPalette, d.seo,
     ].filter(Boolean).length;
     const sectionPct = Math.round((sectionCount / 13) * 100);
@@ -104,13 +104,13 @@ export default function AdminDashboard() {
         await deleteFromSupabase(id);
         count++;
       } catch (err: any) {
-        toast.error("Failed to delete " + id.slice(0, 8) + ": " + err.message);
+        toast.error("Failed to delete " + id.slice(0, 8));
       }
     }
     setPurging(false);
     setConfirmingPurge(false);
     if (count > 0) {
-      toast.success(`Purged ${count} draft${count > 1 ? "s" : ""}`);
+      toast.success(`Purged ${count} drafts`);
       queryClient.invalidateQueries({ queryKey: ["resort-submissions"] });
     }
   }, [parsed, queryClient]);
@@ -142,114 +142,71 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-2xl font-heading font-bold">Resort Submissions</h1>
-              <p className="text-sm text-muted-foreground">
-                {parsed.filter((s) => !s.isDraft).length} resorts
-                {hideDrafts && draftCount > 0 && <span> ({draftCount} hidden)</span>}
-              </p>
+              <h1 className="text-2xl font-bold">Resort Submissions</h1>
+              <p className="text-sm text-muted-foreground">Manage your properties</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {draftCount > 0 && (
-              <button
-                onClick={() => setConfirmingPurge(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all border border-destructive/30 text-destructive hover:bg-destructive/10"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Purge {draftCount} Drafts
-              </button>
-            )}
-            <button
-              onClick={() => setHideDrafts(!hideDrafts)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
-                hideDrafts ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
-              }`}
-            >
-              <Check className="w-3.5 h-3.5" /> {hideDrafts ? "Showing All" : "Hide Drafts"}
-            </button>
-            <Button onClick={() => navigate("/")} className="gap-2 min-h-[44px]">
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/wizard")} className="gap-2">
               <Plus className="h-4 w-4" /> New Resort
             </Button>
           </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-muted/50 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
-            <div className="col-span-3">Resort</div>
-            <div className="col-span-2">Owner</div>
-            <div className="col-span-2">Status</div>
+          <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-muted/50 text-xs font-semibold uppercase text-muted-foreground border-b border-border">
+            <div className="col-span-4">Resort</div>
+            <div className="col-span-3">Status</div>
             <div className="col-span-3">Progress</div>
             <div className="col-span-2 text-right">Actions</div>
           </div>
 
-          {filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <Building2 className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
-              <p className="text-muted-foreground">No resorts found.</p>
-            </div>
-          ) : (
-            filtered.map((sub) => (
-              <div key={sub.id} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 border-b border-border last:border-b-0 hover:bg-muted/20 transition-colors">
-                <div className="sm:col-span-3">
-                  <p className="font-semibold truncate">{sub.resortName}</p>
-                </div>
-                <div className="sm:col-span-2 text-sm text-muted-foreground">
-                  {sub.resortOwner || "—"}
-                </div>
-                <div className="sm:col-span-2">
-                  <Badge variant="outline" className={statusColors[sub.status] || "bg-muted text-muted-foreground"}>
-                    {sub.status}
-                  </Badge>
-                </div>
-                <div className="sm:col-span-3 flex items-center gap-2">
-                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: `${sub.sectionPct}%` }} />
-                  </div>
-                  <span className="text-xs tabular-nums">{sub.sectionPct}%</span>
-                </div>
-                <div className="sm:col-span-2 flex gap-1.5 justify-end">
-                  {!sub.isDraft && (
-                    <Button size="sm" variant="outline" className="px-2" onClick={() => navigate(`/resort/${sub.id}`)}>
-                      <Eye className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                  <Button size="sm" className="px-2" onClick={() => window.location.href = `/?edit=${sub.id}`}>
-                    <Edit3 className="h-3.5 w-3.5" />
-                  </Button>
-                  <button onClick={() => setDeleteId(sub.id)} className="p-2 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+          {filtered.map((sub) => (
+            <div key={sub.id} className="grid grid-cols-1 sm:grid-cols-12 gap-4 px-6 py-4 border-b border-border hover:bg-muted/10 transition-colors">
+              <div className="sm:col-span-4 font-semibold">{sub.resortName}</div>
+              <div className="sm:col-span-3">
+                <Badge variant="outline" className={statusColors[sub.status]}>{sub.status}</Badge>
               </div>
-            ))
-          )}
+              <div className="sm:col-span-3 flex items-center gap-2">
+                <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: `${sub.sectionPct}%` }} />
+                </div>
+                <span className="text-[10px] tabular-nums">{sub.sectionPct}%</span>
+              </div>
+              <div className="sm:col-span-2 flex gap-1 justify-end">
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="h-8 w-8 p-0" 
+                  onClick={() => {
+                    console.log("Navigating to edit ID:", sub.id);
+                    navigate(`/wizard?edit=${sub.id}`);
+                  }}
+                >
+                  <Edit3 className="h-4 w-4 text-primary" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="h-8 w-8 p-0" 
+                  onClick={() => setDeleteId(sub.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {deleteId && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setDeleteId(null)}>
-          <div className="bg-background rounded-2xl border border-border p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2">Delete Resort</h3>
-            <p className="text-sm text-muted-foreground mb-6">This will permanently delete this resort and all its images.</p>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="bg-background rounded-xl border p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="text-lg font-bold mb-2">Delete Resort?</h3>
+            <p className="text-sm text-muted-foreground mb-6">This action cannot be undone.</p>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1" disabled={deleteMutation.isPending}>Cancel</Button>
-              <Button onClick={handleDelete} className="flex-1 bg-destructive text-white" disabled={deleteMutation.isPending}>
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {confirmingPurge && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setConfirmingPurge(false)}>
-          <div className="bg-background rounded-2xl border border-border p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2">Purge All Drafts</h3>
-            <p className="text-sm text-muted-foreground mb-6">Delete {draftCount} empty drafts? This cannot be undone.</p>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setConfirmingPurge(false)} className="flex-1" disabled={purging}>Cancel</Button>
-              <Button onClick={handlePurgeDrafts} className="flex-1 bg-destructive text-white" disabled={purging}>
-                {purging ? "Purging..." : "Purge All"}
-              </Button>
+              <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1">Cancel</Button>
+              <Button onClick={handleDelete} className="flex-1 bg-destructive text-white">Delete</Button>
             </div>
           </div>
         </div>
