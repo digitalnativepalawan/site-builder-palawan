@@ -29,7 +29,6 @@ async function deleteFromSupabase(id: string): Promise<void> {
   } catch {
     // Storage cleanup is best-effort
   }
-
   const { error } = await supabase.from("resort_submissions").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
@@ -167,7 +166,6 @@ export default function AdminDashboard() {
             >
               <Check className="w-3.5 h-3.5" /> {hideDrafts ? "Showing All" : "Hide Drafts"}
             </button>
-            {/* FIXED: Navigate to / not /wizard */}
             <Button onClick={() => navigate("/")} className="gap-2 min-h-[44px]">
               <Plus className="h-4 w-4" /> New Resort
             </Button>
@@ -190,10 +188,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             filtered.map((sub) => (
-              <div
-                key={sub.id}
-                className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 border-b border-border last:border-b-0 hover:bg-muted/20 transition-colors"
-              >
+              <div key={sub.id} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-6 py-4 border-b border-border last:border-b-0 hover:bg-muted/20 transition-colors">
                 <div className="sm:col-span-3">
                   <p className="font-semibold truncate">{sub.resortName}</p>
                 </div>
@@ -213,27 +208,14 @@ export default function AdminDashboard() {
                 </div>
                 <div className="sm:col-span-2 flex gap-1.5 justify-end">
                   {!sub.isDraft && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="px-2" 
-                      onClick={() => navigate(`/resort/${sub.id}`)}
-                    >
+                    <Button size="sm" variant="outline" className="px-2" onClick={() => navigate(`/resort/${sub.id}`)}>
                       <Eye className="h-3.5 w-3.5" />
                     </Button>
                   )}
-                  {/* FIXED: Navigate to /?edit= not /wizard?edit= */}
-                  <Button 
-                    size="sm" 
-                    className="px-2" 
-                    onClick={() => navigate(`/?edit=${sub.id}`)}
-                  >
+                  <Button size="sm" className="px-2" onClick={() => window.location.href = `/?edit=${sub.id}`}>
                     <Edit3 className="h-3.5 w-3.5" />
                   </Button>
-                  <button
-                    onClick={() => setDeleteId(sub.id)}
-                    className="p-2 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30"
-                  >
+                  <button onClick={() => setDeleteId(sub.id)} className="p-2 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -244,17 +226,12 @@ export default function AdminDashboard() {
       </div>
 
       {deleteId && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"
-          onClick={() => setDeleteId(null)}
-        >
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setDeleteId(null)}>
           <div className="bg-background rounded-2xl border border-border p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold mb-2">Delete Resort</h3>
             <p className="text-sm text-muted-foreground mb-6">This will permanently delete this resort and all its images.</p>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1" disabled={deleteMutation.isPending}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={() => setDeleteId(null)} className="flex-1" disabled={deleteMutation.isPending}>Cancel</Button>
               <Button onClick={handleDelete} className="flex-1 bg-destructive text-white" disabled={deleteMutation.isPending}>
                 {deleteMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
@@ -264,17 +241,12 @@ export default function AdminDashboard() {
       )}
 
       {confirmingPurge && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"
-          onClick={() => setConfirmingPurge(false)}
-        >
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setConfirmingPurge(false)}>
           <div className="bg-background rounded-2xl border border-border p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold mb-2">Purge All Drafts</h3>
             <p className="text-sm text-muted-foreground mb-6">Delete {draftCount} empty drafts? This cannot be undone.</p>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setConfirmingPurge(false)} className="flex-1" disabled={purging}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={() => setConfirmingPurge(false)} className="flex-1" disabled={purging}>Cancel</Button>
               <Button onClick={handlePurgeDrafts} className="flex-1 bg-destructive text-white" disabled={purging}>
                 {purging ? "Purging..." : "Purge All"}
               </Button>
