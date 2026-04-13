@@ -11,16 +11,18 @@ const STEPS = [
   "Contact", "Color Palette", "SEO"
 ];
 
-export default function FullWizard() {
+export function FullWizard() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const editId = searchParams.get("edit");
 
+  // --- STATE ---
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isRehydrating, setIsRehydrating] = useState(!!editId);
   const [isSaving, setIsSaving] = useState(false);
 
+  // --- REHYDRATION ENGINE ---
   useEffect(() => {
     if (editId) {
       const fetchResort = async () => {
@@ -46,13 +48,17 @@ export default function FullWizard() {
     }
   }, [editId]);
 
+  // --- SAVE LOGIC ---
   const handleSave = async () => {
     if (!editId) return;
     setIsSaving(true);
     try {
       const { error } = await supabase
         .from("resort_submissions")
-        .update({ data: formData, updated_at: new Date().toISOString() })
+        .update({ 
+          data: formData, 
+          updated_at: new Date().toISOString() 
+        })
         .eq("id", editId);
 
       if (error) throw error;
@@ -75,17 +81,19 @@ export default function FullWizard() {
     window.scrollTo(0, 0);
   };
 
+  // --- RENDER GUARDS ---
   if (isRehydrating) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground animate-pulse">Fetching resort details...</p>
+        <p className="text-muted-foreground animate-pulse">Fetching your resort details...</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Sticky Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
@@ -102,6 +110,7 @@ export default function FullWizard() {
             Save
           </Button>
         </div>
+        {/* Progress Bar */}
         <div className="w-full h-1 bg-muted">
           <div 
             className="h-full bg-primary transition-all duration-500" 
@@ -110,8 +119,9 @@ export default function FullWizard() {
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="flex-1 max-w-3xl mx-auto w-full p-6 pb-32">
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="space-y-2">
@@ -123,6 +133,7 @@ export default function FullWizard() {
                   <label className="text-sm font-medium">Resort Name</label>
                   <input 
                     className="flex h-12 w-full rounded-xl border border-input bg-background px-4 py-2"
+                    placeholder="e.g. Palawan Collective"
                     value={formData.identity?.resortName || ""}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -134,6 +145,7 @@ export default function FullWizard() {
                   <label className="text-sm font-medium">Owner Name</label>
                   <input 
                     className="flex h-12 w-full rounded-xl border border-input bg-background px-4 py-2"
+                    placeholder="Your full name"
                     value={formData.identity?.resortOwner || ""}
                     onChange={(e) => setFormData({
                       ...formData,
@@ -151,22 +163,28 @@ export default function FullWizard() {
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
               <h2 className="text-xl font-semibold">Step {currentStep}: {STEPS[currentStep-1]}</h2>
-              <p className="text-muted-foreground">Field configuration in progress...</p>
+              <p className="text-muted-foreground">Field configuration for this section is in progress...</p>
             </div>
           )}
         </div>
       </main>
 
+      {/* Navigation Footer */}
       <footer className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-md p-4 z-40">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <Button 
             variant="outline" 
             onClick={prevStep} 
             disabled={currentStep === 1}
+            className="rounded-xl px-6"
           >
             <ChevronLeft className="w-4 h-4 mr-2" /> Back
           </Button>
-          <Button onClick={nextStep}>
+          
+          <Button 
+            onClick={nextStep}
+            className="rounded-xl px-8 bg-primary hover:bg-primary/90"
+          >
             {currentStep === STEPS.length ? "Finish" : "Next Step"} 
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
