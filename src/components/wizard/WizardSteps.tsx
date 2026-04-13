@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { TField, ChipGrid, ToggleCheck, PillGroup, ImageDropzone, ImagePreview, RESORT_TYPES, RESORT_ICONS, PALAWAN_FEATURES, DINING_OPTIONS } from "./FormPrimitives";
+import { ImageFileUploader } from "./ImageUploader";
 import { Plus, Trash2 } from "lucide-react";
 
 // Each step component receives: data, onChange, submissionId, errors
@@ -40,12 +41,21 @@ export function Step2_BrandStory({ data, onChange }: StepProps) {
 }
 
 // ═══ Step 3: About the Owner ═══
-export function Step3_AboutOwner({ data, onChange }: StepProps) {
+export function Step3_AboutOwner({ data, onChange, submissionId }: StepProps) {
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">Guests connect with the people behind the property.</p>
+
+      {/* Owner portrait — native file upload */}
+      <ImageFileUploader
+        submissionId={submissionId}
+        label="Owner Portrait"
+        sublabel="A clear, professional photo. Click to upload."
+        existingUrl={data.ownerPhotoUrl}
+        onUploaded={(urls) => onChange({ ...data, ownerPhotoUrl: urls[0] || data.ownerPhotoUrl || "" })}
+      />
+
       <TField label="Owner Bio" placeholder="A brief introduction about yourself..." value={data.ownerBio} onChange={(v) => onChange({ ...data, ownerBio: v })} textarea sub="Your background, passion, and story" />
-      <TField label="Owner Photo URL" placeholder="https://..." value={data.ownerPhotoUrl} onChange={(v) => onChange({ ...data, ownerPhotoUrl: v })} sub="A direct link to your portrait photo" />
     </div>
   );
 }
@@ -53,62 +63,17 @@ export function Step3_AboutOwner({ data, onChange }: StepProps) {
 // ═══ Step 4: Media & Photos ═══
 export function Step4_Media({ data, onChange, submissionId }: StepProps) {
   const [previews, setPreviews] = useState<{ url: string; file: File | null }[]>([]);
-  const bucketRef = useRef<any>(null);
 
   useEffect(() => {
     const hero = (data.heroImages as string[] | undefined)?.filter(Boolean) || [];
     const gallery = (data.galleryImages as string[] | undefined)?.filter(Boolean) || [];
     const allImages = [...hero, ...gallery];
     setPreviews(allImages.map(u => ({ url: u, file: null })));
-  }, []);
+  }, [data.heroImages, data.galleryImages]);
 
-  const addFiles = async (files: File[]) => {
-    if (!submissionId) return;
-    const newPreviews = [...previews];
-    for (const file of files) {
-      newPreviews.push({ url: URL.createObjectURL(file), file });
-    }
+  const updatePreviews = (newPreviews: { url: string; file: File | null }[]) => {
     setPreviews(newPreviews);
-
-    // Upload each file to Supabase immediately
-    const supabase = (await import("@/integrations/supabase/client")).supabase;
-    const bucket = supabase.storage.from("resort-assets");
-    const uploadedUrls: string[] = [];
-
-    for (const preview of newPreviews) {
-      if (preview.file) {
-        const ext = preview.file.name.split(".").pop() || "jpg";
-        const path = `${submissionId}/${crypto.randomUUID()}.${ext}`;
-        const { error } = await bucket.upload(path, preview.file, { upsert: true });
-        if (!error) {
-          uploadedUrls.push(bucket.getPublicUrl(path).data.publicUrl);
-        } else {
-          uploadedUrls.push(preview.url); // fallback to local URL
-          console.warn("Upload error:", error);
-        }
-      } else {
-        uploadedUrls.push(preview.url);
-      }
-    }
-
-    // Store URLs in component state
-    const heroCount = Math.min(2, uploadedUrls.length);
-    const heroUrls = uploadedUrls.slice(0, heroCount);
-    const galleryUrls = uploadedUrls.slice(heroCount);
-    onChange({
-      heroImages: heroUrls,
-      galleryImages: galleryUrls,
-      logoUrl: data.logoUrl || "",
-      allUrls: uploadedUrls,
-    });
-  };
-
-  const removeImage = (i: number) => {
-    const remaining = previews.filter((_, idx) => idx !== i);
-    setPreviews(remaining);
-    const allUrls = remaining
-      .filter(p => p.url.startsWith("http"))
-      .map(p => p.url);
+    const allUrls = newPreviews.map(p => p.url);
     const heroCount = Math.min(2, allUrls.length);
     onChange({
       heroImages: allUrls.slice(0, heroCount),
@@ -117,17 +82,67 @@ export function Step4_Media({ data, onChange, submissionId }: StepProps) {
     });
   };
 
+  const uploadToSupabase = async (files: File[]) => {
+    if (!submissionId) return;
+    const existing = [...previews];
+    const newFiles: { url: string; file: File | null }[] = [];
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+      const localUrl = URL.createObjectURL(file);
+      newFiles.push({ url: localUrl, file });
+    }
+
+    const updatedPreviews = [...existing, ...newFiles];
+    updatePreviews(updatedPreviews);
+
+    // Upload each to Supabase
+    const bucket = supabase.storage.from("resort-assets");
+    const finalUrls: string[] = [];
+
+    for (const p of updatedPreviews) {
+      if (p.file) {
+        const ext = p.file.name.split(".").pop() || "jpg";
+        const path = `${submissionId}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await bucket.upload(path, p.file, { upsert: true, contentType: p.file.type });
+        if (!error) {
+          const { data: { publicUrl } } = bucket.getPublicUrl(path);
+          finalUrls.push(publicUrl);
+        } else {
+          finalUrls.push(p.url); // fallback to local URL
+        }
+      } else {
+        finalUrls.push(p.url);
+      }
+    }
+
+    // Update with Supabase URLs
+    const heroCount = Math.min(2, finalUrls.length);
+    onChange({
+      heroImages: finalUrls.slice(0, heroCount),
+      galleryImages: finalUrls.slice(heroCount),
+      logoUrl: data.logoUrl || "",
+    });
+  };
+
+  const removeImage = (i: number) => {
+    const remaining = previews.filter((_, idx) => idx !== i);
+    updatePreviews(remaining);
+  };
+
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">Upload your best photos. First 2 become hero images; rest go to the gallery.</p>
-      <ImageDropzone onFiles={addFiles} />
+
+      <ImageDropzone onFiles={uploadToSupabase} />
+
       <ImagePreview
         images={previews.map(p => p.url)}
         onRemove={removeImage}
         roleLabels={previews.map((_, i) => i === 0 ? "Hero 1" : i === 1 ? "Hero 2" : "Gallery")}
       />
       {previews.length > 0 && (
-        <p className="text-xs text-muted-foreground">{previews.length} photo{previews.length > 1 ? "s" : ""} uploaded</p>
+        <p className="text-xs text-muted-foreground">{previews.length} photo{previews.length > 1 ? "s" : ""} uploaded — click a photo to remove</p>
       )}
     </div>
   );

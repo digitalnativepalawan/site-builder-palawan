@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useWizard, STEP_KEYS, type StepKey, SKIPPABLE } from "@/context/wizard-context";
@@ -9,6 +9,7 @@ import {
   Step5_HeroVideo, Step6_Rooms, Step7_Amenities, Step8_Dining,
   Step9_FAQ, Step10_HeaderFooter, Step11_Contact, Step12_Colors, Step13_SEO,
 } from "./WizardSteps";
+import { Eye, LayoutDashboard, Sparkles } from "lucide-react";
 
 const STEP_COMPONENTS = [
   Step1_Identity, Step2_BrandStory, Step3_AboutOwner, Step4_Media,
@@ -22,16 +23,69 @@ const STEP_LABELS = [
   "FAQ", "Header & Footer", "Contact & Location", "Colors & Style", "SEO & Publish",
 ];
 
+// Confetti trigger
+function popConfetti() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const confetti = require("canvas-confetti");
+    confetti({ particleCount: 140, spread: 80, startVelocity: 50, gravity: 0.75 });
+    setTimeout(() => {
+      const left = confetti.create({ origin: { x: 0 } });
+      const right = confetti.create({ origin: { x: 1 } });
+      left({ particleCount: 60, spread: 60, startVelocity: 40, gravity: 0.85 });
+      right({ particleCount: 60, spread: 60, startVelocity: 40, gravity: 0.85 });
+    }, 400);
+  } catch {
+    console.warn("Confetti not available");
+  }
+}
+
+// ═══ Success Screen after Step 13 Publish ═══
+function PublishSuccess({ submissionId, onPreview, onDashboard }: {
+  submissionId: string;
+  onPreview: () => void;
+  onDashboard: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      className="min-h-screen flex flex-col items-center justify-center px-6 text-center"
+    >
+      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center ring-4 ring-primary/20 mb-6">
+        <Sparkles className="w-8 h-8 text-primary" />
+      </div>
+      <h1 className="text-3xl font-heading font-bold tracking-tight mb-3">Site Published!</h1>
+      <p className="text-muted-foreground max-w-md mb-8">
+        Your resort website is ready and live. You can preview it or manage it from the dashboard.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+        <button onClick={onPreview}
+          className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+          <Eye className="w-4 h-4" /> View Live Site
+        </button>
+        <button onClick={onDashboard}
+          className="flex-1 py-3 rounded-xl border border-border text-sm font-bold hover:bg-muted transition-colors flex items-center justify-center gap-2">
+          <LayoutDashboard className="w-4 h-4" /> Dashboard
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 // ═══ 13-Step Wizard Controller ═══
 export function FullWizard() {
   const navigate = useNavigate();
-  const { submissionId, allData, saveStepData, anchorSubmission } = useWizard();
+  const { submissionId, allData, anchorSubmission } = useWizard();
   const [step, setStep] = useState(1);
   const [stepData, setStepData] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [published, setPublished] = useState(false);
   const isLast = step === 13;
   const isSkippable = SKIPPABLE.has(step);
   const stepKey = STEP_KEYS[step - 1];
+  const firedRef = useRef(false);
 
   const validate = () => {
     if (step === 1) {
@@ -51,31 +105,27 @@ export function FullWizard() {
     try {
       setSubmitting(true);
 
+      let currentId = submissionId || (allData as any)._submissionId;
+
       // Step 1: anchor the submission if first time
-      if (step === 1 && !submissionId) {
+      if (step === 1 && !currentId) {
         const d = stepData.identity;
-        await anchorSubmission(d);
+        currentId = await anchorSubmission(d);
       }
 
-      // Save current step data
       const currentSaveData = stepData[stepKey] || {};
 
       // Merge with existing allData for upsert
       const merged: Record<string, any> = { ...allData };
-
-      // Preserve identity across steps — merge into basicInfo for compatibility
       if (step === 1) {
         merged.basicInfo = currentSaveData;
         merged.identity = currentSaveData;
       } else {
         merged[stepKey] = currentSaveData;
-        // Merge with identity for steps that need it
         if (allData.identity) merged.identity = allData.identity;
         if (allData.basicInfo) merged.basicInfo = allData.basicInfo;
       }
 
-      // Save to Supabase
-      const currentId = submissionId || (allData as any)._submissionId;
       if (!currentId) {
         toast.error("No submission — please fill out Step 1 first");
         setSubmitting(false);
@@ -83,11 +133,22 @@ export function FullWizard() {
       }
 
       if (isLast) {
-        // Final step
+        // Final step — publish
         merged.seo = currentSaveData;
-        await supabase.from("resort_submissions").update({ data: merged, status: "pending" }).eq("id", currentId);
-        toast.success("Your resort profile is complete! Generating your site...");
-        setTimeout(() => navigate(`/resort/${currentId}`), 1500);
+        const status = currentSaveData.publishImmediately ? "published" : "draft";
+        await supabase.from("resort_submissions").update({ data: merged, status }).eq("id", currentId);
+
+        if (currentSaveData.publishImmediately) {
+          // Trigger confetti and show success screen
+          if (!firedRef.current) {
+            firedRef.current = true;
+            popConfetti();
+          }
+          setPublished(true);
+        } else {
+          toast.success("Resort profile saved as draft!");
+          navigate(`/resort/${currentId}`);
+        }
       } else {
         await supabase.from("resort_submissions").update({ data: merged }).eq("id", currentId);
         setStep((s) => s + 1);
@@ -117,13 +178,31 @@ export function FullWizard() {
 
   // Merge step data with persistent allData
   const currentData = { ...(allData[stepKey] || {}), ...(stepData[stepKey] || {}) };
-
-  // Pre-populate identity into Step 1 data
   if (step === 1) {
     Object.assign(currentData, allData.identity || {}, allData.basicInfo || {});
   }
 
   const Component = STEP_COMPONENTS[step - 1];
+
+  // ═══ Published Success Screen ═══
+  if (published && submissionId) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-50">
+          <div className="max-w-xl mx-auto px-6 py-3 text-center">
+            <span className="text-xs font-heading font-semibold tracking-widest uppercase text-amber-500">
+              ✨ Site Published
+            </span>
+          </div>
+        </header>
+        <PublishSuccess
+          submissionId={submissionId}
+          onPreview={() => navigate(`/resort/${submissionId}`)}
+          onDashboard={() => navigate("/dashboard")}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -138,7 +217,6 @@ export function FullWizard() {
           </span>
           <span className="text-xs text-muted-foreground tabular-nums">{step} / 13</span>
         </div>
-        {/* Progress bar — 13 segments */}
         <div className="max-w-xl mx-auto px-6 pb-3 grid grid-cols-13 gap-0.5">
           {Array.from({ length: 13 }, (_, i) => (
             <div key={i} className={`h-1 rounded-full transition-colors ${i < step - 1 ? "bg-primary/60" : i === step - 1 ? "bg-primary" : "bg-muted"}`} title={STEP_LABELS[i]} />
