@@ -116,6 +116,10 @@ export default function AdminDashboard() {
     }
   }, [parsed, queryClient]);
 
+  // --- DEBUG: Log what we're rendering ---
+  console.log("🔥 Dashboard loaded - submissions:", submissions?.length);
+  console.log("🔥 Parsed resorts:", parsed.map(p => ({ id: p.id, name: p.resortName })));
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -212,15 +216,38 @@ export default function AdminDashboard() {
                 </div>
                 <div className="sm:col-span-2 flex gap-1.5 justify-end">
                   {!sub.isDraft && (
-                    <Button size="sm" variant="outline" className="px-2" onClick={() => navigate(`/resort/${sub.id}`)}>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="px-2" 
+                      onClick={() => {
+                        console.log("🔍 Preview clicked - ID:", sub.id);
+                        console.log("🔍 Navigating to:", `/resort/${sub.id}`);
+                        navigate(`/resort/${sub.id}`);
+                      }}
+                    >
                       <Eye className="h-3.5 w-3.5" />
                     </Button>
                   )}
-                  <Button size="sm" className="px-2" onClick={() => navigate(`/wizard?edit=${sub.id}`)}>
+                  <Button 
+                    size="sm" 
+                    className="px-2" 
+                    onClick={() => {
+                      console.log("✏️ EDIT CLICKED - ID:", sub.id);
+                      console.log("✏️ Full sub object:", sub);
+                      console.log("✏️ Navigating to:", `/wizard?edit=${sub.id}`);
+                      const targetUrl = `/wizard?edit=${sub.id}`;
+                      console.log("✏️ Target URL:", targetUrl);
+                      navigate(targetUrl);
+                    }}
+                  >
                     <Edit3 className="h-3.5 w-3.5" />
                   </Button>
                   <button
-                    onClick={() => setDeleteId(sub.id)}
+                    onClick={() => {
+                      console.log("🗑️ Delete clicked - ID:", sub.id);
+                      setDeleteId(sub.id);
+                    }}
                     className="p-2 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
