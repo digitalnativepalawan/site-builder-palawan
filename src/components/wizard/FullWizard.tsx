@@ -76,10 +76,47 @@ export function FullWizard() {
     }
   };
 
+  // --- SUBMIT FINAL FORM ---
+  const handleSubmit = async () => {
+    if (!editId) {
+      toast.error("No submission ID. Please start from Step 1.");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from("resort_submissions")
+        .update({ 
+          data: formData, 
+          status: "pending",
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", editId);
+
+      if (error) throw error;
+      
+      toast.success("🎉 Resort submitted! Building your site...");
+      
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+      
+    } catch (err: any) {
+      toast.error(err.message || "Submission failed");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const nextStep = () => {
-    handleSave();
-    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
-    window.scrollTo(0, 0);
+    if (currentStep === STEPS.length) {
+      handleSubmit();
+    } else {
+      handleSave();
+      setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+      window.scrollTo(0, 0);
+    }
   };
 
   const prevStep = () => {
@@ -817,9 +854,19 @@ export function FullWizard() {
           <Button 
             onClick={nextStep}
             className="rounded-xl px-8 bg-primary hover:bg-primary/90"
+            disabled={isSaving}
           >
-            {currentStep === STEPS.length ? "Finish" : "Next Step"} 
-            <ChevronRight className="w-4 h-4 ml-2" />
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : currentStep === STEPS.length ? (
+              "Submit & Build Site"
+            ) : (
+              "Next Step"
+            )} 
+            {currentStep !== STEPS.length && <ChevronRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>
       </footer>
