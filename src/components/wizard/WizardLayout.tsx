@@ -1,139 +1,200 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Circle, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { stepTitles } from "@/lib/steps";
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
-const stepKeys = [
-  "basicInfo",
-  "overview",
-  "location",
-  "resortDetails",
-  "amenities",
-  "rooms",
-  "services",
-  "policies",
-  "media",
-  "contacts",
-  "social",
-  "booking",
-  "review",
+// 13-step wizard
+export const STEP_LABELS = [
+  "Resort Identity",
+  "Brand Story",
+  "About the Owner",
+  "Media & Photos",
+  "Hero Video",
+  "Rooms & Villas",
+  "Guest Comforts",
+  "Dining & Experiences",
+  "FAQ",
+  "Header & Footer",
+  "Contact & Location",
+  "Colors & Style",
+  "SEO & Publish",
 ];
 
-interface WizardLayoutProps {
-  currentStep: number;
-  completedSteps: Set<number>;
-  onNext: () => void;
+// Steps that can be skipped (optional fields)
+export const SKIPPABLE_STEPS = new Set([2, 6, 7, 9, 11, 12]); // 1-indexed
+
+export interface WizardLayoutProps {
+  step: number;
+  totalSteps: number;
+  onStepComplete: () => void;
   onBack: () => void;
-  canProceed?: boolean;
-  children: React.ReactNode;
+  isSubmitting?: boolean;
+  isLastStep?: boolean;
 }
 
 export function WizardLayout({
-  currentStep,
-  completedSteps,
-  onNext,
+  step,
+  totalSteps = 13,
+  onStepComplete,
   onBack,
-  canProceed = true,
-  children,
+  isSubmitting,
+  isLastStep,
 }: WizardLayoutProps) {
-  const isLast = currentStep >= 13;
-  const info = stepTitles[currentStep];
+  const navigate = useNavigate();
+  const label = STEP_LABELS[step - 1] || `Step ${step}`;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress bar at top */}
+      {/* Header with progress */}
       <header className="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-2xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-muted-foreground font-heading tracking-widest uppercase">
-              {info?.title ?? `Step ${currentStep}`}
-            </span>
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {currentStep} / 13
-            </span>
-          </div>
-          {/* Progress track */}
-          <div className="flex gap-1.5">
-            {stepKeys.map((_, idx) => {
-              const step = idx + 1;
-              const done = completedSteps.has(step);
-              const active = step === currentStep;
-              return (
-                <div
-                  key={step}
-                  className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                    done
-                      ? "bg-primary"
-                      : active
-                      ? "bg-primary/50"
-                      : "bg-border"
-                  }`}
-                />
-              );
-            })}
-          </div>
+        <div className="max-w-xl mx-auto px-6 py-3 flex items-center justify-between">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            ← Dashboard
+          </button>
+          <span className="text-xs font-heading font-semibold tracking-widest uppercase text-muted-foreground">
+            {label}
+          </span>
+          <span className="text-xs text-muted-foreground tabular-nums">{step} / {totalSteps}</span>
+        </div>
+        {/* Progress bars */}
+        <div className="max-w-xl mx-auto px-6 pb-3 grid grid-cols-13 gap-0.5">
+          {Array.from({ length: totalSteps }, (_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-colors ${
+                i < step - 1 ? "bg-primary/60" : i === step - 1 ? "bg-primary" : "bg-muted"
+              }`}
+              title={STEP_LABELS[i]}
+            />
+          ))}
         </div>
       </header>
 
-      {/* Step indicator circles — desktop */}
-      <div className="hidden md:flex justify-center gap-2 py-4">
-        {stepKeys.map((_, idx) => {
-          const step = idx + 1;
-          const done = completedSteps.has(step);
-          return (
-            <div key={step} className="relative flex items-center">
-              {done ? (
-                <CheckCircle2 className="w-7 h-7 text-primary" />
-              ) : (
-                <motion.div
-                  animate={step === currentStep ? { scale: [1, 1.1, 1] } : {}}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-                      step === currentStep
-                        ? "bg-primary text-white ring-2 ring-primary/30"
-                        : "bg-border text-muted-foreground"
-                    }`}
-                  >
-                    {step}
-                  </div>
-                </motion.div>
-              )}
-              {step < 13 && (
-                <div className={`w-3 h-px ${done ? "bg-primary" : "bg-border"}`} />
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Content area — scrollable, not centered */}
+      <main className="flex-1 px-6 py-8 max-w-xl mx-auto w-full">
+        {onStepComplete && (
+          <div className="mb-8 pt-2 flex items-center gap-2">
+            {!isLastStep && (
+              <button
+                onClick={onBack}
+                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Back
+              </button>
+            )}
+            <div className="flex-1" />
+          </div>
+        )}
 
-      {/* Step content */}
-      <main className="flex-1 flex flex-col justify-center px-6 py-8 md:py-12">
-        <AnimatePresence mode="wait">{children}</AnimatePresence>
+        <div className="space-y-6">
+          {/* Step title */}
+          <div className="space-y-2">
+            <h1 className="text-2xl font-heading font-semibold tracking-tight">{label}</h1>
+            <p className="text-sm text-muted-foreground">
+              Step {step} of {totalSteps}
+            </p>
+          </div>
+
+          {/* Step content will be passed as children */}
+          <div className="space-y-6">
+            {/* Content slots rendered by parent */}
+          </div>
+        </div>
       </main>
 
-      {/* Footer navigation */}
-      <footer className="border-t border-border bg-surface/80 backdrop-blur">
-        <div className="max-w-xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            disabled={currentStep <= 1}
+      {/* Footer with Save & Continue */}
+      <footer className="border-t border-border bg-surface/80 backdrop-blur sticky bottom-0 z-50">
+        <div className="max-w-xl mx-auto px-6 py-4 flex items-center gap-3">
+          {step > 1 && (
+            <button
+              onClick={onBack}
+              className="px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg border border-border hover:bg-muted"
+            >
+              Back
+            </button>
+          )}
+          <button
+            onClick={onStepComplete}
+            disabled={isSubmitting}
+            className="flex-1 px-6 py-3 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            <ChevronLeft className="w-4 h-4 mr-1.5" />
-            Back
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
+            {isSubmitting ? "Saving…" : isLastStep ? "Generate My Site" : "Save & Continue"}
+          </button>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default function WizardContainer({
+  children,
+  step,
+  onNext,
+  onBack,
+  submitting,
+  lastStep,
+}: {
+  children: React.ReactNode;
+  step: number;
+  onNext: () => void;
+  onBack: () => void;
+  submitting?: boolean;
+  lastStep?: boolean;
+}) {
+  const navigate = useNavigate();
+  const label = STEP_LABELS[step - 1] || `Step ${step}`;
+  const totalSteps = 13;
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-50">
+        <div className="max-w-xl mx-auto px-6 py-3 flex items-center justify-between">
+          <button
+            onClick={() => navigate("/")}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            ← Exit
+          </button>
+          <span className="text-xs font-heading font-semibold tracking-widest uppercase text-muted-foreground">
+            {label}
+          </span>
+          <span className="text-xs text-muted-foreground tabular-nums">{step} / {totalSteps}</span>
+        </div>
+        <div className="max-w-xl mx-auto px-6 pb-3 grid grid-cols-13 gap-0.5">
+          {Array.from({ length: totalSteps }, (_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-colors ${
+                i < step - 1 ? "bg-primary/60" : i === step - 1 ? "bg-primary" : "bg-muted"
+              }`}
+              title={STEP_LABELS[i]}
+            />
+          ))}
+        </div>
+      </header>
+
+      <main className="flex-1 px-6 py-8 max-w-xl mx-auto w-full">
+        {children}
+      </main>
+
+      <footer className="border-t border-border bg-surface/80 backdrop-blur sticky bottom-0 z-50">
+        <div className="max-w-xl mx-auto px-6 py-4 flex items-center gap-3">
+          {step > 1 && (
+            <button
+              onClick={onBack}
+              className="px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg border border-border hover:bg-muted"
+            >
+              Back
+            </button>
+          )}
+          <button
             onClick={onNext}
-            disabled={!canProceed}
+            disabled={submitting}
+            className="flex-1 px-6 py-3 rounded-xl text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            {isLast ? "Submit" : "Continue"}
-            <ChevronRight className="w-4 h-4 ml-1.5" />
-          </Button>
+            {submitting ? "Saving…" : lastStep ? "Generate My Site" : "Save & Continue"}
+          </button>
         </div>
       </footer>
     </div>
