@@ -25,6 +25,7 @@ export function FullWizard() {
   const [isRehydrating, setIsRehydrating] = useState(!!editId);
   const [isSaving, setIsSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [submissionId, setSubmissionId] = useState<string | null>(editId);
 
   // --- REHYDRATION ENGINE ---
   useEffect(() => {
@@ -54,9 +55,36 @@ export function FullWizard() {
     }
   }, [editId]);
 
+  // --- CREATE NEW SUBMISSION (Step 1) ---
+  const createSubmission = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("resort_submissions")
+        .insert({ 
+          data: formData, 
+          status: "draft" 
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setSubmissionId(data.id);
+      // Update URL with the new ID
+      window.history.replaceState({}, '', `/wizard?edit=${data.id}`);
+      
+      return data.id;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create submission");
+      return null;
+    }
+  };
+
   // --- SAVE LOGIC ---
   const handleSave = async () => {
-    if (!editId) return;
+    const idToSave = submissionId || editId;
+    if (!idToSave) return;
+    
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -65,7 +93,7 @@ export function FullWizard() {
           data: formData, 
           updated_at: new Date().toISOString() 
         })
-        .eq("id", editId);
+        .eq("id", idToSave);
 
       if (error) throw error;
       toast.success("Progress saved");
@@ -78,7 +106,9 @@ export function FullWizard() {
 
   // --- SUBMIT FINAL FORM ---
   const handleSubmit = async () => {
-    if (!editId) {
+    const idToSubmit = submissionId || editId;
+    
+    if (!idToSubmit) {
       toast.error("No submission ID. Please start from Step 1.");
       return;
     }
@@ -92,7 +122,7 @@ export function FullWizard() {
           status: "pending",
           updated_at: new Date().toISOString() 
         })
-        .eq("id", editId);
+        .eq("id", idToSubmit);
 
       if (error) throw error;
       
@@ -109,7 +139,16 @@ export function FullWizard() {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    // If this is Step 1 and no submission ID exists, create one
+    if (currentStep === 1 && !submissionId && !editId) {
+      setIsSaving(true);
+      const newId = await createSubmission();
+      setIsSaving(false);
+      
+      if (!newId) return; // Don't proceed if creation failed
+    }
+    
     if (currentStep === STEPS.length) {
       handleSubmit();
     } else {
@@ -191,7 +230,7 @@ export function FullWizard() {
             </p>
             <h2 className="text-sm font-semibold text-primary">{STEPS[currentStep - 1]}</h2>
           </div>
-          <Button size="sm" onClick={handleSave} disabled={isSaving || !editId}>
+          <Button size="sm" onClick={handleSave} disabled={isSaving || !submissionId}>
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
             Save
           </Button>
