@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Waves, Anchor, Crown, Heart, Bed, Globe, Leaf, Check, X, Plus, Trash2, Upload, Sun, Coffee, Star } from "lucide-react";
+import { Waves, Anchor, Crown, Heart, Bed, Globe, Leaf, Check, X, Plus, Trash2, Upload, Sun, Coffee, Star, Wifi, Snowflake, Droplets, Wine, Car, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
 // ═══════════════════════════════════════════
@@ -140,24 +140,35 @@ export function ImagePreview({ images, onRemove, roleLabels }: {
 }
 
 // ═══════════════════════════════════════════
-// CONSTANTS
+// CONSTANTS (exported for wizard steps)
 // ═══════════════════════════════════════════
 
-const RESORT_TYPES = ["boutique","resort","villa","hostel","hotel","eco-lodge"];
-const RESORT_ICONS: Record<string, any> = { boutique: Crown, resort: Waves, villa: Heart, hostel: Bed, hotel: Globe, "eco-lodge": Sun };
+export const RESORT_TYPES = ["boutique","resort","villa","eco-lodge","glamping","guest-house"];
+export const RESORT_ICONS: Record<string, any> = {
+  boutique: Crown, resort: Globe, villa: Heart, "eco-lodge": Leaf, glamping: Sun, "guest-house": Building2,
+};
 
-const PALAWAN_FEATURES = [
-  { id: "beachfront", label: "Beachfront", icon: Waves },
-  { id: "island-hopping", label: "Island Hopping", icon: Anchor },
-  { id: "diving", label: "Dive Center", icon: Anchor },
-  { id: "starlink", label: "Starlink Wifi", icon: Sun },
-  { id: "solar", label: "Eco-Solar", icon: Leaf },
-  { id: "infinity-pool", label: "Infinity Pool", icon: Waves },
-  { id: "bar-restaurant", label: "Bar & Restaurant", icon: Coffee },
-  { id: "airport-transfer", label: "Transfer", icon: Anchor },
+export const PALAWAN_FEATURES = [
+  { id: "starlink", label: "Starlink", icon: Wifi },
+  { id: "fiber", label: "Fiber", icon: Wifi },
+  { id: "solar-power", label: "Solar Power", icon: Sun },
+  { id: "beachfront", label: "Beachfront", icon: Anchor },
+  { id: "island-hopping", label: "Island Hopping", icon: Waves },
+  { id: "dive-center", label: "Dive Center", icon: Anchor },
 ];
 
-const DINING_OPTIONS = [
+export const AMENITIES_OPTIONS = [
+  { id: "ac", label: "Air Conditioning", icon: Snowflake },
+  { id: "hot-water", label: "Hot Water", icon: Droplets },
+  { id: "pool", label: "Pool", icon: Waves },
+  { id: "bar", label: "Bar", icon: Wine },
+  { id: "restaurant", label: "Restaurant", icon: Coffee },
+  { id: "wifi", label: "Wifi", icon: Wifi },
+  { id: "parking", label: "Parking", icon: Car },
+  { id: "room-service", label: "Room Service", icon: Coffee },
+];
+
+export const DINING_OPTIONS = [
   { id: "breakfast", label: "Breakfast", icon: Coffee },
   { id: "in-house-restaurant", label: "Restaurant", icon: Coffee },
   { id: "pool-bar", label: "Pool Bar", icon: Star },
