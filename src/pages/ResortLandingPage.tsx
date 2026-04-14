@@ -685,12 +685,13 @@ export default function ResortLandingPage() {
           </div>
         </section>
 
-        {/* FOOTER - STANDARD DESIGNER LAYOUT */}
+        {/* FOOTER - FIXED LAYOUT */}
         <footer
           className="py-12 sm:py-16 px-4 sm:px-6 w-full"
           style={{ backgroundColor: colors.text, color: "#ffffff" }}
         >
           <div className="max-w-7xl mx-auto w-full">
+            
             {/* Top Section: Brand & Socials */}
             <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-10 sm:mb-12 gap-6 sm:gap-0">
               <div className="text-center sm:text-left">
@@ -728,12 +729,12 @@ export default function ResortLandingPage() {
               )}
             </div>
 
-            {/* Middle Section: Links Grid (Compact 2-col on mobile) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-12 mb-10 sm:mb-12 border-t border-white/10 pt-8 sm:pt-10">
+            {/* Middle Section: Links Grid - FIXED TO SINGLE COLUMN ON MOBILE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-10 sm:mb-12 border-t border-white/10 pt-8 sm:pt-10">
               
               {/* Contact Column */}
               {footer.showContactInfo && (
-                <div className="col-span-1">
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
                   <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider opacity-90">Contact</h4>
                   <div className="space-y-2 text-sm opacity-70">
                     {identity.contactEmail && <p className="break-all hover:opacity-100 transition-opacity">{identity.contactEmail}</p>}
@@ -744,7 +745,7 @@ export default function ResortLandingPage() {
 
               {/* Quick Links Column */}
               {footer.showNavigation && (
-                <div className="col-span-1">
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
                   <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider opacity-90">Quick Links</h4>
                   <div className="space-y-2 text-sm opacity-70">
                     {header.navigationLinks?.slice(0, 4).map((link: any, i: number) => (
@@ -756,9 +757,9 @@ export default function ResortLandingPage() {
                 </div>
               )}
               
-              {/* Empty columns to balance grid on larger screens if needed, or just let them flow */}
+              {/* Filler for grid balance if needed */}
               {(!footer.showContactInfo || !footer.showNavigation) && (
-                 <div className="col-span-1 sm:col-span-2"></div>
+                 <div className="hidden sm:block col-span-1 lg:col-span-2"></div>
               )}
             </div>
 
