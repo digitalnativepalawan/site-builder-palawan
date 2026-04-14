@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Trash2 } from "lucide-react";
+import { Loader2, X, Plus, Trash2, Eye } from "lucide-react";
 
 export function FullWizard() {
   const [searchParams] = useSearchParams();
@@ -74,6 +74,14 @@ export function FullWizard() {
     }
   };
 
+  const handlePreview = () => {
+    if (editId) {
+      navigate(`/resort/${editId}`);
+    } else {
+      toast({ title: "Save First", description: "Please save the resort before previewing." });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -90,6 +98,11 @@ export function FullWizard() {
         </h1>
         <div className="space-x-4">
           <Button variant="outline" onClick={() => navigate("/dashboard")}>Cancel</Button>
+          {editId && (
+            <Button variant="outline" onClick={handlePreview}>
+              <Eye className="h-4 w-4 mr-2" /> Preview
+            </Button>
+          )}
           <Button onClick={handleSave} disabled={isSubmitting}>
             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (editId ? "Update" : "Save")}
           </Button>
@@ -361,6 +374,96 @@ export function FullWizard() {
           }}>
             <Plus className="h-4 w-4 mr-2" /> Add FAQ
           </Button>
+        </div>
+      </div>
+
+      {/* Step 7: Media (Hero & Gallery Images) */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4">Media</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-2 text-sm font-medium">Hero Image URL</label>
+            <input
+              className="w-full p-3 border rounded-lg"
+              value={formData.media?.heroImages?.[0] || ""}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                media: { 
+                  ...formData.media, 
+                  heroImages: [e.target.value, ...(formData.media?.heroImages?.slice(1) || [])] 
+                } 
+              })}
+              placeholder="https://example.com/hero.jpg"
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Video URL (YouTube/Vimeo)</label>
+            <input
+              className="w-full p-3 border rounded-lg"
+              value={formData.media?.videoUrl || ""}
+              onChange={(e) => setFormData({ ...formData, media: { ...formData.media, videoUrl: e.target.value } })}
+              placeholder="https://youtube.com/watch?v=..."
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Gallery Images (comma-separated URLs)</label>
+            <textarea
+              className="w-full p-3 border rounded-lg"
+              rows={4}
+              value={(formData.media?.galleryImages || []).join("\n")}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                media: { 
+                  ...formData.media, 
+                  galleryImages: e.target.value.split("\n").filter(url => url.trim()) 
+                } 
+              })}
+              placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Step 8: Color Palette */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-2 text-sm font-medium">Primary Color</label>
+            <input
+              type="color"
+              className="w-full h-12 border rounded-lg"
+              value={formData.colorPalette?.primary || "#0EA5E9"}
+              onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } })}
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Background Color</label>
+            <input
+              type="color"
+              className="w-full h-12 border rounded-lg"
+              value={formData.colorPalette?.background || "#ffffff"}
+              onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } })}
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Text Color</label>
+            <input
+              type="color"
+              className="w-full h-12 border rounded-lg"
+              value={formData.colorPalette?.text || "#1e293b"}
+              onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } })}
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Accent Color</label>
+            <input
+              type="color"
+              className="w-full h-12 border rounded-lg"
+              value={formData.colorPalette?.accent || "#f59e0b"}
+              onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } })}
+            />
+          </div>
         </div>
       </div>
     </div>
