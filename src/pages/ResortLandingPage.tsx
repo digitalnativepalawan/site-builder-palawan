@@ -1,54 +1,81 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoverSection, TextSection, BulletListSection, PricingSection, FaqSection, ImageGallerySection, ContactFormSection, YoutubeSection } from "@/components/preview/SectionRenderers";
 
 export default function ResortLandingPage() {
-  const { submissionId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [siteData, setSiteData] = useState<any>(null);
 
   useEffect(() => {
-    if (!submissionId) return;
+    console.log("Preview page loaded, ID:", id);
+    
+    if (!id) {
+      setError("No resort ID provided");
+      setLoading(false);
+      return;
+    }
 
     const fetchSite = async () => {
       try {
+        console.log("Fetching resort from Supabase:", id);
+        
         const { data, error } = await supabase
           .from("resort_submissions")
-          .select("data, status")
-          .eq("id", submissionId)
+          .select("data, status, id")
+          .eq("id", id)
           .single();
 
-        if (error) throw error;
+        console.log("Supabase response:", { data, error });
+
+        if (error) {
+          console.error("Supabase error:", error);
+          throw new Error(error.message);
+        }
+
+        if (!data) {
+          throw new Error("Resort not found");
+        }
+
         setSiteData(data);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load site:", err);
+        setError(err.message || "Failed to load resort");
       } finally {
         setLoading(false);
       }
     };
 
     fetchSite();
-  }, [submissionId]);
+  }, [id]);
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="ml-4 text-muted-foreground">Loading resort...</p>
       </div>
     );
   }
 
-  if (!siteData) {
+  if (error || !siteData) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Resort not found</h1>
-        <Button onClick={() => navigate("/dashboard")}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
-        </Button>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-4">
+        <h1 className="text-2xl font-bold text-destructive">Error Loading Resort</h1>
+        <p className="text-muted-foreground max-w-md text-center">{error || "Resort not found"}</p>
+        <div className="flex gap-4">
+          <Button onClick={() => navigate("/dashboard")}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+          </Button>
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
@@ -182,9 +209,14 @@ export default function ResortLandingPage() {
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="text-lg font-bold">{resortName}</h1>
-          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate(`/wizard?edit=${id}`)}>
+              <ArrowLeft className="w-4 h-4 mr-2" /> Edit
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.open(window.location.href, "_blank")}>
+              <ExternalLink className="w-4 h-4 mr-2" /> Open New Tab
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -212,6 +244,16 @@ export default function ResortLandingPage() {
               return null;
           }
         })}
+        
+        {sections.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <h2 className="text-2xl font-bold mb-4">No Content Yet</h2>
+            <p className="text-muted-foreground mb-4">This resort doesn't have any sections configured.</p>
+            <Button onClick={() => navigate(`/wizard?edit=${id}`)}>
+              Add Content
+            </Button>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
