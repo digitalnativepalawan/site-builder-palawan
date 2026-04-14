@@ -9,86 +9,24 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type } from "lucide-react";
+import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type, Star, Quote, MapPinned, Zap } from "lucide-react";
 
 // 🎨 PROFESSIONAL COLOR PALETTES
 const COLOR_PRESETS = [
-  {
-    name: "Ocean Breeze",
-    primary: "#0EA5E9",
-    background: "#FFFFFF",
-    text: "#1E293B",
-    accent: "#F59E0B",
-    gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)",
-  },
-  {
-    name: "Tropical Sunset",
-    primary: "#F97316",
-    background: "#FFFBEB",
-    text: "#1C1917",
-    accent: "#EC4899",
-    gradient: "linear-gradient(135deg, #F97316 0%, #EC4899 100%)",
-  },
-  {
-    name: "Forest Retreat",
-    primary: "#059669",
-    background: "#F0FDF4",
-    text: "#14532D",
-    accent: "#84CC16",
-    gradient: "linear-gradient(135deg, #059669 0%, #10B981 100%)",
-  },
-  {
-    name: "Luxury Gold",
-    primary: "#1E1B4B",
-    background: "#FEFCE8",
-    text: "#1C1917",
-    accent: "#D97706",
-    gradient: "linear-gradient(135deg, #1E1B4B 0%, #7C3AED 100%)",
-  },
-  {
-    name: "Minimal Modern",
-    primary: "#18181B",
-    background: "#FAFAFA",
-    text: "#18181B",
-    accent: "#71717A",
-    gradient: "linear-gradient(135deg, #18181B 0%, #52525B 100%)",
-  },
-  {
-    name: "Beach Vibes",
-    primary: "#06B6D4",
-    background: "#F0F9FF",
-    text: "#0C4A6E",
-    accent: "#FBBF24",
-    gradient: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)",
-  },
+  { name: "Ocean Breeze", primary: "#0EA5E9", background: "#FFFFFF", text: "#1E293B", accent: "#F59E0B", gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)" },
+  { name: "Tropical Sunset", primary: "#F97316", background: "#FFFBEB", text: "#1C1917", accent: "#EC4899", gradient: "linear-gradient(135deg, #F97316 0%, #EC4899 100%)" },
+  { name: "Forest Retreat", primary: "#059669", background: "#F0FDF4", text: "#14532D", accent: "#84CC16", gradient: "linear-gradient(135deg, #059669 0%, #10B981 100%)" },
+  { name: "Luxury Gold", primary: "#1E1B4B", background: "#FEFCE8", text: "#1C1917", accent: "#D97706", gradient: "linear-gradient(135deg, #1E1B4B 0%, #7C3AED 100%)" },
+  { name: "Minimal Modern", primary: "#18181B", background: "#FAFAFA", text: "#18181B", accent: "#71717A", gradient: "linear-gradient(135deg, #18181B 0%, #52525B 100%)" },
+  { name: "Beach Vibes", primary: "#06B6D4", background: "#F0F9FF", text: "#0C4A6E", accent: "#FBBF24", gradient: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)" },
 ];
 
 // 📐 TYPOGRAPHY PRESETS
 const TYPOGRAPHY_PRESETS = [
-  {
-    name: "Modern Clean",
-    headingFont: "'Space Grotesk', sans-serif",
-    bodyFont: "'Inter', sans-serif",
-    scale: "comfortable",
-  },
-  {
-    name: "Elegant Classic",
-    headingFont: "'Playfair Display', serif",
-    bodyFont: "'Lato', sans-serif",
-    scale: "comfortable",
-  },
-  {
-    name: "Bold Impact",
-    headingFont: "'Montserrat', sans-serif",
-    bodyFont: "'Open Sans', sans-serif",
-    scale: "spacious",
-  },
-  {
-    name: "Minimal Refined",
-    headingFont: "'DM Sans', sans-serif",
-    bodyFont: "'DM Sans', sans-serif",
-    scale: "compact",
-  },
+  { name: "Modern Clean", headingFont: "'Space Grotesk', sans-serif", bodyFont: "'Inter', sans-serif", scale: "comfortable" },
+  { name: "Elegant Classic", headingFont: "'Playfair Display', serif", bodyFont: "'Lato', sans-serif", scale: "comfortable" },
+  { name: "Bold Impact", headingFont: "'Montserrat', sans-serif", bodyFont: "'Open Sans', sans-serif", scale: "spacious" },
+  { name: "Minimal Refined", headingFont: "'DM Sans', sans-serif", bodyFont: "'DM Sans', sans-serif", scale: "compact" },
 ];
 
 export function FullWizard() {
@@ -99,10 +37,11 @@ export function FullWizard() {
   const editId = searchParams.get("edit");
   const logoInputRef = useRef<HTMLInputElement>(null);
   const heroLogoInputRef = useRef<HTMLInputElement>(null);
+  const heroImageInputRef = useRef<HTMLInputElement>(null);
   
   const [loading, setLoading] = useState(!!editId);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
   const [activeColorPreset, setActiveColorPreset] = useState<number | null>(null);
   const [activeTypographyPreset, setActiveTypographyPreset] = useState<number | null>(null);
   
@@ -113,7 +52,9 @@ export function FullWizard() {
     roomTypes: [],
     location: { fullAddress: "", contactEmail: "", phone: "", whatsapp: "", googleMapsLink: "" },
     faq: [],
-    media: { heroImages: [], videoUrl: "", galleryImages: [] },
+    testimonials: [],
+    features: [],
+    media: { heroImages: [], heroImage: "", videoUrl: "", galleryImages: [] },
     colorPalette: COLOR_PRESETS[0],
     typography: TYPOGRAPHY_PRESETS[0],
     socialMedia: {
@@ -176,6 +117,8 @@ export function FullWizard() {
             hero: { ...formData.hero, ...submission.data.hero },
             colorPalette: submission.data.colorPalette || formData.colorPalette,
             typography: submission.data.typography || formData.typography,
+            testimonials: submission.data.testimonials || [],
+            features: submission.data.features || [],
           });
         }
       } catch (err: any) {
@@ -234,62 +177,45 @@ export function FullWizard() {
   };
 
   const applyColorPreset = (preset: any, index: number) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      colorPalette: preset,
-    }));
+    setFormData((prev: any) => ({ ...prev, colorPalette: preset }));
     setActiveColorPreset(index);
     toast({ title: "Color scheme applied!", description: preset.name });
   };
 
   const applyTypographyPreset = (preset: any, index: number) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      typography: preset,
-    }));
+    setFormData((prev: any) => ({ ...prev, typography: preset }));
     setActiveTypographyPreset(index);
     toast({ title: "Typography applied!", description: preset.name });
   };
 
   const updateSocial = (field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      socialMedia: { ...prev.socialMedia, [field]: value },
-    }));
+    setFormData((prev: any) => ({ ...prev, socialMedia: { ...prev.socialMedia, [field]: value } }));
   };
 
   const updateHeader = (field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      header: { ...prev.header, [field]: value },
-    }));
+    setFormData((prev: any) => ({ ...prev, header: { ...prev.header, [field]: value } }));
   };
 
   const updateFooter = (field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      footer: { ...prev.footer, [field]: value },
-    }));
+    setFormData((prev: any) => ({ ...prev, footer: { ...prev.footer, [field]: value } }));
   };
 
   const updateHero = (field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      hero: { ...prev.hero, [field]: value },
-    }));
+    setFormData((prev: any) => ({ ...prev, hero: { ...prev.hero, [field]: value } }));
   };
 
-  const uploadLogo = async (file: File, type: "header" | "hero") => {
+  // 🔥 UNIVERSAL IMAGE UPLOAD FUNCTION
+  const uploadImage = async (file: File, folder: string) => {
     if (!editId) {
       toast({ variant: "destructive", title: "Save First", description: "Please save the resort before uploading images." });
       return null;
     }
 
-    setUploading(true);
+    setUploading(folder);
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${type}-logo-${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${editId}/logos/${fileName}`;
+      const fileName = `${folder}-${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${editId}/${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("resort-assets")
@@ -306,44 +232,95 @@ export function FullWizard() {
       toast({ variant: "destructive", title: "Upload Failed", description: err.message });
       return null;
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   };
 
-  const handleHeaderLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "header" | "hero") => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file (PNG, JPG, SVG, WebP)" });
+      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file" });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File Too Large", description: "Logo must be less than 5MB" });
+      toast({ variant: "destructive", title: "File Too Large", description: "Image must be less than 5MB" });
       return;
     }
-    const url = await uploadLogo(file, "header");
+    const url = await uploadImage(file, "logos");
     if (url) {
-      updateHeader("logoUrl", url);
-      toast({ title: "Logo uploaded!", description: "Header logo saved." });
+      if (type === "header") updateHeader("logoUrl", url);
+      else updateHero("heroLogoUrl", url);
+      toast({ title: "Logo uploaded!", description: `${type} logo saved.` });
     }
   };
 
-  const handleHeroLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file (PNG, JPG, SVG, WebP)" });
+      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file" });
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File Too Large", description: "Logo must be less than 5MB" });
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File Too Large", description: "Image must be less than 10MB" });
       return;
     }
-    const url = await uploadLogo(file, "hero");
+    const url = await uploadImage(file, "hero");
     if (url) {
-      updateHero("heroLogoUrl", url);
-      toast({ title: "Logo uploaded!", description: "Hero logo saved." });
+      setFormData((prev: any) => ({
+        ...prev,
+        media: { ...prev.media, heroImage: url, heroImages: [url, ...(prev.media?.heroImages?.slice(1) || [])] },
+      }));
+      toast({ title: "Hero image uploaded!", description: "Background image saved." });
     }
+  };
+
+  const handleRoomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, roomIndex: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file" });
+      return;
+    }
+    const url = await uploadImage(file, "rooms");
+    if (url) {
+      const newRooms = [...(formData.roomTypes || [])];
+      newRooms[roomIndex] = { ...newRooms[roomIndex], imageUrl: url };
+      setFormData({ ...formData, roomTypes: newRooms });
+      toast({ title: "Room image uploaded!", description: "Room photo saved." });
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    
+    setUploading("gallery");
+    try {
+      const urls: string[] = [];
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        const url = await uploadImage(file, "gallery");
+        if (url) urls.push(url);
+      }
+      if (urls.length) {
+        setFormData((prev: any) => ({
+          ...prev,
+          media: { ...prev.media, galleryImages: [...(prev.media?.galleryImages || []), ...urls] },
+        }));
+        toast({ title: "Gallery images uploaded!", description: `${urls.length} image(s) saved.` });
+      }
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      media: { ...prev.media, galleryImages: prev.media?.galleryImages?.filter((_: any, i: number) => i !== index) || [] },
+    }));
   };
 
   const isJpg = (url: string) => url.toLowerCase().endsWith(".jpg") || url.toLowerCase().endsWith(".jpeg");
@@ -372,18 +349,14 @@ export function FullWizard() {
 
       {/* 🎨 COLOR PALETTE PRESETS */}
       <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Palette className="h-5 w-5" /> Color Scheme
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Palette className="h-5 w-5" /> Color Scheme</h2>
         <p className="text-sm text-muted-foreground mb-4">Choose a professional color palette for your website</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {COLOR_PRESETS.map((preset, index) => (
             <button
               key={index}
               onClick={() => applyColorPreset(preset, index)}
-              className={`p-4 rounded-lg border-2 transition-all ${
-                activeColorPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
-              }`}
+              className={`p-4 rounded-lg border-2 transition-all ${activeColorPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"}`}
             >
               <div className="flex gap-1 mb-3">
                 <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.primary }} />
@@ -392,65 +365,28 @@ export function FullWizard() {
                 <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.accent }} />
               </div>
               <p className="font-medium text-sm">{preset.name}</p>
-              <div
-                className="h-2 rounded-full mt-2"
-                style={{ background: preset.gradient }}
-              />
+              <div className="h-2 rounded-full mt-2" style={{ background: preset.gradient }} />
             </button>
           ))}
         </div>
-        
-        {/* Custom Color Pickers */}
         <div className="mt-6 pt-6 border-t">
           <Label className="text-sm font-medium mb-3 block">Or Customize Colors</Label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <Label className="text-xs">Primary</Label>
-              <Input
-                type="color"
-                value={formData.colorPalette?.primary || "#0EA5E9"}
-                onChange={(e) => {
-                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } });
-                  setActiveColorPreset(null);
-                }}
-                className="h-10 w-full"
-              />
+              <Input type="color" value={formData.colorPalette?.primary || "#0EA5E9"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
             </div>
             <div>
               <Label className="text-xs">Background</Label>
-              <Input
-                type="color"
-                value={formData.colorPalette?.background || "#FFFFFF"}
-                onChange={(e) => {
-                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } });
-                  setActiveColorPreset(null);
-                }}
-                className="h-10 w-full"
-              />
+              <Input type="color" value={formData.colorPalette?.background || "#FFFFFF"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
             </div>
             <div>
               <Label className="text-xs">Text</Label>
-              <Input
-                type="color"
-                value={formData.colorPalette?.text || "#1E293B"}
-                onChange={(e) => {
-                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } });
-                  setActiveColorPreset(null);
-                }}
-                className="h-10 w-full"
-              />
+              <Input type="color" value={formData.colorPalette?.text || "#1E293B"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
             </div>
             <div>
               <Label className="text-xs">Accent</Label>
-              <Input
-                type="color"
-                value={formData.colorPalette?.accent || "#F59E0B"}
-                onChange={(e) => {
-                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } });
-                  setActiveColorPreset(null);
-                }}
-                className="h-10 w-full"
-              />
+              <Input type="color" value={formData.colorPalette?.accent || "#F59E0B"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
             </div>
           </div>
         </div>
@@ -458,26 +394,18 @@ export function FullWizard() {
 
       {/* 📐 TYPOGRAPHY PRESETS */}
       <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Type className="h-5 w-5" /> Typography
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Type className="h-5 w-5" /> Typography</h2>
         <p className="text-sm text-muted-foreground mb-4">Choose professional font pairings</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TYPOGRAPHY_PRESETS.map((preset, index) => (
             <button
               key={index}
               onClick={() => applyTypographyPreset(preset, index)}
-              className={`p-4 rounded-lg border-2 transition-all text-left ${
-                activeTypographyPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
-              }`}
+              className={`p-4 rounded-lg border-2 transition-all text-left ${activeTypographyPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"}`}
             >
               <p className="font-semibold mb-2">{preset.name}</p>
-              <p className="text-sm text-muted-foreground mb-1" style={{ fontFamily: preset.headingFont }}>
-                Heading: {preset.headingFont.split("'")[1] || preset.headingFont}
-              </p>
-              <p className="text-sm text-muted-foreground" style={{ fontFamily: preset.bodyFont }}>
-                Body: {preset.bodyFont.split("'")[1] || preset.bodyFont}
-              </p>
+              <p className="text-sm text-muted-foreground mb-1" style={{ fontFamily: preset.headingFont }}>Heading: {preset.headingFont.split("'")[1] || preset.headingFont}</p>
+              <p className="text-sm text-muted-foreground" style={{ fontFamily: preset.bodyFont }}>Body: {preset.bodyFont.split("'")[1] || preset.bodyFont}</p>
             </button>
           ))}
         </div>
@@ -485,24 +413,24 @@ export function FullWizard() {
 
       {/* Logo Best Practices */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><CheckCircle className="h-5 w-5 text-blue-600" /> Logo Best Practices</h2>
+        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><CheckCircle className="h-5 w-5 text-blue-600" /> Image Guidelines</h2>
         <div className="grid md:grid-cols-2 gap-4 text-sm">
           <div>
-            <h3 className="font-semibold mb-2">✅ Recommended Format</h3>
+            <h3 className="font-semibold mb-2">✅ Recommended</h3>
             <ul className="space-y-1 text-muted-foreground">
-              <li>• PNG with transparency (best for headers)</li>
-              <li>• SVG (scalable, crisp at any size)</li>
-              <li>• WebP (modern, small file size)</li>
-              <li>• Max file size: 5MB</li>
+              <li>• Logo: PNG with transparency (200×60px)</li>
+              <li>• Hero Image: JPG/WebP (1920×1080px)</li>
+              <li>• Room Photos: JPG (800×600px)</li>
+              <li>• Max file size: 10MB</li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-2">⚠️ Avoid These</h3>
+            <h3 className="font-semibold mb-2">⚠️ Tips</h3>
             <ul className="space-y-1 text-muted-foreground">
-              <li>• JPG with white background (won't blend)</li>
-              <li>• Low resolution (will look pixelated)</li>
-              <li>• Too much detail (hard to read when small)</li>
-              <li>• Text too small (won't be readable on mobile)</li>
+              <li>• Use high-quality, professional photos</li>
+              <li>• Compress images before upload</li>
+              <li>• Hero images work best with dark overlay</li>
+              <li>• Room photos should be well-lit</li>
             </ul>
           </div>
         </div>
@@ -536,11 +464,11 @@ export function FullWizard() {
               <div>
                 <Label>Upload Logo</Label>
                 <div className="mt-2 flex gap-4 items-start">
-                  <Button variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploading || !editId} className="gap-2">
+                  <Button variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploading !== null || !editId} className="gap-2">
                     <Upload className="h-4 w-4" />
-                    {uploading ? "Uploading..." : "Choose File"}
+                    {uploading === "logos" ? "Uploading..." : "Choose File"}
                   </Button>
-                  <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" onChange={handleHeaderLogoUpload} />
+                  <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, "header")} />
                   {!editId && <p className="text-sm text-muted-foreground">Save resort first to upload images</p>}
                 </div>
               </div>
@@ -560,7 +488,7 @@ export function FullWizard() {
                       {isJpg(formData.header.logoUrl) && (
                         <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-2">
                           <AlertTriangle className="h-4 w-4 shrink-0" />
-                          <span>JPG format detected. Consider using PNG with transparency for better results.</span>
+                          <span>JPG format detected. Consider using PNG with transparency.</span>
                         </div>
                       )}
                       {isPng(formData.header.logoUrl) && (
@@ -609,11 +537,11 @@ export function FullWizard() {
                 <div>
                   <Label>Upload Hero Logo</Label>
                   <div className="mt-2 flex gap-4 items-start">
-                    <Button variant="outline" onClick={() => heroLogoInputRef.current?.click()} disabled={uploading || !editId} className="gap-2">
+                    <Button variant="outline" onClick={() => heroLogoInputRef.current?.click()} disabled={uploading !== null || !editId} className="gap-2">
                       <Upload className="h-4 w-4" />
-                      {uploading ? "Uploading..." : "Choose File"}
+                      {uploading === "logos" ? "Uploading..." : "Choose File"}
                     </Button>
-                    <input ref={heroLogoInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" className="hidden" onChange={handleHeroLogoUpload} />
+                    <input ref={heroLogoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, "hero")} />
                   </div>
                 </div>
               )}
@@ -641,6 +569,34 @@ export function FullWizard() {
         </div>
       </div>
 
+      {/* 🖼️ HERO BACKGROUND IMAGE */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Image className="h-5 w-5" /> Hero Background Image</h2>
+        <div className="space-y-4">
+          <div>
+            <Label>Upload Hero Image</Label>
+            <div className="mt-2 flex gap-4 items-start">
+              <Button variant="outline" onClick={() => heroImageInputRef.current?.click()} disabled={uploading !== null || !editId} className="gap-2">
+                <Upload className="h-4 w-4" />
+                {uploading === "hero" ? "Uploading..." : "Choose File"}
+              </Button>
+              <input ref={heroImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleHeroImageUpload} />
+              {!editId && <p className="text-sm text-muted-foreground">Save resort first to upload images</p>}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Recommended: 1920×1080px JPG or WebP. Best with dark areas for text overlay.</p>
+          </div>
+          {formData.media?.heroImage && (
+            <div className="border rounded-lg p-4 bg-muted/30">
+              <div className="flex items-center justify-between mb-2">
+                <Label>Current Hero Image</Label>
+                <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, media: { ...formData.media, heroImage: "", heroImages: [] } })} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+              </div>
+              <img src={formData.media.heroImage} alt="Hero" className="w-full h-48 object-cover rounded-lg" />
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Brand Story */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Brand Story</h2>
@@ -657,6 +613,61 @@ export function FullWizard() {
             <Label>Full Description</Label>
             <Textarea rows={5} value={formData.brandStory?.fullDescription || ""} onChange={(e) => updateNested("brandStory", "fullDescription", e.target.value)} placeholder="Detailed description about your resort" />
           </div>
+        </div>
+      </div>
+
+      {/* ⭐ TESTIMONIALS */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Star className="h-5 w-5" /> Testimonials</h2>
+        <p className="text-sm text-muted-foreground mb-4">Add guest reviews to build trust</p>
+        <div className="space-y-4">
+          {(formData.testimonials || []).map((testimonial: any, i: number) => (
+            <div key={i} className="p-4 border rounded-lg space-y-3">
+              <div className="flex justify-between">
+                <span className="font-medium">Review {i + 1}</span>
+                <Button variant="ghost" size="sm" onClick={() => { const newTestimonials = (formData.testimonials || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, testimonials: newTestimonials }); }}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input value={testimonial.name || ""} onChange={(e) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], name: e.target.value }; setFormData({ ...formData, testimonials: newTestimonials }); }} placeholder="Guest name" />
+                <Input value={testimonial.location || ""} onChange={(e) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], location: e.target.value }; setFormData({ ...formData, testimonials: newTestimonials }); }} placeholder="Location (e.g. Manila)" />
+              </div>
+              <Textarea rows={3} value={testimonial.text || ""} onChange={(e) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], text: e.target.value }; setFormData({ ...formData, testimonials: newTestimonials }); }} placeholder="Review text" />
+              <div className="flex items-center gap-2">
+                <Label>Rating:</Label>
+                <Select value={String(testimonial.rating || 5)} onValueChange={(v) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], rating: Number(v) }; setFormData({ ...formData, testimonials: newTestimonials }); }}>
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">⭐⭐⭐⭐⭐ (5)</SelectItem>
+                    <SelectItem value="4">⭐⭐⭐⭐ (4)</SelectItem>
+                    <SelectItem value="3">⭐⭐⭐ (3)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ))}
+          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, testimonials: [...(formData.testimonials || []), { name: "", location: "", text: "", rating: 5 }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Testimonial</Button>
+        </div>
+      </div>
+
+      {/* ✨ FEATURES */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Zap className="h-5 w-5" /> Features / Why Choose Us</h2>
+        <p className="text-sm text-muted-foreground mb-4">Highlight what makes your resort special</p>
+        <div className="space-y-4">
+          {(formData.features || []).map((feature: any, i: number) => (
+            <div key={i} className="p-4 border rounded-lg space-y-3">
+              <div className="flex justify-between">
+                <span className="font-medium">Feature {i + 1}</span>
+                <Button variant="ghost" size="sm" onClick={() => { const newFeatures = (formData.features || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, features: newFeatures }); }}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input value={feature.title || ""} onChange={(e) => { const newFeatures = [...(formData.features || [])]; newFeatures[i] = { ...newFeatures[i], title: e.target.value }; setFormData({ ...formData, features: newFeatures }); }} placeholder="Feature title (e.g. Beachfront)" />
+                <Input value={feature.icon || ""} onChange={(e) => { const newFeatures = [...(formData.features || [])]; newFeatures[i] = { ...newFeatures[i], icon: e.target.value }; setFormData({ ...formData, features: newFeatures }); }} placeholder="Emoji icon (e.g. 🏖️)" />
+              </div>
+              <Textarea rows={2} value={feature.description || ""} onChange={(e) => { const newFeatures = [...(formData.features || [])]; newFeatures[i] = { ...newFeatures[i], description: e.target.value }; setFormData({ ...formData, features: newFeatures }); }} placeholder="Brief description" />
+            </div>
+          ))}
+          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, features: [...(formData.features || []), { title: "", icon: "✨", description: "" }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Feature</Button>
         </div>
       </div>
 
@@ -785,12 +796,61 @@ export function FullWizard() {
                 <span className="font-medium">Room {i + 1}</span>
                 <Button variant="ghost" size="sm" onClick={() => { const newRooms = (formData.roomTypes || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, roomTypes: newRooms }); }}><Trash2 className="h-4 w-4" /></Button>
               </div>
+              <div>
+                <Label>Room Image</Label>
+                <div className="flex gap-2 items-center mt-2">
+                  <Button variant="outline" size="sm" onClick={() => document.getElementById(`room-image-${i}`)?.click()} className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    {room.imageUrl ? "Replace Image" : "Upload Image"}
+                  </Button>
+                  <input id={`room-image-${i}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleRoomImageUpload(e, i)} />
+                  {room.imageUrl && (
+                    <Button variant="ghost" size="sm" onClick={() => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], imageUrl: "" }; setFormData({ ...formData, roomTypes: newRooms }); }} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                  )}
+                </div>
+                {room.imageUrl && <img src={room.imageUrl} alt="Room" className="w-full h-32 object-cover rounded-lg mt-2" />}
+              </div>
               <Input value={room.name || ""} onChange={(e) => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], name: e.target.value }; setFormData({ ...formData, roomTypes: newRooms }); }} placeholder="Room name" />
               <Input value={room.price || ""} onChange={(e) => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], price: e.target.value }; setFormData({ ...formData, roomTypes: newRooms }); }} placeholder="Price per night" />
               <Input value={room.description || ""} onChange={(e) => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], description: e.target.value }; setFormData({ ...formData, roomTypes: newRooms }); }} placeholder="Description" />
             </div>
           ))}
-          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, roomTypes: [...(formData.roomTypes || []), { name: "", price: "", description: "" }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Room Type</Button>
+          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, roomTypes: [...(formData.roomTypes || []), { name: "", price: "", description: "", imageUrl: "" }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Room Type</Button>
+        </div>
+      </div>
+
+      {/* 🖼️ PHOTO GALLERY */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Image className="h-5 w-5" /> Photo Gallery</h2>
+        <p className="text-sm text-muted-foreground mb-4">Upload multiple photos for your gallery section</p>
+        <div className="space-y-4">
+          <div>
+            <Label>Upload Gallery Images</Label>
+            <div className="mt-2 flex gap-4 items-start">
+              <Button variant="outline" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.multiple = true; input.onchange = handleGalleryUpload; input.click(); }} disabled={uploading !== null || !editId} className="gap-2">
+                <Upload className="h-4 w-4" />
+                {uploading === "gallery" ? "Uploading..." : "Choose Images"}
+              </Button>
+              {!editId && <p className="text-sm text-muted-foreground">Save resort first to upload images</p>}
+            </div>
+          </div>
+          {formData.media?.galleryImages?.length > 0 && (
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+              {formData.media.galleryImages.map((url: string, i: number) => (
+                <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border">
+                  <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeGalleryImage(i)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -841,21 +901,13 @@ export function FullWizard() {
         </div>
       </div>
 
-      {/* Media */}
+      {/* Media - Video URL */}
       <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Media</h2>
+        <h2 className="text-xl font-semibold mb-4">Video Tour</h2>
         <div className="space-y-4">
           <div>
-            <Label>Hero Image URL</Label>
-            <Input value={formData.media?.heroImages?.[0] || ""} onChange={(e) => setFormData({ ...formData, media: { ...formData.media, heroImages: [e.target.value, ...(formData.media?.heroImages?.slice(1) || [])] } })} placeholder="https://example.com/hero.jpg" />
-          </div>
-          <div>
-            <Label>Video URL (YouTube/Vimeo)</Label>
+            <Label>YouTube/Vimeo URL</Label>
             <Input value={formData.media?.videoUrl || ""} onChange={(e) => setFormData({ ...formData, media: { ...formData.media, videoUrl: e.target.value } })} placeholder="https://youtube.com/watch?v=..." />
-          </div>
-          <div>
-            <Label>Gallery Images (one URL per line)</Label>
-            <Textarea rows={4} value={(formData.media?.galleryImages || []).join("\n")} onChange={(e) => setFormData({ ...formData, media: { ...formData.media, galleryImages: e.target.value.split("\n").filter(url => url.trim()) } })} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" />
           </div>
         </div>
       </div>
