@@ -287,7 +287,7 @@ export default function ResortLandingPage() {
         {/* ABOUT */}
         {brandStory.fullDescription && (
           <section id="about" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full">
-            <div className="max-w-4xl mx-auto text-center w-full">
+            <div className="max-w-4xl mx-auto w-full">
               <h2
                 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold mb-4 sm:mb-6 md:mb-8`}
                 style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -317,11 +317,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {features.map((feature: any, i: number) => (
                   <div
                     key={i}
-                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full"
+                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full"
                   >
                     <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
                     <h3
@@ -350,11 +350,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
               
-              <div className="grid grid-cols-2 gap-3 w-full">
+              <div className="grid grid-cols-2 gap-3">
                 {siteData.amenities.map((amenity: string, i: number) => (
                   <div
                     key={i}
-                    className="group p-3 rounded-xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                    className="group p-3 rounded-xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300"
                   >
                     <div className="flex items-center gap-2">
                       <div
@@ -372,7 +372,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* ROOMS GRID - FIXED */}
+        {/* ROOMS GRID - FIXED (Removed w-full to prevent shrinking) */}
         {siteData.roomTypes?.length > 0 && (
           <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -384,11 +384,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {siteData.roomTypes.map((room: any, i: number) => (
                   <div
                     key={i}
-                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden w-full"
+                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col"
                   >
                     {room.imageUrl ? (
                       <div className="h-48 sm:h-56 overflow-hidden w-full">
@@ -406,7 +406,7 @@ export default function ResortLandingPage() {
                         <span className="text-4xl sm:text-5xl md:text-6xl">🏨</span>
                       </div>
                     )}
-                    <div className="p-4 sm:p-6 md:p-8 w-full">
+                    <div className="p-4 sm:p-6 md:p-8 flex-1 flex flex-col">
                       <h3
                         className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3`}
                         style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -419,7 +419,7 @@ export default function ResortLandingPage() {
                         </span>
                         <span className="text-xs sm:text-sm text-muted-foreground">/night</span>
                       </div>
-                      <p className="text-xs sm:text-sm mb-4 sm:mb-6" style={{ color: colors.text, lineHeight: 1.6 }}>
+                      <p className="text-xs sm:text-sm mb-4 sm:mb-6 flex-1" style={{ color: colors.text, lineHeight: 1.6 }}>
                         {room.description || ""}
                       </p>
                       <Button
@@ -448,11 +448,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {media.galleryImages.map((url: string, i: number) => (
                   <div
                     key={i}
-                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full"
+                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
                   >
                     <img
                       src={url}
@@ -503,11 +503,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {testimonials.map((testimonial: any, i: number) => (
                   <div
                     key={i}
-                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full"
+                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full"
                   >
                     <div className="flex gap-1 mb-3 sm:mb-4">
                       {[...Array(5)].map((_, j) => (
