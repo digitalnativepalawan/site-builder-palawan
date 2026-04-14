@@ -122,658 +122,72 @@ export default function ResortLandingPage() {
 
   const currentWidth = deviceWidths[deviceView];
 
-  // ✅ WEBSITE CONTENT WITH PROPER MOBILE RESPONSIVENESS
-  const WebsiteContent = () => (
-    <div
-      className="min-h-screen w-full"
-      style={{
-        backgroundColor: colors.background,
-        color: colors.text,
-        fontFamily: typography.bodyFont,
-        // CRITICAL FIX: Prevent horizontal overflow
-        overflowX: "hidden", 
-        width: "100%",
-        maxWidth: "100vw"
-      }}
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;700&display=swap');
-        
-        /* CRITICAL MOBILE FIXES */
-        * {
-          box-sizing: border-box;
-        }
-        img {
-          max-width: 100%;
-          height: auto;
-          display: block;
-        }
-        input, textarea, button {
-          max-width: 100%;
-        }
-        
-        @media (max-width: 640px) {
-          .mobile-text-3xl { font-size: 1.5rem !important; }
-          .mobile-text-2xl { font-size: 1.25rem !important; }
-          .mobile-text-xl { font-size: 1.125rem !important; }
-          .mobile-py-24 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
-          .mobile-px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-          .mobile-grid-cols-1 { grid-template-columns: 1fr !important; }
-          .mobile-flex-col { flex-direction: column !important; }
-          .mobile-hidden { display: none !important; }
-          .mobile-text-center { text-align: center !important; }
-          .mobile-gap-2 { gap: 0.5rem !important; }
-        }
-      `}</style>
+  // ✅ WEBSITE CONTENT WITH LOGIC TO FORCE MOBILE LAYOUT IN PREVIEWER
+  const WebsiteContent = () => {
+    // Detect if we are in mobile preview mode to override Tailwind's viewport-based classes
+    const isMobilePreview = deviceView === "mobile";
+    const isTabletPreview = deviceView === "tablet";
+    const isSmallPreview = isMobilePreview || isTabletPreview;
 
-      {/* HEADER */}
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 w-full ${
-          header.transparent ? "absolute w-full bg-transparent" : "bg-white/95 backdrop-blur-md shadow-sm"
-        } ${header.sticky ? "" : "relative"}`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            {headerLogoUrl ? (
-              <img src={headerLogoUrl} alt={resortName} style={{ height: Math.min(headerLogoSize, 60) }} className="object-contain" />
-            ) : (
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold" style={{ fontFamily: typography.headingFont, color: header.transparent ? "#ffffff" : colors.text }}>
-                {resortName}
-              </h1>
-            )}
-            
-            {/* Navigation - Hidden on mobile, show hamburger */}
-            <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-              {header.navigationLinks?.map((link: any, i: number) => (
-                <a
-                  key={i}
-                  href={link.url}
-                  className="text-sm font-medium transition-colors hover:opacity-70"
-                  style={{ fontFamily: typography.bodyFont, color: header.transparent ? "#ffffff" : colors.text }}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-
-            {/* Social Icons - Hidden on mobile */}
-            {socialMedia.showInHeader && socialLinks.length > 0 && (
-              <div className="hidden md:flex items-center gap-3">
-                {socialLinks.map((social, i) => {
-                  const Icon = social.icon;
-                  return (
-                    <a
-                      key={i}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="transition-transform hover:scale-110"
-                      style={{ color: header.transparent ? "#ffffff" : colors.primary }}
-                    >
-                      <Icon className="h-4 w-4 lg:h-5 lg:w-5" />
-                    </a>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Mobile Menu Button */}
-            <button className="md:hidden p-2">
-              <svg className="w-6 h-6" fill="none" stroke={header.transparent ? "#ffffff" : colors.text} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* HERO - Mobile Optimized */}
-      <section
-        id="home"
-        className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden mobile-py-24 w-full"
+    return (
+      <div
+        className="min-h-screen w-full"
         style={{
-          background: heroImage
-            ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${heroImage})`
-            : colors.gradient || colors.primary,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundColor: colors.background,
+          color: colors.text,
+          fontFamily: typography.bodyFont,
+          overflowX: "hidden",
+          width: "100%",
+          maxWidth: "100vw"
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
-        
-        <div className="relative z-10 text-center px-4 sm:px-6 py-12 sm:py-16 md:py-20 max-w-5xl mx-auto w-full">
-          {/* Hero Logo */}
-          {heroLogoUrl && (
-            <div className="mb-4 sm:mb-6 md:mb-8">
-              <img
-                src={heroLogoUrl}
-                alt={resortName}
-                style={{ height: Math.min(heroLogoSize, 120), maxWidth: "100%" }}
-                className="mx-auto object-contain"
-              />
-            </div>
-          )}
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;700&display=swap');
+          
+          * { box-sizing: border-box; }
+          img { max-width: 100%; height: auto; display: block; }
+          input, textarea, button { max-width: 100%; }
+          
+          /* Force word breaking for long text */
+          h1, h2, h3, p, span, a, div {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+          }
+        `}</style>
 
-          <h1
-            className="mobile-text-3xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-6"
-            style={{
-              fontFamily: typography.headingFont,
-              color: "#ffffff",
-              textShadow: "0 2px 20px rgba(0,0,0,0.3)",
-              lineHeight: 1.2,
-            }}
-          >
-            {resortName}
-          </h1>
-
-          {brandStory.tagline && (
-            <p
-              className="mobile-text-xl text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 md:mb-8 max-w-2xl mx-auto px-2"
-              style={{ color: "rgba(255,255,255,0.95)", fontFamily: typography.headingFont }}
-            >
-              {brandStory.tagline}
-            </p>
-          )}
-
-          {brandStory.shortDescription && (
-            <p
-              className="text-sm sm:text-base md:text-lg lg:text-xl max-w-xl mx-auto mb-6 sm:mb-8 md:mb-10 px-2"
-              style={{ color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}
-            >
-              {brandStory.shortDescription}
-            </p>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mobile-flex-col w-full">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full shadow-2xl"
-              style={{ backgroundColor: colors.accent, color: "#ffffff" }}
-              onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}`}
-            >
-              Book Now
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full sm:w-auto px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full border-2"
-              style={{ borderColor: "#ffffff", color: "#ffffff" }}
-              onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              Learn More
-            </Button>
-          </div>
-        </div>
-
-        {/* Scroll indicator - Hidden on mobile */}
-        <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </div>
-      </section>
-
-      {/* ABOUT - Mobile Optimized */}
-      {brandStory.fullDescription && (
-        <section id="about" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full">
-          <div className="max-w-4xl mx-auto text-center w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              About Us
-            </h2>
-            <div className="w-16 sm:w-20 md:w-24 h-1 mx-auto mb-6 sm:mb-8 rounded-full" style={{ backgroundColor: colors.primary }} />
-            <p
-              className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-2 sm:px-0"
-              style={{ color: colors.text, lineHeight: 1.8, fontFamily: typography.bodyFont }}
-            >
-              {brandStory.fullDescription}
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* FEATURES - Mobile Optimized */}
-      {features.length > 0 && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-6xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              Why Choose Us
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
-            {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
-              {features.map((feature: any, i: number) => (
-                <div
-                  key={i}
-                  className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
-                >
-                  <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
-                  <h3
-                    className="mobile-text-xl text-xl sm:text-2xl font-bold mb-2 sm:mb-3"
-                    style={{ fontFamily: typography.headingFont, color: colors.text }}
+        {/* HEADER */}
+        <header
+          className={`sticky top-0 z-50 transition-all duration-300 w-full ${
+            header.transparent ? "absolute w-full bg-transparent" : "bg-white/95 backdrop-blur-md shadow-sm"
+          } ${header.sticky ? "" : "relative"}`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="flex justify-between items-center h-16 sm:h-20">
+              {headerLogoUrl ? (
+                <img src={headerLogoUrl} alt={resortName} style={{ height: Math.min(headerLogoSize, 60) }} className="object-contain" />
+              ) : (
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold" style={{ fontFamily: typography.headingFont, color: header.transparent ? "#ffffff" : colors.text }}>
+                  {resortName}
+                </h1>
+              )}
+              
+              {/* Navigation - Hidden on mobile preview OR small screens */}
+              <nav className={`${isSmallPreview ? "hidden" : "hidden md:flex"} items-center gap-6 lg:gap-8`}>
+                {header.navigationLinks?.map((link: any, i: number) => (
+                  <a
+                    key={i}
+                    href={link.url}
+                    className="text-sm font-medium transition-colors hover:opacity-70"
+                    style={{ fontFamily: typography.bodyFont, color: header.transparent ? "#ffffff" : colors.text }}
                   >
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground" style={{ lineHeight: 1.6 }}>{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
 
-      {/* AMENITIES - Mobile Optimized */}
-      {siteData.amenities?.length > 0 && (
-        <section id="amenities" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-6xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              Amenities
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
-            {/* ✅ Mobile: 1 column (fixed from 2 to prevent overflow), Tablet: 2, Desktop: 4 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full">
-              {siteData.amenities.map((amenity: string, i: number) => (
-                <div
-                  key={i}
-                  className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
-                >
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div
-                      className="w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-transform group-hover:scale-125"
-                      style={{ backgroundColor: colors.primary }}
-                    />
-                    <span className="text-xs sm:text-sm font-medium break-words" style={{ color: colors.text }}>
-                      {amenity}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ROOMS - Mobile Optimized */}
-      {siteData.roomTypes?.length > 0 && (
-        <section id="rooms" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-6xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              Our Rooms
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
-            {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
-              {siteData.roomTypes.map((room: any, i: number) => (
-                <div
-                  key={i}
-                  className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden w-full"
-                >
-                  {room.imageUrl ? (
-                    <div className="h-48 sm:h-56 overflow-hidden w-full">
-                      <img
-                        src={room.imageUrl}
-                        alt={room.name}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      className="h-48 sm:h-56 flex items-center justify-center w-full"
-                      style={{ background: `${colors.primary}15` }}
-                    >
-                      <span className="text-4xl sm:text-5xl md:text-6xl">🏨</span>
-                    </div>
-                  )}
-                  <div className="p-4 sm:p-6 md:p-8 w-full">
-                    <h3
-                      className="mobile-text-xl text-xl sm:text-2xl font-bold mb-2 sm:mb-3"
-                      style={{ fontFamily: typography.headingFont, color: colors.text }}
-                    >
-                      {room.name || "Room"}
-                    </h3>
-                    <div className="flex items-baseline gap-1 mb-3 sm:mb-4">
-                      <span className="text-2xl sm:text-3xl font-bold" style={{ color: colors.primary }}>
-                        ₱{room.price || "0"}
-                      </span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">/night</span>
-                    </div>
-                    <p className="text-xs sm:text-sm mb-4 sm:mb-6" style={{ color: colors.text, lineHeight: 1.6 }}>
-                      {room.description || ""}
-                    </p>
-                    <Button
-                      className="w-full py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full"
-                      style={{ backgroundColor: colors.primary, color: "#ffffff" }}
-                    >
-                      Book Now
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* GALLERY - Mobile Optimized */}
-      {media.galleryImages?.length > 0 && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-6xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              Photo Gallery
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
-            {/* ✅ Mobile: 2 columns, Tablet: 3 columns, Desktop: 4 columns */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
-              {media.galleryImages.map((url: string, i: number) => (
-                <div
-                  key={i}
-                  className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full"
-                >
-                  <img
-                    src={url}
-                    alt={`Gallery ${i + 1}`}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* VIDEO - Mobile Optimized */}
-      {videoId && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-5xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              Video Tour
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Take a virtual tour of our resort</p>
-            <div className="relative aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl w-full">
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-                title="Resort Video Tour"
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* TESTIMONIALS - Mobile Optimized */}
-      {testimonials.length > 0 && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-6xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              Guest Reviews
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
-            {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
-              {testimonials.map((testimonial: any, i: number) => (
-                <div
-                  key={i}
-                  className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
-                >
-                  <div className="flex gap-1 mb-3 sm:mb-4">
-                    {[...Array(5)].map((_, j) => (
-                      <Star
-                        key={j}
-                        className="h-4 w-4 sm:h-5 sm:w-5"
-                        style={{
-                          fill: j < (testimonial.rating || 5) ? colors.accent : "none",
-                          color: j < (testimonial.rating || 5) ? colors.accent : "#d1d5db",
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <Quote className="h-6 w-6 sm:h-8 sm:w-8 mb-3 sm:mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6" style={{ lineHeight: 1.6, fontStyle: "italic" }}>
-                    "{testimonial.text}"
-                  </p>
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div
-                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base"
-                      style={{ backgroundColor: colors.primary }}
-                    >
-                      {testimonial.name?.charAt(0) || "G"}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm sm:text-base" style={{ color: colors.text }}>{testimonial.name}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.location}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* FAQ - Mobile Optimized */}
-      {siteData.faq?.length > 0 && (
-        <section id="faq" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-4xl mx-auto w-full">
-            <h2
-              className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
-              FAQ
-            </h2>
-            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Common questions answered</p>
-            <div className="space-y-3 sm:space-y-4 w-full">
-              {siteData.faq.map((item: any, i: number) => (
-                <div
-                  key={i}
-                  className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full"
-                >
-                  <h3
-                    className="mobile-text-xl text-lg sm:text-xl font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3"
-                    style={{ fontFamily: typography.headingFont, color: colors.text }}
-                  >
-                    <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 mt-0.5 flex-shrink-0" style={{ color: colors.primary }} />
-                    {item.question}
-                  </h3>
-                  <p className="text-sm sm:text-base text-muted-foreground" style={{ lineHeight: 1.6 }}>{item.answer}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* CONTACT - Mobile Optimized */}
-      <section id="contact" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
-        <div className="max-w-6xl mx-auto w-full">
-          <h2
-            className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
-            style={{ fontFamily: typography.headingFont, color: colors.text }}
-          >
-            Contact Us
-          </h2>
-          <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">We'd love to hear from you</p>
-          {/* ✅ Mobile: 1 column (stacked), Desktop: 2 columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 w-full">
-            {/* Contact Info */}
-            <div className="space-y-6 sm:space-y-8 w-full">
-              {identity.contactEmail && (
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
-                    <Mail className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Email</p>
-                    <a href={`mailto:${identity.contactEmail}`} className="text-sm sm:text-base hover:underline break-all" style={{ color: colors.text }}>
-                      {identity.contactEmail}
-                    </a>
-                  </div>
-                </div>
-              )}
-              {identity.phone && (
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
-                    <Phone className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Phone</p>
-                    <a href={`tel:${identity.phone}`} className="text-sm sm:text-base hover:underline" style={{ color: colors.text }}>
-                      {identity.phone}
-                    </a>
-                  </div>
-                </div>
-              )}
-              {identity.fullAddress && (
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
-                    <MapPinned className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Address</p>
-                    <p className="text-sm sm:text-base" style={{ color: colors.text }}>{identity.fullAddress}</p>
-                  </div>
-                </div>
-              )}
-              {identity.googleMapsLink && (
-                <a
-                  href={identity.googleMapsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm sm:text-base font-medium hover:underline"
-                  style={{ color: colors.primary }}
-                >
-                  View on Google Maps →
-                </a>
-              )}
-            </div>
-
-            {/* Contact Form */}
-            <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg w-full">
-              <form className="space-y-4 sm:space-y-6 w-full">
-                <div className="w-full">
-                  <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
-                    style={{ borderColor: `${colors.primary}30` }}
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div className="w-full">
-                  <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
-                    style={{ borderColor: `${colors.primary}30` }}
-                    placeholder="john@example.com"
-                  />
-                </div>
-                <div className="w-full">
-                  <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
-                    Message
-                  </label>
-                  <textarea
-                    rows={4}
-                    className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all resize-none text-sm sm:text-base"
-                    style={{ borderColor: `${colors.primary}30` }}
-                    placeholder="Your message..."
-                  />
-                </div>
-                <Button
-                  className="w-full py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full"
-                  style={{ backgroundColor: colors.primary, color: "#ffffff" }}
-                >
-                  Send Message
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER - Mobile Optimized */}
-      <footer
-        className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full"
-        style={{ backgroundColor: colors.text, color: "#ffffff" }}
-      >
-        <div className="max-w-7xl mx-auto w-full">
-          {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3-4 columns */}
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-10 sm:mb-12 w-full"
-          >
-            {/* Column 1: Brand */}
-            <div className="w-full">
-              {headerLogoUrl && (
-                <img
-                  src={headerLogoUrl}
-                  alt={resortName}
-                  style={{ height: Math.min(headerLogoSize, 50), filter: "brightness(0) invert(1)" }}
-                  className="mb-4 sm:mb-6 object-contain"
-                />
-              )}
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3" style={{ fontFamily: typography.headingFont }}>
-                {resortName}
-              </h3>
-              <p className="text-xs sm:text-sm opacity-70">{brandStory.tagline || ""}</p>
-            </div>
-
-            {/* Column 2: Contact */}
-            {footer.showContactInfo && (
-              <div className="w-full">
-                <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Contact</h4>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-70">
-                  {identity.contactEmail && <p className="break-all">{identity.contactEmail}</p>}
-                  {identity.phone && <p>{identity.phone}</p>}
-                  {identity.fullAddress && <p>{identity.fullAddress}</p>}
-                </div>
-              </div>
-            )}
-
-            {/* Column 3: Navigation */}
-            {footer.showNavigation && (
-              <div className="w-full">
-                <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Quick Links</h4>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-70">
-                  {header.navigationLinks?.map((link: any, i: number) => (
-                    <a key={i} href={link.url} className="block hover:opacity-100 transition-opacity">
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Column 4: Social */}
-            {footer.showSocialIcons && socialLinks.length > 0 && (
-              <div className="w-full">
-                <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Follow Us</h4>
-                <div className="flex gap-3 sm:gap-4">
+              {/* Social Icons - Hidden on mobile preview */}
+              {socialMedia.showInHeader && socialLinks.length > 0 && (
+                <div className={`${isSmallPreview ? "hidden" : "hidden md:flex"} items-center gap-3`}>
                   {socialLinks.map((social, i) => {
                     const Icon = social.icon;
                     return (
@@ -782,37 +196,612 @@ export default function ResortLandingPage() {
                         href={social.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-110"
+                        className="transition-transform hover:scale-110"
+                        style={{ color: header.transparent ? "#ffffff" : colors.primary }}
                       >
-                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <Icon className="h-4 w-4 lg:h-5 lg:w-5" />
                       </a>
                     );
                   })}
                 </div>
+              )}
+
+              {/* Mobile Menu Button */}
+              <button className="md:hidden p-2">
+                <svg className="w-6 h-6" fill="none" stroke={header.transparent ? "#ffffff" : colors.text} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* HERO */}
+        <section
+          id="home"
+          className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden w-full"
+          style={{
+            background: heroImage
+              ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${heroImage})`
+              : colors.gradient || colors.primary,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+          
+          <div className="relative z-10 text-center px-4 sm:px-6 py-12 sm:py-16 md:py-20 max-w-5xl mx-auto w-full">
+            {heroLogoUrl && (
+              <div className="mb-4 sm:mb-6 md:mb-8">
+                <img
+                  src={heroLogoUrl}
+                  alt={resortName}
+                  style={{ height: Math.min(heroLogoSize, 120), maxWidth: "100%" }}
+                  className="mx-auto object-contain"
+                />
               </div>
             )}
+
+            <h1
+              // Force smaller text on mobile preview
+              className={`${isMobilePreview ? "text-3xl" : "text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl"} font-bold mb-3 sm:mb-4 md:mb-6`}
+              style={{
+                fontFamily: typography.headingFont,
+                color: "#ffffff",
+                textShadow: "0 2px 20px rgba(0,0,0,0.3)",
+                lineHeight: 1.2,
+              }}
+            >
+              {resortName}
+            </h1>
+
+            {brandStory.tagline && (
+              <p
+                className={`${isMobilePreview ? "text-base" : "text-base sm:text-lg md:text-xl lg:text-2xl"} mb-4 sm:mb-6 md:mb-8 max-w-2xl mx-auto px-2`}
+                style={{ color: "rgba(255,255,255,0.95)", fontFamily: typography.headingFont }}
+              >
+                {brandStory.tagline}
+              </p>
+            )}
+
+            {brandStory.shortDescription && (
+              <p
+                className="text-sm sm:text-base md:text-lg lg:text-xl max-w-xl mx-auto mb-6 sm:mb-8 md:mb-10 px-2"
+                style={{ color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}
+              >
+                {brandStory.shortDescription}
+              </p>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full shadow-2xl"
+                style={{ backgroundColor: colors.accent, color: "#ffffff" }}
+                onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}`}
+              >
+                Book Now
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full border-2"
+                style={{ borderColor: "#ffffff", color: "#ffffff" }}
+                onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                Learn More
+              </Button>
+            </div>
           </div>
+        </section>
 
-          {/* Copyright */}
-          <div className="pt-6 sm:pt-8 border-t border-white/10 text-center text-xs sm:text-sm opacity-50 w-full">
-            <p>{footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}</p>
+        {/* ABOUT */}
+        {brandStory.fullDescription && (
+          <section id="about" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full">
+            <div className="max-w-4xl mx-auto text-center w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold mb-4 sm:mb-6 md:mb-8`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                About Us
+              </h2>
+              <div className="w-16 sm:w-20 md:w-24 h-1 mx-auto mb-6 sm:mb-8 rounded-full" style={{ backgroundColor: colors.primary }} />
+              <p
+                className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-2 sm:px-0"
+                style={{ color: colors.text, lineHeight: 1.8, fontFamily: typography.bodyFont }}
+              >
+                {brandStory.fullDescription}
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* FEATURES */}
+        {features.length > 0 && (
+          <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
+            <div className="max-w-6xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                Why Choose Us
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
+              
+              {/* FIX: Force 1 column on mobile preview */}
+              <div className={isMobilePreview ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"}>
+                {features.map((feature: any, i: number) => (
+                  <div
+                    key={i}
+                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                  >
+                    <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
+                    <h3
+                      className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3`}
+                      style={{ fontFamily: typography.headingFont, color: colors.text }}
+                    >
+                      {feature.title}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground" style={{ lineHeight: 1.6 }}>{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* AMENITIES */}
+        {siteData.amenities?.length > 0 && (
+          <section id="amenities" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+            <div className="max-w-6xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                Amenities
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
+              
+              {/* FIX: Force 1 or 2 columns on mobile preview */}
+              <div className={isMobilePreview ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full"}>
+                {siteData.amenities.map((amenity: string, i: number) => (
+                  <div
+                    key={i}
+                    className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div
+                        className="w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-transform group-hover:scale-125"
+                        style={{ backgroundColor: colors.primary }}
+                      />
+                      <span className="text-xs sm:text-sm font-medium break-words" style={{ color: colors.text }}>
+                        {amenity}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ROOMS */}
+        {siteData.roomTypes?.length > 0 && (
+          <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+            <div className="max-w-6xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                Our Rooms
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
+              
+              {/* FIX: Force 1 column on mobile preview */}
+              <div className={isMobilePreview ? "grid grid-cols-1 gap-6" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"}>
+                {siteData.roomTypes.map((room: any, i: number) => (
+                  <div
+                    key={i}
+                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden w-full"
+                  >
+                    {room.imageUrl ? (
+                      <div className="h-48 sm:h-56 overflow-hidden w-full">
+                        <img
+                          src={room.imageUrl}
+                          alt={room.name}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="h-48 sm:h-56 flex items-center justify-center w-full"
+                        style={{ background: `${colors.primary}15` }}
+                      >
+                        <span className="text-4xl sm:text-5xl md:text-6xl">🏨</span>
+                      </div>
+                    )}
+                    <div className="p-4 sm:p-6 md:p-8 w-full">
+                      <h3
+                        className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3`}
+                        style={{ fontFamily: typography.headingFont, color: colors.text }}
+                      >
+                        {room.name || "Room"}
+                      </h3>
+                      <div className="flex items-baseline gap-1 mb-3 sm:mb-4">
+                        <span className="text-2xl sm:text-3xl font-bold" style={{ color: colors.primary }}>
+                          ₱{room.price || "0"}
+                        </span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">/night</span>
+                      </div>
+                      <p className="text-xs sm:text-sm mb-4 sm:mb-6" style={{ color: colors.text, lineHeight: 1.6 }}>
+                        {room.description || ""}
+                      </p>
+                      <Button
+                        className="w-full py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full"
+                        style={{ backgroundColor: colors.primary, color: "#ffffff" }}
+                      >
+                        Book Now
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* GALLERY */}
+        {media.galleryImages?.length > 0 && (
+          <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
+            <div className="max-w-6xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                Photo Gallery
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
+              
+              {/* FIX: Force 2 columns on mobile preview */}
+              <div className={isMobilePreview ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full"}>
+                {media.galleryImages.map((url: string, i: number) => (
+                  <div
+                    key={i}
+                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full"
+                  >
+                    <img
+                      src={url}
+                      alt={`Gallery ${i + 1}`}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* VIDEO */}
+        {videoId && (
+          <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+            <div className="max-w-5xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                Video Tour
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Take a virtual tour of our resort</p>
+              <div className="relative aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl w-full">
+                <iframe
+                  src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+                  title="Resort Video Tour"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* TESTIMONIALS */}
+        {testimonials.length > 0 && (
+          <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
+            <div className="max-w-6xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                Guest Reviews
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
+              
+              {/* FIX: Force 1 column on mobile preview */}
+              <div className={isMobilePreview ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"}>
+                {testimonials.map((testimonial: any, i: number) => (
+                  <div
+                    key={i}
+                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                  >
+                    <div className="flex gap-1 mb-3 sm:mb-4">
+                      {[...Array(5)].map((_, j) => (
+                        <Star
+                          key={j}
+                          className="h-4 w-4 sm:h-5 sm:w-5"
+                          style={{
+                            fill: j < (testimonial.rating || 5) ? colors.accent : "none",
+                            color: j < (testimonial.rating || 5) ? colors.accent : "#d1d5db",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <Quote className="h-6 w-6 sm:h-8 sm:w-8 mb-3 sm:mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
+                    <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6" style={{ lineHeight: 1.6, fontStyle: "italic" }}>
+                      "{testimonial.text}"
+                    </p>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base"
+                        style={{ backgroundColor: colors.primary }}
+                      >
+                        {testimonial.name?.charAt(0) || "G"}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm sm:text-base" style={{ color: colors.text }}>{testimonial.name}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.location}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* FAQ */}
+        {siteData.faq?.length > 0 && (
+          <section id="faq" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+            <div className="max-w-4xl mx-auto w-full">
+              <h2
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+                style={{ fontFamily: typography.headingFont, color: colors.text }}
+              >
+                FAQ
+              </h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Common questions answered</p>
+              <div className="space-y-3 sm:space-y-4 w-full">
+                {siteData.faq.map((item: any, i: number) => (
+                  <div
+                    key={i}
+                    className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full"
+                  >
+                    <h3
+                      className={`${isMobilePreview ? "text-lg" : "text-lg sm:text-xl"} font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3`}
+                      style={{ fontFamily: typography.headingFont, color: colors.text }}
+                    >
+                      <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 mt-0.5 flex-shrink-0" style={{ color: colors.primary }} />
+                      {item.question}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground" style={{ lineHeight: 1.6 }}>{item.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* CONTACT - CRITICAL FIX */}
+        <section id="contact" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+          <div className="max-w-6xl mx-auto w-full">
+            <h2
+              className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
+              style={{ fontFamily: typography.headingFont, color: colors.text }}
+            >
+              Contact Us
+            </h2>
+            <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">We'd love to hear from you</p>
+            
+            {/* FIX: Force Flex Column on mobile preview to stack vertically */}
+            <div className={isMobilePreview ? "flex flex-col gap-8 w-full" : "grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 w-full"}>
+              {/* Contact Info */}
+              <div className="space-y-6 sm:space-y-8 w-full">
+                {identity.contactEmail && (
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
+                      <Mail className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Email</p>
+                      <a href={`mailto:${identity.contactEmail}`} className="text-sm sm:text-base hover:underline break-all" style={{ color: colors.text }}>
+                        {identity.contactEmail}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                {identity.phone && (
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
+                      <Phone className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Phone</p>
+                      <a href={`tel:${identity.phone}`} className="text-sm sm:text-base hover:underline" style={{ color: colors.text }}>
+                        {identity.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                {identity.fullAddress && (
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
+                      <MapPinned className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Address</p>
+                      <p className="text-sm sm:text-base" style={{ color: colors.text }}>{identity.fullAddress}</p>
+                    </div>
+                  </div>
+                )}
+                {identity.googleMapsLink && (
+                  <a
+                    href={identity.googleMapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm sm:text-base font-medium hover:underline"
+                    style={{ color: colors.primary }}
+                  >
+                    View on Google Maps →
+                  </a>
+                )}
+              </div>
+
+              {/* Contact Form */}
+              <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg w-full">
+                <form className="space-y-4 sm:space-y-6 w-full">
+                  <div className="w-full">
+                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
+                      style={{ borderColor: `${colors.primary}30` }}
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
+                      style={{ borderColor: `${colors.primary}30` }}
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
+                      Message
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all resize-none text-sm sm:text-base"
+                      style={{ borderColor: `${colors.primary}30` }}
+                      placeholder="Your message..."
+                    />
+                  </div>
+                  <Button
+                    className="w-full py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full"
+                    style={{ backgroundColor: colors.primary, color: "#ffffff" }}
+                  >
+                    Send Message
+                  </Button>
+                </form>
+              </div>
+            </div>
           </div>
-        </div>
-      </footer>
+        </section>
 
-      <style>{`
-        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
-        .animate-fade-in-down { animation: fade-in-down 0.8s ease-out forwards; }
-        .animation-delay-200 { animation-delay: 0.2s; }
-        .animation-delay-400 { animation-delay: 0.4s; }
-        .animation-delay-600 { animation-delay: 0.6s; }
-      `}</style>
-    </div>
-  );
+        {/* FOOTER */}
+        <footer
+          className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full"
+          style={{ backgroundColor: colors.text, color: "#ffffff" }}
+        >
+          <div className="max-w-7xl mx-auto w-full">
+            {/* FIX: Force 1 column on mobile preview */}
+            <div
+              className={isMobilePreview ? "grid grid-cols-1 gap-8 mb-10" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-10 sm:mb-12 w-full"}
+            >
+              {/* Column 1: Brand */}
+              <div className="w-full">
+                {headerLogoUrl && (
+                  <img
+                    src={headerLogoUrl}
+                    alt={resortName}
+                    style={{ height: Math.min(headerLogoSize, 50), filter: "brightness(0) invert(1)" }}
+                    className="mb-4 sm:mb-6 object-contain"
+                  />
+                )}
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3" style={{ fontFamily: typography.headingFont }}>
+                  {resortName}
+                </h3>
+                <p className="text-xs sm:text-sm opacity-70">{brandStory.tagline || ""}</p>
+              </div>
 
-  // 🔧 DEVICE PREVIEW CONTAINER (unchanged)
+              {/* Column 2: Contact */}
+              {footer.showContactInfo && (
+                <div className="w-full">
+                  <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Contact</h4>
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-70">
+                    {identity.contactEmail && <p className="break-all">{identity.contactEmail}</p>}
+                    {identity.phone && <p>{identity.phone}</p>}
+                    {identity.fullAddress && <p>{identity.fullAddress}</p>}
+                  </div>
+                </div>
+              )}
+
+              {/* Column 3: Navigation */}
+              {footer.showNavigation && (
+                <div className="w-full">
+                  <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Quick Links</h4>
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-70">
+                    {header.navigationLinks?.map((link: any, i: number) => (
+                      <a key={i} href={link.url} className="block hover:opacity-100 transition-opacity">
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Column 4: Social */}
+              {footer.showSocialIcons && socialLinks.length > 0 && (
+                <div className="w-full">
+                  <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Follow Us</h4>
+                  <div className="flex gap-3 sm:gap-4">
+                    {socialLinks.map((social, i) => {
+                      const Icon = social.icon;
+                      return (
+                        <a
+                          key={i}
+                          href={social.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-110"
+                        >
+                          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Copyright */}
+            <div className="pt-6 sm:pt-8 border-t border-white/10 text-center text-xs sm:text-sm opacity-50 w-full">
+              <p>{footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}</p>
+            </div>
+          </div>
+        </footer>
+
+        <style>{`
+          @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+          .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
+          .animate-fade-in-down { animation: fade-in-down 0.8s ease-out forwards; }
+          .animation-delay-200 { animation-delay: 0.2s; }
+          .animation-delay-400 { animation-delay: 0.4s; }
+          .animation-delay-600 { animation-delay: 0.6s; }
+        `}</style>
+      </div>
+    );
+  };
+
+  // 🔧 DEVICE PREVIEW CONTAINER
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Device Preview Toolbar */}
