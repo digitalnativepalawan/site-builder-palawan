@@ -184,9 +184,6 @@ const AdminDashboard = () => {
                   <li>The website URL will <strong>stop working</strong></li>
                 </ul>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Please type <strong>"DELETE"</strong> to confirm (coming soon) or click the delete button below.
-              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
