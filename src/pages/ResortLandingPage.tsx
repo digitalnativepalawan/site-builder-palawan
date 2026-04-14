@@ -685,32 +685,76 @@ export default function ResortLandingPage() {
           </div>
         </section>
 
-        {/* FOOTER - FIXED LAYOUT */}
+        {/* FOOTER - UNIFORM GLOBAL STANDARD */}
         <footer
-          className="py-12 sm:py-16 px-4 sm:px-6 w-full"
-          style={{ backgroundColor: colors.text, color: "#ffffff" }}
+          className="w-full py-12 sm:py-16 px-4 sm:px-6"
+          style={{ backgroundColor: colors.text || "#1E293B", color: "#ffffff" }}
         >
           <div className="max-w-7xl mx-auto w-full">
             
-            {/* Top Section: Brand & Socials */}
-            <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-10 sm:mb-12 gap-6 sm:gap-0">
+            {/* Three Column Grid - Stacks on mobile, side by side on desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 mb-10 sm:mb-12">
+              
+              {/* Column 1: Brand */}
               <div className="text-center sm:text-left">
-                {headerLogoUrl && (
+                {headerLogoUrl ? (
                   <img
                     src={headerLogoUrl}
                     alt={resortName}
-                    style={{ height: Math.min(headerLogoSize, 40), filter: "brightness(0) invert(1)" }}
-                    className="mb-4 object-contain mx-auto sm:mx-0"
+                    style={{ height: Math.min(headerLogoSize || 120, 45), filter: "brightness(0) invert(1)" }}
+                    className="mb-3 object-contain mx-auto sm:mx-0"
                   />
+                ) : (
+                  <h3 className="text-xl font-bold mb-2" style={{ fontFamily: typography.headingFont }}>
+                    {resortName}
+                  </h3>
                 )}
-                <h3 className="text-xl font-bold mb-1" style={{ fontFamily: typography.headingFont }}>
-                  {resortName}
-                </h3>
-                <p className="text-sm opacity-60">{brandStory.tagline || ""}</p>
+                <p className="text-xs opacity-60">{brandStory.tagline || "paradise found"}</p>
               </div>
-              
+
+              {/* Column 2: Contact */}
+              <div className="text-center sm:text-left">
+                <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider opacity-70">CONTACT</h4>
+                <div className="space-y-2 text-sm opacity-70">
+                  {identity.phone && (
+                    <p className="hover:opacity-100 transition-opacity">
+                      <a href={`tel:${identity.phone}`} className="hover:underline">
+                        {identity.phone}
+                      </a>
+                    </p>
+                  )}
+                  {identity.contactEmail && (
+                    <p className="hover:opacity-100 transition-opacity break-all">
+                      <a href={`mailto:${identity.contactEmail}`} className="hover:underline">
+                        {identity.contactEmail}
+                      </a>
+                    </p>
+                  )}
+                  {!identity.phone && !identity.contactEmail && (
+                    <>
+                      <p>+63 947 444 5678</p>
+                      <p>info@palawancollective.com</p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Column 3: Quick Links */}
+              <div className="text-center sm:text-left">
+                <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider opacity-70">QUICK LINKS</h4>
+                <div className="space-y-2 text-sm opacity-70">
+                  <a href="#home" className="block hover:opacity-100 transition-opacity hover:translate-x-1 duration-200">Home</a>
+                  <a href="#about" className="block hover:opacity-100 transition-opacity hover:translate-x-1 duration-200">About</a>
+                  <a href="#rooms" className="block hover:opacity-100 transition-opacity hover:translate-x-1 duration-200">Rooms</a>
+                  <a href="#contact" className="block hover:opacity-100 transition-opacity hover:translate-x-1 duration-200">Contact</a>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Section: Social Icons (if enabled) + Copyright */}
+            <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row justify-between items-center gap-4">
               {footer.showSocialIcons && socialLinks.length > 0 && (
-                <div className="flex gap-4">
+                <div className="flex gap-4 order-2 sm:order-1">
                   {socialLinks.map((social, i) => {
                     const Icon = social.icon;
                     return (
@@ -727,45 +771,13 @@ export default function ResortLandingPage() {
                   })}
                 </div>
               )}
-            </div>
-
-            {/* Middle Section: Links Grid - FIXED TO SINGLE COLUMN ON MOBILE */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-10 sm:mb-12 border-t border-white/10 pt-8 sm:pt-10">
               
-              {/* Contact Column */}
-              {footer.showContactInfo && (
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-                  <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider opacity-90">Contact</h4>
-                  <div className="space-y-2 text-sm opacity-70">
-                    {identity.contactEmail && <p className="break-all hover:opacity-100 transition-opacity">{identity.contactEmail}</p>}
-                    {identity.phone && <p className="hover:opacity-100 transition-opacity">{identity.phone}</p>}
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Links Column */}
-              {footer.showNavigation && (
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-                  <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider opacity-90">Quick Links</h4>
-                  <div className="space-y-2 text-sm opacity-70">
-                    {header.navigationLinks?.slice(0, 4).map((link: any, i: number) => (
-                      <a key={i} href={link.url} className="block hover:opacity-100 transition-opacity hover:translate-x-1 duration-200">
-                        {link.label}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <p className="text-xs opacity-50 text-center order-1 sm:order-2">
+                {footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}
+              </p>
               
-              {/* Filler for grid balance if needed */}
-              {(!footer.showContactInfo || !footer.showNavigation) && (
-                 <div className="hidden sm:block col-span-1 lg:col-span-2"></div>
-              )}
-            </div>
-
-            {/* Bottom Section: Copyright */}
-            <div className="pt-6 border-t border-white/10 text-center text-xs sm:text-sm opacity-50 w-full">
-              <p>{footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}</p>
+              {/* Spacer for balance on desktop */}
+              <div className="hidden sm:block w-24 order-3" />
             </div>
           </div>
         </footer>
