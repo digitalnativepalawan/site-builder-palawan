@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Trash2, Eye } from "lucide-react";
+import { Loader2, X, Plus, Trash2, Eye, Smartphone, Tablet, Monitor, Facebook, Instagram, Youtube, Wifi } from "lucide-react";
 
 export function FullWizard() {
   const [searchParams] = useSearchParams();
@@ -16,10 +21,44 @@ export function FullWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<any>({
     identity: { resortName: "", location: "" },
+    brandStory: { tagline: "", shortDescription: "", fullDescription: "" },
+    amenities: [],
+    roomTypes: [],
+    location: { fullAddress: "", contactEmail: "", phone: "", whatsapp: "", googleMapsLink: "" },
+    faq: [],
+    media: { heroImages: [], videoUrl: "", galleryImages: [] },
+    colorPalette: { primary: "#0EA5E9", background: "#ffffff", text: "#1e293b", accent: "#f59e0b" },
+    socialMedia: {
+      facebook: "",
+      instagram: "",
+      tiktok: "",
+      youtube: "",
+      whatsapp: "",
+      showInHeader: true,
+      showInFooter: true,
+    },
+    header: {
+      showLogo: true,
+      logoUrl: "",
+      showNavigation: true,
+      navigationLinks: [{ label: "Home", url: "#home" }, { label: "About", url: "#about" }, { label: "Rooms", url: "#rooms" }, { label: "Contact", url: "#contact" }],
+      sticky: true,
+      transparent: false,
+    },
+    footer: {
+      copyrightText: "",
+      showSocialIcons: true,
+      showContactInfo: true,
+      showNavigation: true,
+      columns: 3,
+    },
   });
 
   useEffect(() => {
-    if (!editId) return;
+    if (!editId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchResortData = async () => {
       try {
@@ -32,7 +71,13 @@ export function FullWizard() {
         if (error) throw error;
 
         if (submission && submission.data) {
-          setFormData(submission.data);
+          setFormData({
+            ...formData,
+            ...submission.data,
+            socialMedia: { ...formData.socialMedia, ...submission.data.socialMedia },
+            header: { ...formData.header, ...submission.data.header },
+            footer: { ...formData.footer, ...submission.data.footer },
+          });
         }
       } catch (err: any) {
         console.error("Handshake Error:", err.message);
@@ -82,6 +127,34 @@ export function FullWizard() {
     }
   };
 
+  const updateNested = (section: string, field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [section]: { ...prev[section], [field]: value },
+    }));
+  };
+
+  const updateSocial = (field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      socialMedia: { ...prev.socialMedia, [field]: value },
+    }));
+  };
+
+  const updateHeader = (field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      header: { ...prev.header, [field]: value },
+    }));
+  };
+
+  const updateFooter = (field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      footer: { ...prev.footer, [field]: value },
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -91,7 +164,7 @@ export function FullWizard() {
   }
 
   return (
-    <div className="container mx-auto py-10 max-w-4xl">
+    <div className="container mx-auto py-10 max-w-5xl">
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">
           {editId ? "Edit Resort" : "New Resort"}
@@ -109,25 +182,23 @@ export function FullWizard() {
         </div>
       </header>
 
-      {/* Step 1: Identity */}
+      {/* Step 1: Basic Information */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
         <div className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium">Resort Name</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Resort Name</Label>
+            <Input
               value={formData.identity?.resortName || ""}
-              onChange={(e) => setFormData({ ...formData, identity: { ...formData.identity, resortName: e.target.value } })}
+              onChange={(e) => updateNested("identity", "resortName", e.target.value)}
               placeholder="Enter resort name"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Location</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Location</Label>
+            <Input
               value={formData.identity?.location || ""}
-              onChange={(e) => setFormData({ ...formData, identity: { ...formData.identity, location: e.target.value } })}
+              onChange={(e) => updateNested("identity", "location", e.target.value)}
               placeholder="e.g. Palawan, Philippines"
             />
           </div>
@@ -139,45 +210,250 @@ export function FullWizard() {
         <h2 className="text-xl font-semibold mb-4">Brand Story</h2>
         <div className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium">Tagline</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Tagline</Label>
+            <Input
               value={formData.brandStory?.tagline || ""}
-              onChange={(e) => setFormData({ ...formData, brandStory: { ...formData.brandStory, tagline: e.target.value } })}
+              onChange={(e) => updateNested("brandStory", "tagline", e.target.value)}
               placeholder="Short catchy tagline"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Short Description</label>
-            <textarea
-              className="w-full p-3 border rounded-lg"
+            <Label>Short Description</Label>
+            <Textarea
               rows={3}
               value={formData.brandStory?.shortDescription || ""}
-              onChange={(e) => setFormData({ ...formData, brandStory: { ...formData.brandStory, shortDescription: e.target.value } })}
+              onChange={(e) => updateNested("brandStory", "shortDescription", e.target.value)}
               placeholder="Brief description"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Full Description</label>
-            <textarea
-              className="w-full p-3 border rounded-lg"
+            <Label>Full Description</Label>
+            <Textarea
               rows={5}
               value={formData.brandStory?.fullDescription || ""}
-              onChange={(e) => setFormData({ ...formData, brandStory: { ...formData.brandStory, fullDescription: e.target.value } })}
+              onChange={(e) => updateNested("brandStory", "fullDescription", e.target.value)}
               placeholder="Detailed description about your resort"
             />
           </div>
         </div>
       </div>
 
-      {/* Step 3: Amenities */}
+      {/* Step 3: Social Media */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Facebook className="h-5 w-5" /> Social Media Links
+        </h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Facebook URL</Label>
+              <Input
+                value={formData.socialMedia?.facebook || ""}
+                onChange={(e) => updateSocial("facebook", e.target.value)}
+                placeholder="https://facebook.com/yourpage"
+              />
+            </div>
+            <div>
+              <Label>Instagram URL</Label>
+              <Input
+                value={formData.socialMedia?.instagram || ""}
+                onChange={(e) => updateSocial("instagram", e.target.value)}
+                placeholder="https://instagram.com/yourpage"
+              />
+            </div>
+            <div>
+              <Label>TikTok URL</Label>
+              <Input
+                value={formData.socialMedia?.tiktok || ""}
+                onChange={(e) => updateSocial("tiktok", e.target.value)}
+                placeholder="https://tiktok.com/@yourpage"
+              />
+            </div>
+            <div>
+              <Label>YouTube URL</Label>
+              <Input
+                value={formData.socialMedia?.youtube || ""}
+                onChange={(e) => updateSocial("youtube", e.target.value)}
+                placeholder="https://youtube.com/@yourchannel"
+              />
+            </div>
+          </div>
+          <div>
+            <Label>WhatsApp Number</Label>
+            <Input
+              value={formData.socialMedia?.whatsapp || ""}
+              onChange={(e) => updateSocial("whatsapp", e.target.value)}
+              placeholder="+63 xxx xxx xxxx"
+            />
+          </div>
+          <div className="flex gap-6 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.socialMedia?.showInHeader || false}
+                onCheckedChange={(v) => updateSocial("showInHeader", v)}
+              />
+              <Label>Show in Header</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.socialMedia?.showInFooter || false}
+                onCheckedChange={(v) => updateSocial("showInFooter", v)}
+              />
+              <Label>Show in Footer</Label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 4: Header Settings */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Monitor className="h-5 w-5" /> Header Settings
+        </h2>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.header?.showLogo || false}
+              onCheckedChange={(v) => updateHeader("showLogo", v)}
+            />
+            <Label>Show Logo in Header</Label>
+          </div>
+          {formData.header?.showLogo && (
+            <div>
+              <Label>Logo URL</Label>
+              <Input
+                value={formData.header?.logoUrl || ""}
+                onChange={(e) => updateHeader("logoUrl", e.target.value)}
+                placeholder="https://example.com/logo.png"
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.header?.sticky || false}
+              onCheckedChange={(v) => updateHeader("sticky", v)}
+            />
+            <Label>Sticky Header (stays on scroll)</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.header?.transparent || false}
+              onCheckedChange={(v) => updateHeader("transparent", v)}
+            />
+            <Label>Transparent Header (over hero image)</Label>
+          </div>
+          <div>
+            <Label>Navigation Links</Label>
+            <div className="space-y-2 mt-2">
+              {formData.header?.navigationLinks?.map((link: any, i: number) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    value={link.label}
+                    onChange={(e) => {
+                      const newLinks = [...formData.header.navigationLinks];
+                      newLinks[i] = { ...newLinks[i], label: e.target.value };
+                      updateHeader("navigationLinks", newLinks);
+                    }}
+                    placeholder="Label"
+                    className="flex-1"
+                  />
+                  <Input
+                    value={link.url}
+                    onChange={(e) => {
+                      const newLinks = [...formData.header.navigationLinks];
+                      newLinks[i] = { ...newLinks[i], url: e.target.value };
+                      updateHeader("navigationLinks", newLinks);
+                    }}
+                    placeholder="#section"
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const newLinks = formData.header.navigationLinks.filter((_: any, idx: number) => idx !== i);
+                      updateHeader("navigationLinks", newLinks);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  updateHeader("navigationLinks", [...(formData.header.navigationLinks || []), { label: "", url: "" }]);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Link
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 5: Footer Settings */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Wifi className="h-5 w-5" /> Footer Settings
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <Label>Copyright Text</Label>
+            <Input
+              value={formData.footer?.copyrightText || ""}
+              onChange={(e) => updateFooter("copyrightText", e.target.value)}
+              placeholder="© 2025 My Resort. All rights reserved."
+            />
+          </div>
+          <div>
+            <Label>Footer Columns</Label>
+            <Select
+              value={String(formData.footer?.columns || 3)}
+              onValueChange={(v) => updateFooter("columns", Number(v))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2 Columns</SelectItem>
+                <SelectItem value="3">3 Columns</SelectItem>
+                <SelectItem value="4">4 Columns</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.footer?.showSocialIcons || false}
+              onCheckedChange={(v) => updateFooter("showSocialIcons", v)}
+            />
+            <Label>Show Social Icons in Footer</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.footer?.showContactInfo || false}
+              onCheckedChange={(v) => updateFooter("showContactInfo", v)}
+            />
+            <Label>Show Contact Info in Footer</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.footer?.showNavigation || false}
+              onCheckedChange={(v) => updateFooter("showNavigation", v)}
+            />
+            <Label>Show Navigation Links in Footer</Label>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 6: Amenities */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Amenities</h2>
         <div className="space-y-2">
           {(formData.amenities || []).map((amenity: string, i: number) => (
             <div key={i} className="flex gap-2">
-              <input
-                className="flex-1 p-3 border rounded-lg"
+              <Input
                 value={amenity}
                 onChange={(e) => {
                   const newAmenities = [...(formData.amenities || [])];
@@ -202,7 +478,7 @@ export function FullWizard() {
         </div>
       </div>
 
-      {/* Step 4: Room Types */}
+      {/* Step 7: Room Types */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Room Types</h2>
         <div className="space-y-4">
@@ -217,18 +493,16 @@ export function FullWizard() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              <input
-                className="w-full p-3 border rounded-lg"
+              <Input
                 value={room.name || ""}
                 onChange={(e) => {
                   const newRooms = [...(formData.roomTypes || [])];
                   newRooms[i] = { ...newRooms[i], name: e.target.value };
                   setFormData({ ...formData, roomTypes: newRooms });
                 }}
-                placeholder="Room name (e.g. Deluxe Ocean View)"
+                placeholder="Room name"
               />
-              <input
-                className="w-full p-3 border rounded-lg"
+              <Input
                 value={room.price || ""}
                 onChange={(e) => {
                   const newRooms = [...(formData.roomTypes || [])];
@@ -237,101 +511,75 @@ export function FullWizard() {
                 }}
                 placeholder="Price per night"
               />
-              <input
-                className="w-full p-3 border rounded-lg"
+              <Input
                 value={room.description || ""}
                 onChange={(e) => {
                   const newRooms = [...(formData.roomTypes || [])];
                   newRooms[i] = { ...newRooms[i], description: e.target.value };
                   setFormData({ ...formData, roomTypes: newRooms });
                 }}
-                placeholder="Room description"
-              />
-              <input
-                className="w-full p-3 border rounded-lg"
-                value={room.maxGuests || ""}
-                onChange={(e) => {
-                  const newRooms = [...(formData.roomTypes || [])];
-                  newRooms[i] = { ...newRooms[i], maxGuests: e.target.value };
-                  setFormData({ ...formData, roomTypes: newRooms });
-                }}
-                placeholder="Max guests"
-              />
-              <input
-                className="w-full p-3 border rounded-lg"
-                value={room.bedType || ""}
-                onChange={(e) => {
-                  const newRooms = [...(formData.roomTypes || [])];
-                  newRooms[i] = { ...newRooms[i], bedType: e.target.value };
-                  setFormData({ ...formData, roomTypes: newRooms });
-                }}
-                placeholder="Bed type (e.g. King, Twin)"
+                placeholder="Description"
               />
             </div>
           ))}
           <Button variant="outline" className="w-full" onClick={() => {
-            setFormData({ ...formData, roomTypes: [...(formData.roomTypes || []), { name: "", price: "", description: "", maxGuests: "", bedType: "" }] });
+            setFormData({ ...formData, roomTypes: [...(formData.roomTypes || []), { name: "", price: "", description: "" }] });
           }}>
             <Plus className="h-4 w-4 mr-2" /> Add Room Type
           </Button>
         </div>
       </div>
 
-      {/* Step 5: Location & Contact */}
+      {/* Step 8: Location & Contact */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Location & Contact</h2>
         <div className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium">Full Address</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Full Address</Label>
+            <Input
               value={formData.location?.fullAddress || ""}
-              onChange={(e) => setFormData({ ...formData, location: { ...formData.location, fullAddress: e.target.value } })}
+              onChange={(e) => updateNested("location", "fullAddress", e.target.value)}
               placeholder="Complete address"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block mb-2 text-sm font-medium">Email</label>
-              <input
-                className="w-full p-3 border rounded-lg"
+              <Label>Email</Label>
+              <Input
                 value={formData.location?.contactEmail || ""}
-                onChange={(e) => setFormData({ ...formData, location: { ...formData.location, contactEmail: e.target.value } })}
+                onChange={(e) => updateNested("location", "contactEmail", e.target.value)}
                 placeholder="contact@resort.com"
               />
             </div>
             <div>
-              <label className="block mb-2 text-sm font-medium">Phone</label>
-              <input
-                className="w-full p-3 border rounded-lg"
+              <Label>Phone</Label>
+              <Input
                 value={formData.location?.phone || ""}
-                onChange={(e) => setFormData({ ...formData, location: { ...formData.location, phone: e.target.value } })}
+                onChange={(e) => updateNested("location", "phone", e.target.value)}
                 placeholder="+63 xxx xxx xxxx"
               />
             </div>
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">WhatsApp</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>WhatsApp</Label>
+            <Input
               value={formData.location?.whatsapp || ""}
-              onChange={(e) => setFormData({ ...formData, location: { ...formData.location, whatsapp: e.target.value } })}
+              onChange={(e) => updateNested("location", "whatsapp", e.target.value)}
               placeholder="WhatsApp number"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Google Maps Link</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Google Maps Link</Label>
+            <Input
               value={formData.location?.googleMapsLink || ""}
-              onChange={(e) => setFormData({ ...formData, location: { ...formData.location, googleMapsLink: e.target.value } })}
+              onChange={(e) => updateNested("location", "googleMapsLink", e.target.value)}
               placeholder="https://maps.google.com/..."
             />
           </div>
         </div>
       </div>
 
-      {/* Step 6: FAQ */}
+      {/* Step 9: FAQ */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">FAQ</h2>
         <div className="space-y-4">
@@ -346,8 +594,7 @@ export function FullWizard() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              <input
-                className="w-full p-3 border rounded-lg"
+              <Input
                 value={item.question || ""}
                 onChange={(e) => {
                   const newFaq = [...(formData.faq || [])];
@@ -356,8 +603,7 @@ export function FullWizard() {
                 }}
                 placeholder="Question"
               />
-              <textarea
-                className="w-full p-3 border rounded-lg"
+              <Textarea
                 rows={3}
                 value={item.answer || ""}
                 onChange={(e) => {
@@ -377,14 +623,13 @@ export function FullWizard() {
         </div>
       </div>
 
-      {/* Step 7: Media (Hero & Gallery Images) */}
+      {/* Step 10: Media */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Media</h2>
         <div className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium">Hero Image URL</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Hero Image URL</Label>
+            <Input
               value={formData.media?.heroImages?.[0] || ""}
               onChange={(e) => setFormData({ 
                 ...formData, 
@@ -397,18 +642,16 @@ export function FullWizard() {
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Video URL (YouTube/Vimeo)</label>
-            <input
-              className="w-full p-3 border rounded-lg"
+            <Label>Video URL (YouTube/Vimeo)</Label>
+            <Input
               value={formData.media?.videoUrl || ""}
               onChange={(e) => setFormData({ ...formData, media: { ...formData.media, videoUrl: e.target.value } })}
               placeholder="https://youtube.com/watch?v=..."
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Gallery Images (comma-separated URLs)</label>
-            <textarea
-              className="w-full p-3 border rounded-lg"
+            <Label>Gallery Images (one URL per line)</Label>
+            <Textarea
               rows={4}
               value={(formData.media?.galleryImages || []).join("\n")}
               onChange={(e) => setFormData({ 
@@ -424,44 +667,44 @@ export function FullWizard() {
         </div>
       </div>
 
-      {/* Step 8: Color Palette */}
+      {/* Step 11: Color Palette */}
       <div className="bg-white p-6 rounded border mb-6">
         <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block mb-2 text-sm font-medium">Primary Color</label>
-            <input
+            <Label>Primary Color</Label>
+            <Input
               type="color"
-              className="w-full h-12 border rounded-lg"
               value={formData.colorPalette?.primary || "#0EA5E9"}
               onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } })}
+              className="h-12"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Background Color</label>
-            <input
+            <Label>Background Color</Label>
+            <Input
               type="color"
-              className="w-full h-12 border rounded-lg"
               value={formData.colorPalette?.background || "#ffffff"}
               onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } })}
+              className="h-12"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Text Color</label>
-            <input
+            <Label>Text Color</Label>
+            <Input
               type="color"
-              className="w-full h-12 border rounded-lg"
               value={formData.colorPalette?.text || "#1e293b"}
               onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } })}
+              className="h-12"
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium">Accent Color</label>
-            <input
+            <Label>Accent Color</Label>
+            <Input
               type="color"
-              className="w-full h-12 border rounded-lg"
               value={formData.colorPalette?.accent || "#f59e0b"}
               onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } })}
+              className="h-12"
             />
           </div>
         </div>
