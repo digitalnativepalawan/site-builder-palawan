@@ -1,11 +1,28 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Edit3, Plus, Eye } from "lucide-react";
+import { Edit3, Plus, Eye, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resortToDelete, setResortToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const { data: submissions, isLoading } = useQuery({
     queryKey: ["resort_submissions"],
@@ -18,6 +35,43 @@ const AdminDashboard = () => {
       return data;
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("resort_submissions")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resort_submissions"] });
+      toast({
+        title: "Resort deleted",
+        description: "The website has been permanently removed.",
+      });
+      setDeleteDialogOpen(false);
+      setResortToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleDeleteClick = (id: string, name: string) => {
+    setResortToDelete({ id, name });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (resortToDelete) {
+      deleteMutation.mutate(resortToDelete.id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -94,12 +148,59 @@ const AdminDashboard = () => {
                   >
                     <Edit3 className="h-4 w-4" />
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDeleteClick(s.id, s.data?.identity?.resortName || "Untitled")}
+                    title="Delete"
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">
+              ⚠️ Delete Website Permanently?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="pt-4 space-y-2">
+              <p className="font-semibold">
+                You are about to delete: <span className="text-foreground">"{resortToDelete?.name}"</span>
+              </p>
+              <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-sm">
+                <p className="font-semibold text-destructive">⚠️ WARNING:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>This action <strong>cannot be undone</strong></li>
+                  <li>All website data will be <strong>permanently deleted</strong></li>
+                  <li>All content, images, and settings will be <strong>lost forever</strong></li>
+                  <li>The website URL will <strong>stop working</strong></li>
+                </ul>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Please type <strong>"DELETE"</strong> to confirm (coming soon) or click the delete button below.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Yes, Delete Forever"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
