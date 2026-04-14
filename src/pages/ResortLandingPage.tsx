@@ -261,10 +261,11 @@ export default function ResortLandingPage() {
               </p>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full px-4">
+            {/* HERO BUTTONS - FIXED */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full px-4">
               <Button
                 size="lg"
-                className="w-full sm:w-auto px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+                className="w-full sm:w-auto min-w-[140px] px-6 py-3 rounded-full whitespace-nowrap shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
                 style={{ backgroundColor: colors.accent, color: "#ffffff" }}
                 onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}`}
               >
@@ -273,7 +274,7 @@ export default function ResortLandingPage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-full border-2 bg-transparent hover:bg-white/10 transition-all duration-200"
+                className="w-full sm:w-auto min-w-[140px] px-6 py-3 rounded-full whitespace-nowrap border-2 bg-transparent hover:bg-white/10 transition-all duration-200"
                 style={{ borderColor: "#ffffff", color: "#ffffff" }}
                 onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
               >
@@ -304,7 +305,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* FEATURES */}
+        {/* FEATURES GRID - FIXED */}
         {features.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -316,11 +317,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
               
-              <div className={isMobilePreview ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                 {features.map((feature: any, i: number) => (
                   <div
                     key={i}
-                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full"
                   >
                     <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
                     <h3
@@ -337,7 +338,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* AMENITIES */}
+        {/* AMENITIES GRID - FIXED */}
         {siteData.amenities?.length > 0 && (
           <section id="amenities" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -349,18 +350,18 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
               
-              <div className={isMobilePreview ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full"}>
+              <div className="grid grid-cols-2 gap-3 w-full">
                 {siteData.amenities.map((amenity: string, i: number) => (
                   <div
                     key={i}
-                    className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                    className="group p-3 rounded-xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2">
                       <div
-                        className="w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-transform group-hover:scale-125"
+                        className="w-2 h-2 rounded-full transition-transform group-hover:scale-125"
                         style={{ backgroundColor: colors.primary }}
                       />
-                      <span className="text-xs sm:text-sm font-medium break-words" style={{ color: colors.text }}>
+                      <span className="text-xs text-center sm:text-left" style={{ color: colors.text }}>
                         {amenity}
                       </span>
                     </div>
@@ -371,7 +372,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* ROOMS */}
+        {/* ROOMS GRID - FIXED */}
         {siteData.roomTypes?.length > 0 && (
           <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -383,7 +384,7 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
               
-              <div className={isMobilePreview ? "grid grid-cols-1 gap-6" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                 {siteData.roomTypes.map((room: any, i: number) => (
                   <div
                     key={i}
@@ -435,7 +436,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* GALLERY */}
+        {/* GALLERY GRID - FIXED */}
         {media.galleryImages?.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -447,7 +448,7 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
               
-              <div className={isMobilePreview ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full"}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
                 {media.galleryImages.map((url: string, i: number) => (
                   <div
                     key={i}
@@ -490,7 +491,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* TESTIMONIALS */}
+        {/* TESTIMONIALS GRID - FIXED */}
         {testimonials.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -502,11 +503,11 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
               
-              <div className={isMobilePreview ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                 {testimonials.map((testimonial: any, i: number) => (
                   <div
                     key={i}
-                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full"
                   >
                     <div className="flex gap-1 mb-3 sm:mb-4">
                       {[...Array(5)].map((_, j) => (
@@ -685,15 +686,15 @@ export default function ResortLandingPage() {
           </div>
         </section>
 
-        {/* FOOTER - UNIFORM GLOBAL STANDARD */}
+        {/* FOOTER - FIXED */}
         <footer
-          className="w-full py-12 sm:py-16 px-4 sm:px-6"
+          className="py-12 px-4 w-full"
           style={{ backgroundColor: colors.text || "#1E293B", color: "#ffffff" }}
         >
           <div className="max-w-7xl mx-auto w-full">
             
             {/* Three Column Grid - Stacks on mobile, side by side on desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 mb-10 sm:mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
               
               {/* Column 1: Brand */}
               <div className="text-center sm:text-left">
