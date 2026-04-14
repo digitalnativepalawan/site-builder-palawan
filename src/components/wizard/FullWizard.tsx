@@ -9,7 +9,87 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor } from "lucide-react";
+import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type } from "lucide-react";
+
+// 🎨 PROFESSIONAL COLOR PALETTES
+const COLOR_PRESETS = [
+  {
+    name: "Ocean Breeze",
+    primary: "#0EA5E9",
+    background: "#FFFFFF",
+    text: "#1E293B",
+    accent: "#F59E0B",
+    gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)",
+  },
+  {
+    name: "Tropical Sunset",
+    primary: "#F97316",
+    background: "#FFFBEB",
+    text: "#1C1917",
+    accent: "#EC4899",
+    gradient: "linear-gradient(135deg, #F97316 0%, #EC4899 100%)",
+  },
+  {
+    name: "Forest Retreat",
+    primary: "#059669",
+    background: "#F0FDF4",
+    text: "#14532D",
+    accent: "#84CC16",
+    gradient: "linear-gradient(135deg, #059669 0%, #10B981 100%)",
+  },
+  {
+    name: "Luxury Gold",
+    primary: "#1E1B4B",
+    background: "#FEFCE8",
+    text: "#1C1917",
+    accent: "#D97706",
+    gradient: "linear-gradient(135deg, #1E1B4B 0%, #7C3AED 100%)",
+  },
+  {
+    name: "Minimal Modern",
+    primary: "#18181B",
+    background: "#FAFAFA",
+    text: "#18181B",
+    accent: "#71717A",
+    gradient: "linear-gradient(135deg, #18181B 0%, #52525B 100%)",
+  },
+  {
+    name: "Beach Vibes",
+    primary: "#06B6D4",
+    background: "#F0F9FF",
+    text: "#0C4A6E",
+    accent: "#FBBF24",
+    gradient: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)",
+  },
+];
+
+// 📐 TYPOGRAPHY PRESETS
+const TYPOGRAPHY_PRESETS = [
+  {
+    name: "Modern Clean",
+    headingFont: "'Space Grotesk', sans-serif",
+    bodyFont: "'Inter', sans-serif",
+    scale: "comfortable",
+  },
+  {
+    name: "Elegant Classic",
+    headingFont: "'Playfair Display', serif",
+    bodyFont: "'Lato', sans-serif",
+    scale: "comfortable",
+  },
+  {
+    name: "Bold Impact",
+    headingFont: "'Montserrat', sans-serif",
+    bodyFont: "'Open Sans', sans-serif",
+    scale: "spacious",
+  },
+  {
+    name: "Minimal Refined",
+    headingFont: "'DM Sans', sans-serif",
+    bodyFont: "'DM Sans', sans-serif",
+    scale: "compact",
+  },
+];
 
 export function FullWizard() {
   const [searchParams] = useSearchParams();
@@ -23,6 +103,9 @@ export function FullWizard() {
   const [loading, setLoading] = useState(!!editId);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [activeColorPreset, setActiveColorPreset] = useState<number | null>(null);
+  const [activeTypographyPreset, setActiveTypographyPreset] = useState<number | null>(null);
+  
   const [formData, setFormData] = useState<any>({
     identity: { resortName: "", location: "" },
     brandStory: { tagline: "", shortDescription: "", fullDescription: "" },
@@ -31,7 +114,8 @@ export function FullWizard() {
     location: { fullAddress: "", contactEmail: "", phone: "", whatsapp: "", googleMapsLink: "" },
     faq: [],
     media: { heroImages: [], videoUrl: "", galleryImages: [] },
-    colorPalette: { primary: "#0EA5E9", background: "#ffffff", text: "#1e293b", accent: "#f59e0b" },
+    colorPalette: COLOR_PRESETS[0],
+    typography: TYPOGRAPHY_PRESETS[0],
     socialMedia: {
       facebook: "",
       instagram: "",
@@ -49,7 +133,7 @@ export function FullWizard() {
       showNavigation: true,
       navigationLinks: [{ label: "Home", url: "#home" }, { label: "About", url: "#about" }, { label: "Rooms", url: "#rooms" }, { label: "Contact", url: "#contact" }],
       sticky: true,
-      transparent: false,
+      transparent: true,
     },
     footer: {
       copyrightText: "",
@@ -59,9 +143,9 @@ export function FullWizard() {
       columns: 3,
     },
     hero: {
-      showLogo: false,
+      showLogo: true,
       heroLogoUrl: "",
-      heroLogoSize: 200,
+      heroLogoSize: 180,
       useSameAsHeader: true,
     },
   });
@@ -90,7 +174,8 @@ export function FullWizard() {
             header: { ...formData.header, ...submission.data.header },
             footer: { ...formData.footer, ...submission.data.footer },
             hero: { ...formData.hero, ...submission.data.hero },
-            colorPalette: { ...formData.colorPalette, ...submission.data.colorPalette },
+            colorPalette: submission.data.colorPalette || formData.colorPalette,
+            typography: submission.data.typography || formData.typography,
           });
         }
       } catch (err: any) {
@@ -146,6 +231,24 @@ export function FullWizard() {
       ...prev,
       [section]: { ...prev[section], [field]: value },
     }));
+  };
+
+  const applyColorPreset = (preset: any, index: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      colorPalette: preset,
+    }));
+    setActiveColorPreset(index);
+    toast({ title: "Color scheme applied!", description: preset.name });
+  };
+
+  const applyTypographyPreset = (preset: any, index: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      typography: preset,
+    }));
+    setActiveTypographyPreset(index);
+    toast({ title: "Typography applied!", description: preset.name });
   };
 
   const updateSocial = (field: string, value: any) => {
@@ -267,6 +370,119 @@ export function FullWizard() {
         </div>
       </header>
 
+      {/* 🎨 COLOR PALETTE PRESETS */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Palette className="h-5 w-5" /> Color Scheme
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">Choose a professional color palette for your website</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {COLOR_PRESETS.map((preset, index) => (
+            <button
+              key={index}
+              onClick={() => applyColorPreset(preset, index)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                activeColorPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
+              }`}
+            >
+              <div className="flex gap-1 mb-3">
+                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.primary }} />
+                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.background }} />
+                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.text }} />
+                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.accent }} />
+              </div>
+              <p className="font-medium text-sm">{preset.name}</p>
+              <div
+                className="h-2 rounded-full mt-2"
+                style={{ background: preset.gradient }}
+              />
+            </button>
+          ))}
+        </div>
+        
+        {/* Custom Color Pickers */}
+        <div className="mt-6 pt-6 border-t">
+          <Label className="text-sm font-medium mb-3 block">Or Customize Colors</Label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <Label className="text-xs">Primary</Label>
+              <Input
+                type="color"
+                value={formData.colorPalette?.primary || "#0EA5E9"}
+                onChange={(e) => {
+                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } });
+                  setActiveColorPreset(null);
+                }}
+                className="h-10 w-full"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Background</Label>
+              <Input
+                type="color"
+                value={formData.colorPalette?.background || "#FFFFFF"}
+                onChange={(e) => {
+                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } });
+                  setActiveColorPreset(null);
+                }}
+                className="h-10 w-full"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Text</Label>
+              <Input
+                type="color"
+                value={formData.colorPalette?.text || "#1E293B"}
+                onChange={(e) => {
+                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } });
+                  setActiveColorPreset(null);
+                }}
+                className="h-10 w-full"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Accent</Label>
+              <Input
+                type="color"
+                value={formData.colorPalette?.accent || "#F59E0B"}
+                onChange={(e) => {
+                  setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } });
+                  setActiveColorPreset(null);
+                }}
+                className="h-10 w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 📐 TYPOGRAPHY PRESETS */}
+      <div className="bg-white p-6 rounded border mb-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Type className="h-5 w-5" /> Typography
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">Choose professional font pairings</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {TYPOGRAPHY_PRESETS.map((preset, index) => (
+            <button
+              key={index}
+              onClick={() => applyTypographyPreset(preset, index)}
+              className={`p-4 rounded-lg border-2 transition-all text-left ${
+                activeTypographyPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
+              }`}
+            >
+              <p className="font-semibold mb-2">{preset.name}</p>
+              <p className="text-sm text-muted-foreground mb-1" style={{ fontFamily: preset.headingFont }}>
+                Heading: {preset.headingFont.split("'")[1] || preset.headingFont}
+              </p>
+              <p className="text-sm text-muted-foreground" style={{ fontFamily: preset.bodyFont }}>
+                Body: {preset.bodyFont.split("'")[1] || preset.bodyFont}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Logo Best Practices */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
         <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><CheckCircle className="h-5 w-5 text-blue-600" /> Logo Best Practices</h2>
@@ -287,23 +503,6 @@ export function FullWizard() {
               <li>• Low resolution (will look pixelated)</li>
               <li>• Too much detail (hard to read when small)</li>
               <li>• Text too small (won't be readable on mobile)</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">📏 Recommended Sizes</h3>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>• Header Logo: 200×60px or 300×80px</li>
-              <li>• Hero Logo: 400×400px or 500×500px</li>
-              <li>• Favicon: 32×32px or 64×64px</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">🎨 Background Tips</h3>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>• Dark logo for light backgrounds</li>
-              <li>• Light/white logo for dark backgrounds</li>
-              <li>• Consider uploading 2 versions (light & dark)</li>
-              <li>• Transparent PNG works on any background</li>
             </ul>
           </div>
         </div>
@@ -427,11 +626,11 @@ export function FullWizard() {
                     )}
                   </div>
                   <div className="flex flex-col items-center gap-4">
-                    <img src={formData.hero?.useSameAsHeader ? formData.header?.logoUrl : formData.hero?.heroLogoUrl} alt="Hero logo" style={{ height: formData.hero.heroLogoSize || 200, objectFit: "contain" }} className="border rounded bg-white p-4" />
+                    <img src={formData.hero?.useSameAsHeader ? formData.header?.logoUrl : formData.hero?.heroLogoUrl} alt="Hero logo" style={{ height: formData.hero.heroLogoSize || 180, objectFit: "contain" }} className="border rounded bg-white p-4" />
                     <div className="w-full space-y-2">
                       <div>
                         <Label>Hero Logo Size: {formData.hero.heroLogoSize}px</Label>
-                        <Slider min={100} max={400} step={20} value={[formData.hero.heroLogoSize || 200]} onValueChange={([v]) => updateHero("heroLogoSize", v)} className="mt-2" />
+                        <Slider min={100} max={400} step={20} value={[formData.hero.heroLogoSize || 180]} onValueChange={([v]) => updateHero("heroLogoSize", v)} className="mt-2" />
                       </div>
                     </div>
                   </div>
@@ -657,29 +856,6 @@ export function FullWizard() {
           <div>
             <Label>Gallery Images (one URL per line)</Label>
             <Textarea rows={4} value={(formData.media?.galleryImages || []).join("\n")} onChange={(e) => setFormData({ ...formData, media: { ...formData.media, galleryImages: e.target.value.split("\n").filter(url => url.trim()) } })} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" />
-          </div>
-        </div>
-      </div>
-
-      {/* Color Palette */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Primary Color</Label>
-            <Input type="color" value={formData.colorPalette?.primary || "#0EA5E9"} onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } })} className="h-12" />
-          </div>
-          <div>
-            <Label>Background Color</Label>
-            <Input type="color" value={formData.colorPalette?.background || "#ffffff"} onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } })} className="h-12" />
-          </div>
-          <div>
-            <Label>Text Color</Label>
-            <Input type="color" value={formData.colorPalette?.text || "#1e293b"} onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } })} className="h-12" />
-          </div>
-          <div>
-            <Label>Accent Color</Label>
-            <Input type="color" value={formData.colorPalette?.accent || "#f59e0b"} onChange={(e) => setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } })} className="h-12" />
           </div>
         </div>
       </div>
