@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft, ExternalLink, Facebook, Instagram, Youtube, Wifi, Phone, Mail, MapPin, Star, CheckCircle2, Clock, MapPinned } from "lucide-react";
+import { Loader2, ArrowLeft, ExternalLink, Facebook, Instagram, Youtube, Phone, Mail, MapPinned, Star, Quote, Zap, CheckCircle2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ResortLandingPage() {
@@ -73,6 +73,8 @@ export default function ResortLandingPage() {
   const footer = siteData.footer || {};
   const hero = siteData.hero || {};
   const media = siteData.media || {};
+  const testimonials = siteData.testimonials || [];
+  const features = siteData.features || [];
   
   // Color palette with defaults
   const colors = siteData.colorPalette || {
@@ -95,6 +97,7 @@ export default function ResortLandingPage() {
   const headerLogoSize = header.logoSize || 120;
   const heroLogoUrl = hero.showLogo ? (hero.useSameAsHeader ? header.logoUrl : hero.heroLogoUrl) : null;
   const heroLogoSize = hero.heroLogoSize || 180;
+  const heroImage = media.heroImage || media.heroImages?.[0];
 
   // Social media links
   const socialLinks = [
@@ -102,6 +105,13 @@ export default function ResortLandingPage() {
     { platform: "instagram", url: socialMedia.instagram, icon: Instagram },
     { platform: "youtube", url: socialMedia.youtube, icon: Youtube },
   ].filter(s => s.url);
+
+  // Get YouTube video ID
+  const getYouTubeId = (url: string) => {
+    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    return match ? match[1] : null;
+  };
+  const videoId = media.videoUrl ? getYouTubeId(media.videoUrl) : null;
 
   return (
     <div
@@ -202,8 +212,8 @@ export default function ResortLandingPage() {
         id="home"
         className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
         style={{
-          background: media.heroImages?.[0]
-            ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${media.heroImages[0]})`
+          background: heroImage
+            ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${heroImage})`
             : colors.gradient || colors.primary,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -305,6 +315,42 @@ export default function ResortLandingPage() {
         </section>
       )}
 
+      {/* ========== FEATURES SECTION ========== */}
+      {features.length > 0 && (
+        <section className="py-24 px-4" style={{ backgroundColor: `${colors.primary}08` }}>
+          <div className="max-w-6xl mx-auto">
+            <h2
+              className="text-4xl sm:text-5xl font-bold text-center mb-4"
+              style={{ fontFamily: typography.headingFont, color: colors.text }}
+            >
+              Why Choose Us
+            </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+              What makes our resort special
+            </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {features.map((feature: any, i: number) => (
+                <div
+                  key={i}
+                  className="group p-8 rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                >
+                  <div className="text-5xl mb-6">{feature.icon || "✨"}</div>
+                  <h3
+                    className="text-2xl font-bold mb-3"
+                    style={{ fontFamily: typography.headingFont, color: colors.text }}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground" style={{ lineHeight: 1.8 }}>
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ========== AMENITIES SECTION ========== */}
       {siteData.amenities?.length > 0 && (
         <section id="amenities" className="py-24 px-4" style={{ backgroundColor: colors.background }}>
@@ -359,12 +405,22 @@ export default function ResortLandingPage() {
                   key={i}
                   className="group rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2"
                 >
-                  <div
-                    className="h-56 flex items-center justify-center"
-                    style={{ background: `${colors.primary}15` }}
-                  >
-                    <span className="text-6xl">🏨</span>
-                  </div>
+                  {room.imageUrl ? (
+                    <div className="h-56 overflow-hidden">
+                      <img
+                        src={room.imageUrl}
+                        alt={room.name}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="h-56 flex items-center justify-center"
+                      style={{ background: `${colors.primary}15` }}
+                    >
+                      <span className="text-6xl">🏨</span>
+                    </div>
+                  )}
                   <div className="p-8">
                     <h3
                       className="text-2xl font-bold mb-3"
@@ -395,9 +451,115 @@ export default function ResortLandingPage() {
         </section>
       )}
 
+      {/* ========== PHOTO GALLERY SECTION ========== */}
+      {media.galleryImages?.length > 0 && (
+        <section className="py-24 px-4" style={{ backgroundColor: `${colors.primary}08` }}>
+          <div className="max-w-6xl mx-auto">
+            <h2
+              className="text-4xl sm:text-5xl font-bold text-center mb-4"
+              style={{ fontFamily: typography.headingFont, color: colors.text }}
+            >
+              Photo Gallery
+            </h2>
+            <p className="text-center text-muted-foreground mb-12">Explore our resort</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {media.galleryImages.map((url: string, i: number) => (
+                <div
+                  key={i}
+                  className="group relative aspect-square rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                >
+                  <img
+                    src={url}
+                    alt={`Gallery ${i + 1}`}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ========== VIDEO TOUR SECTION ========== */}
+      {videoId && (
+        <section className="py-24 px-4" style={{ backgroundColor: colors.background }}>
+          <div className="max-w-5xl mx-auto">
+            <h2
+              className="text-4xl sm:text-5xl font-bold text-center mb-4"
+              style={{ fontFamily: typography.headingFont, color: colors.text }}
+            >
+              Video Tour
+            </h2>
+            <p className="text-center text-muted-foreground mb-12">Take a virtual tour of our resort</p>
+            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+                title="Resort Video Tour"
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ========== TESTIMONIALS SECTION ========== */}
+      {testimonials.length > 0 && (
+        <section className="py-24 px-4" style={{ backgroundColor: `${colors.primary}08` }}>
+          <div className="max-w-6xl mx-auto">
+            <h2
+              className="text-4xl sm:text-5xl font-bold text-center mb-4"
+              style={{ fontFamily: typography.headingFont, color: colors.text }}
+            >
+              Guest Reviews
+            </h2>
+            <p className="text-center text-muted-foreground mb-12">What our guests say about us</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {testimonials.map((testimonial: any, i: number) => (
+                <div
+                  key={i}
+                  className="p-8 rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, j) => (
+                      <Star
+                        key={j}
+                        className="h-5 w-5"
+                        style={{
+                          fill: j < (testimonial.rating || 5) ? colors.accent : "none",
+                          color: j < (testimonial.rating || 5) ? colors.accent : "#d1d5db",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <Quote className="h-8 w-8 mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
+                  <p className="text-muted-foreground mb-6" style={{ lineHeight: 1.8, fontStyle: "italic" }}>
+                    "{testimonial.text}"
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: colors.primary }}
+                    >
+                      {testimonial.name?.charAt(0) || "G"}
+                    </div>
+                    <div>
+                      <p className="font-semibold" style={{ color: colors.text }}>{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ========== FAQ SECTION ========== */}
       {siteData.faq?.length > 0 && (
-        <section id="faq" className="py-24 px-4" style={{ backgroundColor: `${colors.primary}08` }}>
+        <section id="faq" className="py-24 px-4" style={{ backgroundColor: colors.background }}>
           <div className="max-w-4xl mx-auto">
             <h2
               className="text-4xl sm:text-5xl font-bold text-center mb-4"
