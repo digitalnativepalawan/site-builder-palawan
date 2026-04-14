@@ -11,40 +11,54 @@ export default function ResortLandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [siteData, setSiteData] = useState<any>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
-    console.log("Preview page loaded, ID:", id);
+    console.log("=== PREVIEW PAGE DEBUG ===");
+    console.log("Route ID param:", id);
     
     if (!id) {
-      setError("No resort ID provided");
+      setError("No resort ID provided in URL");
       setLoading(false);
       return;
     }
 
     const fetchSite = async () => {
       try {
-        console.log("Fetching resort from Supabase:", id);
+        console.log("Fetching from Supabase...");
+        console.log("Table: resort_submissions");
+        console.log("ID:", id);
         
         const { data, error } = await supabase
           .from("resort_submissions")
-          .select("data, status, id")
+          .select("data, status, id, created_at")
           .eq("id", id)
           .single();
 
-        console.log("Supabase response:", { data, error });
+        console.log("=== SUPABASE RESPONSE ===");
+        console.log("Data:", data);
+        console.log("Error:", error);
+        
+        setDebugInfo({ data, error });
 
         if (error) {
-          console.error("Supabase error:", error);
+          console.error("Supabase query failed:", error);
           throw new Error(error.message);
         }
 
         if (!data) {
-          throw new Error("Resort not found");
+          console.error("No data returned from query");
+          throw new Error("Resort not found in database");
         }
 
+        console.log("=== DATA STRUCTURE ===");
+        console.log("data.data:", data.data);
+        console.log("Type:", typeof data.data);
+        
         setSiteData(data);
       } catch (err: any) {
-        console.error("Failed to load site:", err);
+        console.error("=== CATCH ERROR ===");
+        console.error(err);
         setError(err.message || "Failed to load resort");
       } finally {
         setLoading(false);
@@ -56,9 +70,10 @@ export default function ResortLandingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center flex-col gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="ml-4 text-muted-foreground">Loading resort...</p>
+        <p className="text-muted-foreground">Loading resort preview...</p>
+        <p className="text-xs text-muted-foreground">ID: {id}</p>
       </div>
     );
   }
@@ -68,6 +83,16 @@ export default function ResortLandingPage() {
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-4">
         <h1 className="text-2xl font-bold text-destructive">Error Loading Resort</h1>
         <p className="text-muted-foreground max-w-md text-center">{error || "Resort not found"}</p>
+        
+        {debugInfo && (
+          <details className="w-full max-w-2xl bg-muted p-4 rounded-lg">
+            <summary className="cursor-pointer font-medium">Debug Info (click to expand)</summary>
+            <pre className="text-xs mt-2 overflow-auto max-h-96">
+              {JSON.stringify(debugInfo, null, 2)}
+            </pre>
+          </details>
+        )}
+        
         <div className="flex gap-4">
           <Button onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
@@ -83,6 +108,10 @@ export default function ResortLandingPage() {
   const d = siteData.data || {};
   const identity = d.identity || d.basicInfo || {};
   const resortName = identity.resortName || "Resort";
+  
+  console.log("=== BUILDING SECTIONS ===");
+  console.log("Identity:", identity);
+  console.log("Resort Name:", resortName);
   
   // Build sections from data
   const sections = [];
@@ -202,6 +231,10 @@ export default function ResortLandingPage() {
     headingFont: "'Space Grotesk', sans-serif",
     bodyFont: "'Inter', sans-serif",
   };
+
+  console.log("=== SECTIONS BUILT ===");
+  console.log("Total sections:", sections.length);
+  console.log("Sections:", sections);
 
   return (
     <div className="min-h-screen bg-background">
