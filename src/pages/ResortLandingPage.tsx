@@ -125,17 +125,33 @@ export default function ResortLandingPage() {
   // ✅ WEBSITE CONTENT WITH PROPER MOBILE RESPONSIVENESS
   const WebsiteContent = () => (
     <div
-      className="min-h-screen"
+      className="min-h-screen w-full"
       style={{
         backgroundColor: colors.background,
         color: colors.text,
         fontFamily: typography.bodyFont,
+        // CRITICAL FIX: Prevent horizontal overflow
+        overflowX: "hidden", 
+        width: "100%",
+        maxWidth: "100vw"
       }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;700&display=swap');
         
-        /* Mobile-first responsive utilities */
+        /* CRITICAL MOBILE FIXES */
+        * {
+          box-sizing: border-box;
+        }
+        img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+        }
+        input, textarea, button {
+          max-width: 100%;
+        }
+        
         @media (max-width: 640px) {
           .mobile-text-3xl { font-size: 1.5rem !important; }
           .mobile-text-2xl { font-size: 1.25rem !important; }
@@ -152,11 +168,11 @@ export default function ResortLandingPage() {
 
       {/* HEADER */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 transition-all duration-300 w-full ${
           header.transparent ? "absolute w-full bg-transparent" : "bg-white/95 backdrop-blur-md shadow-sm"
         } ${header.sticky ? "" : "relative"}`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex justify-between items-center h-16 sm:h-20">
             {headerLogoUrl ? (
               <img src={headerLogoUrl} alt={resortName} style={{ height: Math.min(headerLogoSize, 60) }} className="object-contain" />
@@ -214,7 +230,7 @@ export default function ResortLandingPage() {
       {/* HERO - Mobile Optimized */}
       <section
         id="home"
-        className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden mobile-py-24"
+        className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden mobile-py-24 w-full"
         style={{
           background: heroImage
             ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${heroImage})`
@@ -268,10 +284,10 @@ export default function ResortLandingPage() {
             </p>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mobile-flex-col">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mobile-flex-col w-full">
             <Button
               size="lg"
-              className="px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full shadow-2xl"
+              className="w-full sm:w-auto px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full shadow-2xl"
               style={{ backgroundColor: colors.accent, color: "#ffffff" }}
               onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}`}
             >
@@ -280,7 +296,7 @@ export default function ResortLandingPage() {
             <Button
               size="lg"
               variant="outline"
-              className="px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full border-2"
+              className="w-full sm:w-auto px-6 sm:px-8 md:px-10 py-5 sm:py-6 md:py-7 text-base sm:text-lg font-semibold rounded-full border-2"
               style={{ borderColor: "#ffffff", color: "#ffffff" }}
               onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
             >
@@ -299,8 +315,8 @@ export default function ResortLandingPage() {
 
       {/* ABOUT - Mobile Optimized */}
       {brandStory.fullDescription && (
-        <section id="about" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto text-center">
+        <section id="about" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full">
+          <div className="max-w-4xl mx-auto text-center w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 md:mb-8"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -320,8 +336,8 @@ export default function ResortLandingPage() {
 
       {/* FEATURES - Mobile Optimized */}
       {features.length > 0 && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-6xl mx-auto">
+        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
+          <div className="max-w-6xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -330,11 +346,11 @@ export default function ResortLandingPage() {
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
             {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
               {features.map((feature: any, i: number) => (
                 <div
                   key={i}
-                  className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300"
+                  className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
                 >
                   <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
                   <h3
@@ -353,8 +369,8 @@ export default function ResortLandingPage() {
 
       {/* AMENITIES - Mobile Optimized */}
       {siteData.amenities?.length > 0 && (
-        <section id="amenities" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-6xl mx-auto">
+        <section id="amenities" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+          <div className="max-w-6xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -362,19 +378,19 @@ export default function ResortLandingPage() {
               Amenities
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
-            {/* ✅ Mobile: 2 columns, Tablet: 3 columns, Desktop: 4 columns */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {/* ✅ Mobile: 1 column (fixed from 2 to prevent overflow), Tablet: 2, Desktop: 4 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full">
               {siteData.amenities.map((amenity: string, i: number) => (
                 <div
                   key={i}
-                  className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300"
+                  className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
                 >
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div
                       className="w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-transform group-hover:scale-125"
                       style={{ backgroundColor: colors.primary }}
                     />
-                    <span className="text-xs sm:text-sm font-medium" style={{ color: colors.text }}>
+                    <span className="text-xs sm:text-sm font-medium break-words" style={{ color: colors.text }}>
                       {amenity}
                     </span>
                   </div>
@@ -387,8 +403,8 @@ export default function ResortLandingPage() {
 
       {/* ROOMS - Mobile Optimized */}
       {siteData.roomTypes?.length > 0 && (
-        <section id="rooms" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-6xl mx-auto">
+        <section id="rooms" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+          <div className="max-w-6xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -397,14 +413,14 @@ export default function ResortLandingPage() {
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
             {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
               {siteData.roomTypes.map((room: any, i: number) => (
                 <div
                   key={i}
-                  className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                  className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden w-full"
                 >
                   {room.imageUrl ? (
-                    <div className="h-48 sm:h-56 overflow-hidden">
+                    <div className="h-48 sm:h-56 overflow-hidden w-full">
                       <img
                         src={room.imageUrl}
                         alt={room.name}
@@ -413,13 +429,13 @@ export default function ResortLandingPage() {
                     </div>
                   ) : (
                     <div
-                      className="h-48 sm:h-56 flex items-center justify-center"
+                      className="h-48 sm:h-56 flex items-center justify-center w-full"
                       style={{ background: `${colors.primary}15` }}
                     >
                       <span className="text-4xl sm:text-5xl md:text-6xl">🏨</span>
                     </div>
                   )}
-                  <div className="p-4 sm:p-6 md:p-8">
+                  <div className="p-4 sm:p-6 md:p-8 w-full">
                     <h3
                       className="mobile-text-xl text-xl sm:text-2xl font-bold mb-2 sm:mb-3"
                       style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -451,8 +467,8 @@ export default function ResortLandingPage() {
 
       {/* GALLERY - Mobile Optimized */}
       {media.galleryImages?.length > 0 && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-6xl mx-auto">
+        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
+          <div className="max-w-6xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -461,11 +477,11 @@ export default function ResortLandingPage() {
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
             {/* ✅ Mobile: 2 columns, Tablet: 3 columns, Desktop: 4 columns */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
               {media.galleryImages.map((url: string, i: number) => (
                 <div
                   key={i}
-                  className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                  className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full"
                 >
                   <img
                     src={url}
@@ -482,8 +498,8 @@ export default function ResortLandingPage() {
 
       {/* VIDEO - Mobile Optimized */}
       {videoId && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-5xl mx-auto">
+        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+          <div className="max-w-5xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -491,7 +507,7 @@ export default function ResortLandingPage() {
               Video Tour
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Take a virtual tour of our resort</p>
-            <div className="relative aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl w-full">
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
                 title="Resort Video Tour"
@@ -506,8 +522,8 @@ export default function ResortLandingPage() {
 
       {/* TESTIMONIALS - Mobile Optimized */}
       {testimonials.length > 0 && (
-        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-6xl mx-auto">
+        <section className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
+          <div className="max-w-6xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -516,11 +532,11 @@ export default function ResortLandingPage() {
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
             {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
               {testimonials.map((testimonial: any, i: number) => (
                 <div
                   key={i}
-                  className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300"
+                  className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full"
                 >
                   <div className="flex gap-1 mb-3 sm:mb-4">
                     {[...Array(5)].map((_, j) => (
@@ -559,8 +575,8 @@ export default function ResortLandingPage() {
 
       {/* FAQ - Mobile Optimized */}
       {siteData.faq?.length > 0 && (
-        <section id="faq" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: colors.background }}>
-          <div className="max-w-4xl mx-auto">
+        <section id="faq" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+          <div className="max-w-4xl mx-auto w-full">
             <h2
               className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
               style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -568,11 +584,11 @@ export default function ResortLandingPage() {
               FAQ
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Common questions answered</p>
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-3 sm:space-y-4 w-full">
               {siteData.faq.map((item: any, i: number) => (
                 <div
                   key={i}
-                  className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow"
+                  className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full"
                 >
                   <h3
                     className="mobile-text-xl text-lg sm:text-xl font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3"
@@ -590,8 +606,8 @@ export default function ResortLandingPage() {
       )}
 
       {/* CONTACT - Mobile Optimized */}
-      <section id="contact" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6" style={{ backgroundColor: colors.background }}>
-        <div className="max-w-6xl mx-auto">
+      <section id="contact" className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+        <div className="max-w-6xl mx-auto w-full">
           <h2
             className="mobile-text-2xl text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-3 sm:mb-4"
             style={{ fontFamily: typography.headingFont, color: colors.text }}
@@ -600,9 +616,9 @@ export default function ResortLandingPage() {
           </h2>
           <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">We'd love to hear from you</p>
           {/* ✅ Mobile: 1 column (stacked), Desktop: 2 columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 w-full">
             {/* Contact Info */}
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-6 sm:space-y-8 w-full">
               {identity.contactEmail && (
                 <div className="flex items-start gap-3 sm:gap-4">
                   <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
@@ -610,7 +626,7 @@ export default function ResortLandingPage() {
                   </div>
                   <div>
                     <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Email</p>
-                    <a href={`mailto:${identity.contactEmail}`} className="text-sm sm:text-base hover:underline" style={{ color: colors.text }}>
+                    <a href={`mailto:${identity.contactEmail}`} className="text-sm sm:text-base hover:underline break-all" style={{ color: colors.text }}>
                       {identity.contactEmail}
                     </a>
                   </div>
@@ -654,9 +670,9 @@ export default function ResortLandingPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg">
-              <form className="space-y-4 sm:space-y-6">
-                <div>
+            <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg w-full">
+              <form className="space-y-4 sm:space-y-6 w-full">
+                <div className="w-full">
                   <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
                     Your Name
                   </label>
@@ -667,7 +683,7 @@ export default function ResortLandingPage() {
                     placeholder="John Doe"
                   />
                 </div>
-                <div>
+                <div className="w-full">
                   <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
                     Email Address
                   </label>
@@ -678,7 +694,7 @@ export default function ResortLandingPage() {
                     placeholder="john@example.com"
                   />
                 </div>
-                <div>
+                <div className="w-full">
                   <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
                     Message
                   </label>
@@ -703,16 +719,16 @@ export default function ResortLandingPage() {
 
       {/* FOOTER - Mobile Optimized */}
       <footer
-        className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6"
+        className="mobile-py-24 py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full"
         style={{ backgroundColor: colors.text, color: "#ffffff" }}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto w-full">
           {/* ✅ Mobile: 1 column, Tablet: 2 columns, Desktop: 3-4 columns */}
           <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-10 sm:mb-12"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-10 sm:mb-12 w-full"
           >
             {/* Column 1: Brand */}
-            <div>
+            <div className="w-full">
               {headerLogoUrl && (
                 <img
                   src={headerLogoUrl}
@@ -729,10 +745,10 @@ export default function ResortLandingPage() {
 
             {/* Column 2: Contact */}
             {footer.showContactInfo && (
-              <div>
+              <div className="w-full">
                 <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Contact</h4>
                 <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-70">
-                  {identity.contactEmail && <p>{identity.contactEmail}</p>}
+                  {identity.contactEmail && <p className="break-all">{identity.contactEmail}</p>}
                   {identity.phone && <p>{identity.phone}</p>}
                   {identity.fullAddress && <p>{identity.fullAddress}</p>}
                 </div>
@@ -741,7 +757,7 @@ export default function ResortLandingPage() {
 
             {/* Column 3: Navigation */}
             {footer.showNavigation && (
-              <div>
+              <div className="w-full">
                 <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Quick Links</h4>
                 <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm opacity-70">
                   {header.navigationLinks?.map((link: any, i: number) => (
@@ -755,7 +771,7 @@ export default function ResortLandingPage() {
 
             {/* Column 4: Social */}
             {footer.showSocialIcons && socialLinks.length > 0 && (
-              <div>
+              <div className="w-full">
                 <h4 className="font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Follow Us</h4>
                 <div className="flex gap-3 sm:gap-4">
                   {socialLinks.map((social, i) => {
@@ -778,7 +794,7 @@ export default function ResortLandingPage() {
           </div>
 
           {/* Copyright */}
-          <div className="pt-6 sm:pt-8 border-t border-white/10 text-center text-xs sm:text-sm opacity-50">
+          <div className="pt-6 sm:pt-8 border-t border-white/10 text-center text-xs sm:text-sm opacity-50 w-full">
             <p>{footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}</p>
           </div>
         </div>
