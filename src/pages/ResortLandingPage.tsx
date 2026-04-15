@@ -321,7 +321,7 @@ export default function ResortLandingPage() {
                 {features.map((feature: any, i: number) => (
                   <div
                     key={i}
-                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full"
+                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
                   >
                     <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
                     <h3
@@ -354,7 +354,7 @@ export default function ResortLandingPage() {
                 {siteData.amenities.map((amenity: string, i: number) => (
                   <div
                     key={i}
-                    className="group p-3 rounded-xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300"
+                    className="group p-3 rounded-xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
                   >
                     <div className="flex items-center gap-2">
                       <div
@@ -372,7 +372,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* ROOMS GRID - FIXED (Removed w-full to prevent shrinking) */}
+        {/* ROOMS GRID - FIXED (Added w-full to card) */}
         {siteData.roomTypes?.length > 0 && (
           <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -388,7 +388,7 @@ export default function ResortLandingPage() {
                 {siteData.roomTypes.map((room: any, i: number) => (
                   <div
                     key={i}
-                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col"
+                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col w-full"
                   >
                     {room.imageUrl ? (
                       <div className="h-48 sm:h-56 overflow-hidden w-full">
@@ -452,7 +452,7 @@ export default function ResortLandingPage() {
                 {media.galleryImages.map((url: string, i: number) => (
                   <div
                     key={i}
-                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full"
                   >
                     <img
                       src={url}
@@ -507,7 +507,7 @@ export default function ResortLandingPage() {
                 {testimonials.map((testimonial: any, i: number) => (
                   <div
                     key={i}
-                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full"
+                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
                   >
                     <div className="flex gap-1 mb-3 sm:mb-4">
                       {[...Array(5)].map((_, j) => (
