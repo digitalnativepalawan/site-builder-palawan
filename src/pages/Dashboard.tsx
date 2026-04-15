@@ -3,48 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, ExternalLink, Trash2, Menu, Globe, Settings, LogOut, LayoutDashboard, Loader2 } from "lucide-react";
+import { Plus, Edit, ExternalLink, Trash2, Globe, Loader2, Building2, MoreVertical } from "lucide-react";
 import { format } from "date-fns";
 
 function generateSubdomain(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + Math.random().toString(36).slice(2, 6);
 }
 
-function SidebarNav() {
-  const navigate = useNavigate();
+const BUSINESS_TYPES = [
+  { value: "resort", label: "🏖️ Resort / Hotel" },
+  { value: "restaurant", label: "🍽️ Restaurant / Café" },
+  { value: "service", label: "🛠️ Service Business" },
+  { value: "shop", label: "🛍️ Shop / Retail" },
+  { value: "portfolio", label: "🎨 Portfolio / Creative" },
+  { value: "blog", label: "✍️ Blog / Content" },
+];
 
-  const links = [
-    { icon: LayoutDashboard, label: "My Sites", onClick: () => navigate("/dashboard") },
-  ];
-
-  return (
-    <nav className="flex flex-col gap-1 p-4">
-      <div className="flex items-center gap-2 px-3 py-4 mb-4">
-        <Globe className="h-6 w-6 text-sidebar-primary" />
-        <span className="font-heading text-lg font-bold text-sidebar-foreground">SiteForge</span>
-      </div>
-      {links.map((link) => (
-        <button
-          key={link.label}
-          onClick={link.onClick}
-          className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors min-h-[44px]"
-        >
-          <link.icon className="h-4 w-4" />
-          {link.label}
-        </button>
-      ))}
-    </nav>
-  );
-}
+const TYPE_COLORS: Record<string, string> = {
+  resort: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  restaurant: "bg-orange-50 text-orange-700 border-orange-200",
+  service: "bg-blue-50 text-blue-700 border-blue-200",
+  shop: "bg-purple-50 text-purple-700 border-purple-200",
+  portfolio: "bg-pink-50 text-pink-700 border-pink-200",
+  blog: "bg-amber-50 text-amber-700 border-amber-200",
+};
 
 export default function Dashboard() {
   const DEV_USER_ID = "4f66ea34-fdde-44aa-8d98-99c2a5a89f16";
@@ -54,7 +43,7 @@ export default function Dashboard() {
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newSiteName, setNewSiteName] = useState("");
-  const [newTemplate, setNewTemplate] = useState("business");
+  const [newTemplate, setNewTemplate] = useState("service");
 
   const { data: sites, isLoading } = useQuery({
     queryKey: ["sites"],
@@ -80,7 +69,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["sites"] });
       setCreateOpen(false);
       setNewSiteName("");
-      toast({ title: "Site created!" });
+      toast({ title: "Business created! Let's build your site." });
       navigate(`/sites/${data.id}/edit`);
     },
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
@@ -98,162 +87,193 @@ export default function Dashboard() {
     },
   });
 
-  const templateColors: Record<string, string> = {
-    business: "bg-info/10 text-info",
-    portfolio: "bg-foreground/10 text-foreground",
-    blog: "bg-warning/10 text-warning",
-  };
-
   return (
-    <div className="flex min-h-screen max-w-full overflow-x-hidden">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
-        <SidebarNav />
-      </aside>
-
-      <div className="flex-1 flex flex-col max-w-full overflow-x-hidden">
-        {/* Top bar */}
-        <header className="flex items-center justify-between border-b px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden min-h-[44px] min-w-[44px]">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0 bg-sidebar">
-                <SidebarNav />
-              </SheetContent>
-            </Sheet>
-            <h1 className="font-heading text-xl font-bold sm:text-2xl">My Sites</h1>
+    <div className="min-h-screen bg-gray-50 max-w-full overflow-x-hidden">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Globe className="h-5 w-5 text-blue-600 shrink-0" />
+            <h1 className="font-bold text-lg text-gray-900 truncate">My Businesses</h1>
           </div>
-
-          {/* Build Resort Website (Auto) Button */}
-          <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="min-h-[44px] gap-2">
-              <Globe className="h-4 w-4" />
-              <span className="hidden lg:inline">Build Resort Website (Auto)</span>
-              <span className="lg:hidden">Build Resort</span>
-            </Button>
-          </a>
 
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
-              <Button className="min-h-[44px] gap-2">
+              <Button className="min-h-[44px] gap-2 shrink-0 bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4" />
-                <span className="hidden lg:inline">Build Custom Site (Manual)</span>
-                <span className="lg:hidden">Manual Build</span>
+                <span>New Business</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="mx-4 max-w-md">
-              {/* Resort form link inside dialog */}
-              <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer"
-                 className="text-sm text-muted-foreground hover:text-primary transition-colors block mb-2">
-                🏖️ Submit resort details to automatically build your website
-              </a>
+            <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-md rounded-2xl p-6">
               <DialogHeader>
-                <DialogTitle className="font-heading">Create New Site</DialogTitle>
+                <DialogTitle className="text-xl font-bold">Create Your Business Site</DialogTitle>
+                <p className="text-sm text-gray-500 mt-1">Fill in the basics — you can add more details after.</p>
               </DialogHeader>
               <form
-                onSubmit={(e) => { e.preventDefault(); createSite.mutate(); }}
-                className="space-y-4"
+                onSubmit={(e) => { e.preventDefault(); if (newSiteName.trim()) createSite.mutate(); }}
+                className="space-y-5 mt-4"
               >
                 <div className="space-y-2">
-                  <Label>Site Name</Label>
-                  <Input value={newSiteName} onChange={(e) => setNewSiteName(e.target.value)} required className="min-h-[44px]" placeholder="My Awesome Site" />
+                  <Label className="font-semibold">Business Name <span className="text-red-500">*</span></Label>
+                  <Input
+                    value={newSiteName}
+                    onChange={(e) => setNewSiteName(e.target.value)}
+                    required
+                    className="min-h-[48px] rounded-xl text-base"
+                    placeholder="e.g. Sunset Beach Resort"
+                    autoFocus
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>Template</Label>
+                  <Label className="font-semibold">Business Type</Label>
                   <Select value={newTemplate} onValueChange={setNewTemplate}>
-                    <SelectTrigger className="min-h-[44px]">
+                    <SelectTrigger className="min-h-[48px] rounded-xl text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="business">🏢 Business</SelectItem>
-                      <SelectItem value="portfolio">🎨 Portfolio</SelectItem>
-                      <SelectItem value="blog">✍️ Blog</SelectItem>
+                      {BUSINESS_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value} className="min-h-[44px] text-base">
+                          {t.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-gray-400">Don't worry — all types share the same sections. This just sets the default labels.</p>
                 </div>
-                <Button type="submit" className="w-full min-h-[44px]" disabled={createSite.isPending}>
-                  {createSite.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Site
+                <Button
+                  type="submit"
+                  className="w-full min-h-[52px] rounded-xl text-base font-bold bg-blue-600 hover:bg-blue-700"
+                  disabled={createSite.isPending || !newSiteName.trim()}
+                >
+                  {createSite.isPending
+                    ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating…</>
+                    : "Create & Start Building →"
+                  }
                 </Button>
               </form>
             </DialogContent>
           </Dialog>
-        </header>
+        </div>
+      </header>
 
-        {/* Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          {isLoading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      {/* Content */}
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {isLoading ? (
+          <div className="flex justify-center py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        ) : !sites?.length ? (
+          /* Empty state */
+          <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+            <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
+              <Building2 className="h-10 w-10 text-blue-400" />
             </div>
-          ) : !sites?.length ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-              <Globe className="h-16 w-16 text-muted-foreground/30 mb-4" />
-              <h2 className="font-heading text-xl font-semibold mb-2">No sites yet</h2>
-              <p className="text-muted-foreground mb-6">Build a site automatically with our resort form, or create one manually</p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a href="/resort-form-full.html" target="_blank" rel="noopener noreferrer">
-                  <Button className="min-h-[44px] gap-2">
-                    <Globe className="h-4 w-4" /> Build Resort Website (Auto)
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Build your first website</h2>
+            <p className="text-gray-500 mb-8 max-w-xs leading-relaxed">
+              Create a professional website for your business in minutes — no technical skills needed.
+            </p>
+            <Button
+              onClick={() => setCreateOpen(true)}
+              className="min-h-[52px] px-8 gap-2 bg-blue-600 hover:bg-blue-700 text-base font-bold rounded-xl"
+            >
+              <Plus className="h-5 w-5" /> Create Your First Site
+            </Button>
+          </div>
+        ) : (
+          /* Sites grid */
+          <div className="space-y-3">
+            {sites.map((site) => (
+              <div
+                key={site.id}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+              >
+                {/* Card top */}
+                <div className="p-4 flex items-start gap-3">
+                  {/* Icon */}
+                  <div className="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xl">
+                      {BUSINESS_TYPES.find(t => t.value === site.template)?.label.split(" ")[0] || "🌐"}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{site.site_name}</h3>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${TYPE_COLORS[site.template] || "bg-gray-50 text-gray-600 border-gray-200"}`}>
+                        {BUSINESS_TYPES.find(t => t.value === site.template)?.label.split(" ").slice(1).join(" ") || site.template}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        Updated {format(new Date(site.updated_at), "MMM d")}
+                      </span>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        site.status === "published"
+                          ? "bg-green-50 text-green-700"
+                          : "bg-yellow-50 text-yellow-700"
+                      }`}>
+                        {site.status === "published" ? "● Live" : "○ Draft"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action bar */}
+                <div className="border-t border-gray-50 px-4 py-3 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 min-h-[44px] gap-1.5 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold"
+                    onClick={() => navigate(`/sites/${site.id}/edit`)}
+                  >
+                    <Edit className="h-4 w-4" /> Edit Site
                   </Button>
-                </a>
-                <Button variant="outline" onClick={() => setCreateOpen(true)} className="min-h-[44px] gap-2">
-                  <Plus className="h-4 w-4" /> Build Custom Site (Manual)
-                </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="min-h-[44px] px-4 gap-1.5 rounded-xl font-semibold"
+                    onClick={() => navigate(`/preview/${site.id}`)}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    <span className="hidden sm:inline">Preview</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="min-h-[44px] min-w-[44px] text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl"
+                    onClick={() => setDeleteId(site.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {sites.map((site) => (
-                <Card key={site.id} className="animate-fade-in hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="font-heading text-lg">{site.site_name}</CardTitle>
-                      <Badge variant={site.status === "published" ? "default" : "secondary"} className={site.status === "published" ? "bg-success text-accent-foreground" : ""}>
-                        {site.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-4">
-                      <Badge variant="outline" className={templateColors[site.template]}>{site.template}</Badge>
-                      <span>·</span>
-                      <span>{format(new Date(site.updated_at), "MMM d, yyyy")}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button size="sm" className="min-h-[44px] flex-1 gap-1" onClick={() => navigate(`/sites/${site.id}/edit`)}>
-                        <Edit className="h-3.5 w-3.5" /> Edit
-                      </Button>
-                      <Button size="sm" variant="outline" className="min-h-[44px] flex-1 gap-1" onClick={() => navigate(`/preview/${site.id}`)}>
-                        <ExternalLink className="h-3.5 w-3.5" /> Preview
-                      </Button>
-                      <Button size="sm" variant="ghost" className="min-h-[44px] min-w-[44px] text-destructive hover:text-destructive" onClick={() => setDeleteId(site.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
+            ))}
+
+            {/* Add another */}
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors font-semibold text-sm flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" /> Add Another Business
+            </button>
+          </div>
+        )}
+      </main>
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-md rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this site?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. All content and uploaded files will be permanently deleted.</AlertDialogDescription>
+            <AlertDialogDescription>
+              This cannot be undone. All content and uploaded files will be permanently deleted.
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="min-h-[44px]">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="min-h-[44px] bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteId && deleteSite.mutate(deleteId)}>
-              Delete
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="min-h-[44px] rounded-xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="min-h-[44px] rounded-xl bg-red-600 hover:bg-red-700"
+              onClick={() => deleteId && deleteSite.mutate(deleteId)}
+            >
+              Delete Site
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
