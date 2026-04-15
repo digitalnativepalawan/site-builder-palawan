@@ -142,10 +142,31 @@ export default function ResortLandingPage() {
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;700&display=swap');
           
-          * { box-sizing: border-box; }
-          img { max-width: 100%; height: auto; display: block; }
-          input, textarea, button { max-width: 100%; }
-          h1, h2, h3, p, span, a, div { overflow-wrap: break-word; word-wrap: break-word; }
+          * { 
+            box-sizing: border-box; 
+          }
+          img { 
+            max-width: 100%; 
+            height: auto; 
+            display: block; 
+          }
+          input, textarea, button { 
+            max-width: 100%; 
+          }
+          h1, h2, h3, p, span, a, div, li { 
+            overflow-wrap: break-word; 
+            word-wrap: break-word; 
+            word-break: break-word;
+            white-space: normal;
+          }
+          
+          @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+          .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
+          .animate-fade-in-down { animation: fade-in-down 0.8s ease-out forwards; }
+          .animation-delay-200 { animation-delay: 0.2s; }
+          .animation-delay-400 { animation-delay: 0.4s; }
+          .animation-delay-600 { animation-delay: 0.6s; }
         `}</style>
 
         {/* HEADER */}
@@ -261,7 +282,7 @@ export default function ResortLandingPage() {
               </p>
             )}
 
-            {/* HERO BUTTONS - FIXED */}
+            {/* HERO BUTTONS */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full px-4">
               <Button
                 size="lg"
@@ -289,7 +310,7 @@ export default function ResortLandingPage() {
           <section id="about" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full">
             <div className="max-w-4xl mx-auto w-full">
               <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold mb-4 sm:mb-6 md:mb-8`}
+                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold mb-4 sm:mb-6 md:mb-8 text-center`}
                 style={{ fontFamily: typography.headingFont, color: colors.text }}
               >
                 About Us
@@ -305,7 +326,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* FEATURES GRID - FIXED */}
+        {/* FEATURES GRID */}
         {features.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -317,20 +338,25 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {features.map((feature: any, i: number) => (
                   <div
                     key={i}
-                    className="group p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
+                    className="group p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
                   >
-                    <div className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">{feature.icon || "✨"}</div>
+                    <div className="text-3xl sm:text-4xl md:text-5xl mb-3 sm:mb-4 md:mb-6">{feature.icon || "✨"}</div>
                     <h3
-                      className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3`}
+                      className={`${isMobilePreview ? "text-lg" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3 break-words`}
                       style={{ fontFamily: typography.headingFont, color: colors.text }}
                     >
                       {feature.title}
                     </h3>
-                    <p className="text-sm sm:text-base text-muted-foreground" style={{ lineHeight: 1.6 }}>{feature.description}</p>
+                    <p 
+                      className="text-sm sm:text-base text-muted-foreground break-words" 
+                      style={{ lineHeight: 1.6 }}
+                    >
+                      {feature.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -338,7 +364,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* AMENITIES GRID - FIXED */}
+        {/* AMENITIES GRID */}
         {siteData.amenities?.length > 0 && (
           <section id="amenities" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -350,18 +376,21 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                 {siteData.amenities.map((amenity: string, i: number) => (
                   <div
                     key={i}
-                    className="group p-3 rounded-xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 w-full"
+                    className="group p-2 sm:p-3 rounded-lg sm:rounded-xl border bg-white shadow-sm hover:shadow-md transition-all duration-300 w-full"
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-2 h-2 rounded-full transition-transform group-hover:scale-125"
+                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 transition-transform group-hover:scale-125"
                         style={{ backgroundColor: colors.primary }}
                       />
-                      <span className="text-xs text-center sm:text-left" style={{ color: colors.text }}>
+                      <span 
+                        className="text-xs sm:text-sm text-left break-words whitespace-normal line-clamp-2" 
+                        style={{ color: colors.text }}
+                      >
                         {amenity}
                       </span>
                     </div>
@@ -372,7 +401,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* ROOMS GRID - FIXED (Added w-full to card) */}
+        {/* ROOMS GRID - FIXED FOR MOBILE */}
         {siteData.roomTypes?.length > 0 && (
           <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -384,47 +413,83 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Responsive grid - 1 column on mobile, 2 on tablet, 3 on desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
                 {siteData.roomTypes.map((room: any, i: number) => (
                   <div
                     key={i}
-                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col w-full"
+                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col w-full h-full"
                   >
+                    {/* Room Image - Responsive height */}
                     {room.imageUrl ? (
-                      <div className="h-48 sm:h-56 overflow-hidden w-full">
+                      <div className="h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden w-full">
                         <img
                           src={room.imageUrl}
                           alt={room.name}
-                          className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       </div>
                     ) : (
                       <div
-                        className="h-48 sm:h-56 flex items-center justify-center w-full"
+                        className="h-48 sm:h-56 md:h-64 lg:h-72 flex items-center justify-center w-full"
                         style={{ background: `${colors.primary}15` }}
                       >
-                        <span className="text-4xl sm:text-5xl md:text-6xl">🏨</span>
+                        <span className="text-5xl sm:text-6xl md:text-7xl">🏨</span>
                       </div>
                     )}
-                    <div className="p-4 sm:p-6 md:p-8 flex-1 flex flex-col">
+                    
+                    {/* Room Content - Responsive padding */}
+                    <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex-1 flex flex-col">
                       <h3
-                        className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3`}
+                        className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl md:text-2xl"} font-bold mb-2 break-words`}
                         style={{ fontFamily: typography.headingFont, color: colors.text }}
                       >
                         {room.name || "Room"}
                       </h3>
-                      <div className="flex items-baseline gap-1 mb-3 sm:mb-4">
-                        <span className="text-2xl sm:text-3xl font-bold" style={{ color: colors.primary }}>
-                          ₱{room.price || "0"}
+                      
+                      {/* Price - Responsive sizing */}
+                      <div className="flex items-baseline gap-1 mb-3 sm:mb-4 flex-wrap">
+                        <span className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: colors.primary }}>
+                          ₱{room.price?.toLocaleString() || "0"}
                         </span>
                         <span className="text-xs sm:text-sm text-muted-foreground">/night</span>
                       </div>
-                      <p className="text-xs sm:text-sm mb-4 sm:mb-6 flex-1" style={{ color: colors.text, lineHeight: 1.6 }}>
-                        {room.description || ""}
+                      
+                      {/* Description - Responsive text with proper wrapping */}
+                      <p 
+                        className="text-xs sm:text-sm md:text-base mb-4 sm:mb-5 md:mb-6 flex-1 break-words" 
+                        style={{ color: colors.text, lineHeight: 1.5 }}
+                      >
+                        {room.description || "Experience luxury and comfort in our beautifully appointed room."}
                       </p>
+                      
+                      {/* Room features if available */}
+                      {room.features && room.features.length > 0 && (
+                        <div className="mb-4 sm:mb-5">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                            {room.features.slice(0, 3).map((feature: string, idx: number) => (
+                              <span
+                                key={idx}
+                                className="text-xs px-2 py-1 rounded-full"
+                                style={{ backgroundColor: `${colors.primary}10`, color: colors.primary }}
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                            {room.features.length > 3 && (
+                              <span className="text-xs px-2 py-1 rounded-full text-muted-foreground">
+                                +{room.features.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Book Now Button - Responsive */}
                       <Button
-                        className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-full shadow-sm hover:shadow-md"
+                        className="w-full py-2.5 sm:py-3 md:py-4 text-sm sm:text-base font-semibold rounded-full shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
                         style={{ backgroundColor: colors.primary, color: "#ffffff" }}
+                        onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}?subject=Booking inquiry for ${room.name}`}
                       >
                         Book Now
                       </Button>
@@ -436,7 +501,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* GALLERY GRID - FIXED */}
+        {/* GALLERY GRID */}
         {media.galleryImages?.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -448,16 +513,17 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                 {media.galleryImages.map((url: string, i: number) => (
                   <div
                     key={i}
-                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full"
+                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full cursor-pointer"
+                    onClick={() => window.open(url, "_blank")}
                   >
                     <img
                       src={url}
                       alt={`Gallery ${i + 1}`}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -491,7 +557,7 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* TESTIMONIALS GRID - FIXED */}
+        {/* TESTIMONIALS GRID */}
         {testimonials.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
@@ -503,17 +569,17 @@ export default function ResortLandingPage() {
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {testimonials.map((testimonial: any, i: number) => (
                   <div
                     key={i}
-                    className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
+                    className="p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
                   >
                     <div className="flex gap-1 mb-3 sm:mb-4">
                       {[...Array(5)].map((_, j) => (
                         <Star
                           key={j}
-                          className="h-4 w-4 sm:h-5 sm:w-5"
+                          className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5"
                           style={{
                             fill: j < (testimonial.rating || 5) ? colors.accent : "none",
                             color: j < (testimonial.rating || 5) ? colors.accent : "#d1d5db",
@@ -521,13 +587,13 @@ export default function ResortLandingPage() {
                         />
                       ))}
                     </div>
-                    <Quote className="h-6 w-6 sm:h-8 sm:w-8 mb-3 sm:mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
-                    <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6" style={{ lineHeight: 1.6, fontStyle: "italic" }}>
+                    <Quote className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mb-3 sm:mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
+                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-6 break-words" style={{ lineHeight: 1.6, fontStyle: "italic" }}>
                       "{testimonial.text}"
                     </p>
                     <div className="flex items-center gap-2 sm:gap-3">
                       <div
-                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base"
+                        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm md:text-base"
                         style={{ backgroundColor: colors.primary }}
                       >
                         {testimonial.name?.charAt(0) || "G"}
@@ -559,16 +625,16 @@ export default function ResortLandingPage() {
                 {siteData.faq.map((item: any, i: number) => (
                   <div
                     key={i}
-                    className="p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full"
+                    className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full"
                   >
                     <h3
-                      className={`${isMobilePreview ? "text-lg" : "text-lg sm:text-xl"} font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3`}
+                      className={`${isMobilePreview ? "text-base" : "text-base sm:text-lg md:text-xl"} font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3`}
                       style={{ fontFamily: typography.headingFont, color: colors.text }}
                     >
-                      <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 mt-0.5 flex-shrink-0" style={{ color: colors.primary }} />
-                      {item.question}
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mt-0.5 flex-shrink-0" style={{ color: colors.primary }} />
+                      <span className="break-words">{item.question}</span>
                     </h3>
-                    <p className="text-sm sm:text-base text-muted-foreground" style={{ lineHeight: 1.6 }}>{item.answer}</p>
+                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground break-words pl-6 sm:pl-7 md:pl-8" style={{ lineHeight: 1.6 }}>{item.answer}</p>
                   </div>
                 ))}
               </div>
@@ -591,12 +657,12 @@ export default function ResortLandingPage() {
               <div className="space-y-6 sm:space-y-8 w-full">
                 {identity.contactEmail && (
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
-                      <Mail className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
+                    <div className="p-2 sm:p-3 rounded-full flex-shrink-0" style={{ backgroundColor: `${colors.primary}15` }}>
+                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" style={{ color: colors.primary }} />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Email</p>
-                      <a href={`mailto:${identity.contactEmail}`} className="text-sm sm:text-base hover:underline break-all" style={{ color: colors.text }}>
+                      <a href={`mailto:${identity.contactEmail}`} className="text-xs sm:text-sm md:text-base hover:underline break-all" style={{ color: colors.text }}>
                         {identity.contactEmail}
                       </a>
                     </div>
@@ -604,12 +670,12 @@ export default function ResortLandingPage() {
                 )}
                 {identity.phone && (
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
-                      <Phone className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
+                    <div className="p-2 sm:p-3 rounded-full flex-shrink-0" style={{ backgroundColor: `${colors.primary}15` }}>
+                      <Phone className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" style={{ color: colors.primary }} />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Phone</p>
-                      <a href={`tel:${identity.phone}`} className="text-sm sm:text-base hover:underline" style={{ color: colors.text }}>
+                      <a href={`tel:${identity.phone}`} className="text-xs sm:text-sm md:text-base hover:underline break-all" style={{ color: colors.text }}>
                         {identity.phone}
                       </a>
                     </div>
@@ -617,12 +683,12 @@ export default function ResortLandingPage() {
                 )}
                 {identity.fullAddress && (
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2 sm:p-3 rounded-full" style={{ backgroundColor: `${colors.primary}15` }}>
-                      <MapPinned className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: colors.primary }} />
+                    <div className="p-2 sm:p-3 rounded-full flex-shrink-0" style={{ backgroundColor: `${colors.primary}15` }}>
+                      <MapPinned className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" style={{ color: colors.primary }} />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Address</p>
-                      <p className="text-sm sm:text-base" style={{ color: colors.text }}>{identity.fullAddress}</p>
+                      <p className="text-xs sm:text-sm md:text-base break-words" style={{ color: colors.text }}>{identity.fullAddress}</p>
                     </div>
                   </div>
                 )}
@@ -631,7 +697,7 @@ export default function ResortLandingPage() {
                     href={identity.googleMapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm sm:text-base font-medium hover:underline"
+                    className="inline-flex items-center gap-2 text-xs sm:text-sm md:text-base font-medium hover:underline"
                     style={{ color: colors.primary }}
                   >
                     View on Google Maps →
@@ -639,7 +705,7 @@ export default function ResortLandingPage() {
                 )}
               </div>
 
-              <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg w-full">
+              <div className="p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg w-full">
                 <form className="space-y-4 sm:space-y-6 w-full">
                   <div className="w-full">
                     <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
@@ -647,7 +713,7 @@ export default function ResortLandingPage() {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                       style={{ borderColor: `${colors.primary}30` }}
                       placeholder="John Doe"
                     />
@@ -658,7 +724,7 @@ export default function ResortLandingPage() {
                     </label>
                     <input
                       type="email"
-                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                       style={{ borderColor: `${colors.primary}30` }}
                       placeholder="john@example.com"
                     />
@@ -669,13 +735,13 @@ export default function ResortLandingPage() {
                     </label>
                     <textarea
                       rows={4}
-                      className="w-full px-3 sm:px-4 py-3 sm:py-4 border rounded-xl focus:outline-none focus:ring-2 transition-all resize-none text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all resize-none text-sm sm:text-base"
                       style={{ borderColor: `${colors.primary}30` }}
                       placeholder="Your message..."
                     />
                   </div>
                   <Button
-                    className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg"
+                    className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200"
                     style={{ backgroundColor: colors.primary, color: "#ffffff" }}
                   >
                     Send Message
@@ -686,17 +752,15 @@ export default function ResortLandingPage() {
           </div>
         </section>
 
-        {/* FOOTER - FIXED */}
+        {/* FOOTER */}
         <footer
           className="py-12 px-4 w-full"
           style={{ backgroundColor: colors.text || "#1E293B", color: "#ffffff" }}
         >
           <div className="max-w-7xl mx-auto w-full">
             
-            {/* Three Column Grid - Stacks on mobile, side by side on desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
               
-              {/* Column 1: Brand */}
               <div className="text-center sm:text-left">
                 {headerLogoUrl ? (
                   <img
@@ -706,27 +770,26 @@ export default function ResortLandingPage() {
                     className="mb-3 object-contain mx-auto sm:mx-0"
                   />
                 ) : (
-                  <h3 className="text-xl font-bold mb-2" style={{ fontFamily: typography.headingFont }}>
+                  <h3 className="text-xl font-bold mb-2 break-words" style={{ fontFamily: typography.headingFont }}>
                     {resortName}
                   </h3>
                 )}
-                <p className="text-xs opacity-60">{brandStory.tagline || "paradise found"}</p>
+                <p className="text-xs opacity-60 break-words">{brandStory.tagline || "paradise found"}</p>
               </div>
 
-              {/* Column 2: Contact */}
               <div className="text-center sm:text-left">
                 <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider opacity-70">CONTACT</h4>
                 <div className="space-y-2 text-sm opacity-70">
                   {identity.phone && (
                     <p className="hover:opacity-100 transition-opacity">
-                      <a href={`tel:${identity.phone}`} className="hover:underline">
+                      <a href={`tel:${identity.phone}`} className="hover:underline break-all">
                         {identity.phone}
                       </a>
                     </p>
                   )}
                   {identity.contactEmail && (
                     <p className="hover:opacity-100 transition-opacity break-all">
-                      <a href={`mailto:${identity.contactEmail}`} className="hover:underline">
+                      <a href={`mailto:${identity.contactEmail}`} className="hover:underline break-all">
                         {identity.contactEmail}
                       </a>
                     </p>
@@ -740,7 +803,6 @@ export default function ResortLandingPage() {
                 </div>
               </div>
 
-              {/* Column 3: Quick Links */}
               <div className="text-center sm:text-left">
                 <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider opacity-70">QUICK LINKS</h4>
                 <div className="space-y-2 text-sm opacity-70">
@@ -752,7 +814,6 @@ export default function ResortLandingPage() {
               </div>
             </div>
 
-            {/* Bottom Section: Social Icons (if enabled) + Copyright */}
             <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row justify-between items-center gap-4">
               {footer.showSocialIcons && socialLinks.length > 0 && (
                 <div className="flex gap-4 order-2 sm:order-1">
@@ -766,32 +827,21 @@ export default function ResortLandingPage() {
                         rel="noopener noreferrer"
                         className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-110"
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                       </a>
                     );
                   })}
                 </div>
               )}
               
-              <p className="text-xs opacity-50 text-center order-1 sm:order-2">
+              <p className="text-xs opacity-50 text-center order-1 sm:order-2 break-words">
                 {footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}
               </p>
               
-              {/* Spacer for balance on desktop */}
               <div className="hidden sm:block w-24 order-3" />
             </div>
           </div>
         </footer>
-
-        <style>{`
-          @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-          .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
-          .animate-fade-in-down { animation: fade-in-down 0.8s ease-out forwards; }
-          .animation-delay-200 { animation-delay: 0.2s; }
-          .animation-delay-400 { animation-delay: 0.4s; }
-          .animation-delay-600 { animation-delay: 0.6s; }
-        `}</style>
       </div>
     );
   };
@@ -801,7 +851,7 @@ export default function ResortLandingPage() {
       {/* Device Preview Toolbar */}
       <div className="fixed top-0 left-0 right-0 z-[100] bg-white border-b shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")} className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Back to Dashboard</span>
@@ -854,7 +904,7 @@ export default function ResortLandingPage() {
               )}
               <div className="flex items-center gap-2">
                 <Switch checked={showDeviceFrame} onCheckedChange={setShowDeviceFrame} id="frame-toggle" />
-                <Label htmlFor="frame-toggle" className="text-sm">Show Frame</Label>
+                <Label htmlFor="frame-toggle" className="text-sm hidden sm:inline">Show Frame</Label>
               </div>
               <Button variant="outline" size="sm" onClick={() => window.open(window.location.href, "_blank")} className="gap-2">
                 <ExternalLink className="w-4 h-4" />
