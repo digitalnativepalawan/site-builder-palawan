@@ -848,14 +848,14 @@ export function FullWizard() {
             <div>
               <Label>Booking System</Label>
               <Select
-                value={formData.booking?.system || ""}
-                onValueChange={(v) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, system: v } }))}
+                value={formData.booking?.system || "none"}
+                onValueChange={(v) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, system: v === "none" ? "" : v } }))}
               >
                 <SelectTrigger className="mt-1 min-h-[44px]">
                   <SelectValue placeholder="Select a system..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   <SelectItem value="Cloudbeds">Cloudbeds</SelectItem>
                   <SelectItem value="Lodgify">Lodgify</SelectItem>
                   <SelectItem value="Little Hotelier">Little Hotelier</SelectItem>
