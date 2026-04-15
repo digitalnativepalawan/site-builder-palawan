@@ -256,48 +256,46 @@ export default function BusinessLandingPage() {
 
       {/* ── HERO ── */}
       <section
-        className="hero-parallax relative min-h-[90vh] flex items-end justify-start px-4 sm:px-8 pb-16 pt-24"
+        className="hero-parallax relative min-h-[100svh] flex items-center justify-center text-center px-4 sm:px-8 pb-16 pt-24"
         style={{
           background: heroImage
-            ? `linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.1) 100%), url(${heroImage}) center/cover no-repeat`
+            ? `linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.15) 100%), url(${heroImage}) center/cover no-repeat`
             : colors.gradient || `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
         }}
       >
-        <div className="max-w-6xl mx-auto w-full">
-          <div className="max-w-2xl">
-            {brandStory.tagline && (
-              <p className="text-white/70 text-sm font-semibold tracking-widest uppercase mb-4">
-                {brandStory.tagline}
-              </p>
-            )}
-            <h1
-              className="text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-[1.05] mb-6"
-              style={{ fontFamily: typography.headingFont }}
+        <div className="max-w-3xl mx-auto w-full">
+          {brandStory.tagline && (
+            <p className="text-white/60 text-xs sm:text-sm font-bold tracking-widest uppercase mb-4">
+              {brandStory.tagline}
+            </p>
+          )}
+          <h1
+            className="text-4xl sm:text-6xl md:text-7xl font-bold text-white leading-[1.1] mb-4"
+            style={{ fontFamily: typography.headingFont }}
+          >
+            {businessName}
+          </h1>
+          {brandStory.shortDescription && (
+            <p className="text-white/80 text-base sm:text-xl mb-8 leading-relaxed max-w-xl mx-auto">
+              {brandStory.shortDescription}
+            </p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <a
+              href="#contact"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white text-base transition-transform hover:scale-105 shadow-xl w-full sm:w-auto max-w-xs"
+              style={{ backgroundColor: colors.accent || colors.primary }}
             >
-              {brandStory.shortDescription || businessName}
-            </h1>
-            {brandStory.shortDescription && brandStory.tagline && (
-              <p className="text-white/80 text-lg sm:text-xl mb-8 leading-relaxed max-w-lg">
-                {brandStory.tagline}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-3">
+              {ctaLabel} <ChevronRight className="h-4 w-4" />
+            </a>
+            {offerings.length > 0 && (
               <a
-                href="#contact"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-full font-bold text-white text-base transition-transform hover:scale-105 shadow-xl"
-                style={{ backgroundColor: colors.accent || colors.primary }}
+                href="#offerings"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white text-base bg-white/20 backdrop-blur hover:bg-white/30 transition-colors w-full sm:w-auto max-w-xs"
               >
-                {ctaLabel} <ChevronRight className="h-4 w-4" />
+                {offeringsLabel}
               </a>
-              {offerings.length > 0 && (
-                <a
-                  href="#offerings"
-                  className="inline-flex items-center gap-2 px-7 py-4 rounded-full font-bold text-white text-base bg-white/20 backdrop-blur hover:bg-white/30 transition-colors"
-                >
-                  {offeringsLabel}
-                </a>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -366,23 +364,45 @@ export default function BusinessLandingPage() {
                 {/* Amenities badges */}
                 {amenities.length > 0 && (
                   <div className="absolute -bottom-5 left-4 right-4 bg-white rounded-2xl shadow-xl p-4 flex flex-wrap gap-2">
-                    {amenities.slice(0, 4).map((a: string, i: number) => (
-                      <span
-                        key={i}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full"
-                        style={{ backgroundColor: `${colors.primary}15`, color: colors.primary }}
-                      >
+                    {amenities.slice(0, 5).map((a: string, i: number) => (
+                      <span key={i} className="text-xs font-semibold px-3 py-1.5 rounded-full"
+                        style={{ backgroundColor: `${colors.primary}15`, color: colors.primary }}>
                         {a}
                       </span>
                     ))}
-                    {amenities.length > 4 && (
+                    {amenities.length > 5 && (
                       <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-500">
-                        +{amenities.length - 4} more
+                        +{amenities.length - 5} more
                       </span>
                     )}
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── AMENITIES ── */}
+      {amenities.length > 0 && (
+        <section className="py-16 sm:py-20 px-4 sm:px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-10">
+              <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: colors.primary }}>Amenities</p>
+              <h2 className="text-3xl sm:text-4xl font-bold" style={{ fontFamily: typography.headingFont }}>
+                Everything You Need
+              </h2>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
+              {amenities.map((a: string, i: number) => (
+                <span key={i}
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-semibold border-2 transition-all"
+                  style={{ borderColor: `${colors.primary}30`, backgroundColor: `${colors.primary}08`, color: colors.text }}
+                >
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colors.primary }} />
+                  {a}
+                </span>
+              ))}
             </div>
           </div>
         </section>
@@ -575,25 +595,21 @@ export default function BusinessLandingPage() {
               </h2>
               <div className="space-y-4 mb-8">
                 {(identity.phone || location.phone) && (
-                  <a
-                    href={`tel:${identity.phone || location.phone}`}
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group"
-                  >
+                  <a href={`tel:${identity.phone || location.phone}`}
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                     <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: colors.primary }}>
                       <Phone className="h-5 w-5" />
                     </span>
                     <span className="font-semibold text-slate-800 group-hover:underline">{identity.phone || location.phone}</span>
                   </a>
                 )}
-                {(identity.contactEmail || location.email) && (
-                  <a
-                    href={`mailto:${identity.contactEmail || location.email}`}
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group"
-                  >
+                {(identity.contactEmail || location.contactEmail || location.email) && (
+                  <a href={`mailto:${identity.contactEmail || location.contactEmail || location.email}`}
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                     <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: colors.primary }}>
                       <Mail className="h-5 w-5" />
                     </span>
-                    <span className="font-semibold text-slate-800 group-hover:underline break-all">{identity.contactEmail || location.email}</span>
+                    <span className="font-semibold text-slate-800 group-hover:underline break-all">{identity.contactEmail || location.contactEmail || location.email}</span>
                   </a>
                 )}
                 {(location.fullAddress || identity.location) && (
@@ -604,13 +620,10 @@ export default function BusinessLandingPage() {
                     <span className="font-semibold text-slate-800 leading-relaxed">{location.fullAddress || identity.location}</span>
                   </div>
                 )}
-                {socialMedia.whatsapp && (
-                  <a
-                    href={`https://wa.me/${socialMedia.whatsapp.replace(/[^0-9]/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-2xl bg-green-50 hover:bg-green-100 transition-colors"
-                  >
+                {(socialMedia.whatsapp || location.whatsapp) && (
+                  <a href={`https://wa.me/${(socialMedia.whatsapp || location.whatsapp).replace(/[^0-9]/g, "")}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-green-50 hover:bg-green-100 transition-colors">
                     <span className="w-10 h-10 rounded-xl flex items-center justify-center bg-green-500 text-white shrink-0">
                       <MessageCircle className="h-5 w-5" />
                     </span>
@@ -689,9 +702,9 @@ export default function BusinessLandingPage() {
       </footer>
 
       {/* Floating WhatsApp */}
-      {socialMedia.whatsapp && (
+      {(socialMedia.whatsapp || location.whatsapp) && (
         <a
-          href={`https://wa.me/${socialMedia.whatsapp.replace(/[^0-9]/g, "")}`}
+          href={`https://wa.me/${(socialMedia.whatsapp || location.whatsapp).replace(/[^0-9]/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-xl transition-transform hover:scale-110"
