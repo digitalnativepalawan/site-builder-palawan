@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Edit3, Plus, Eye, Trash2 } from "lucide-react";
+import { Edit3, Plus, Eye, Trash2, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -20,9 +20,9 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [resortToDelete, setResortToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [businessToDelete, setBusinessToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const { data: submissions, isLoading } = useQuery({
     queryKey: ["resort_submissions"],
@@ -47,11 +47,11 @@ const AdminDashboard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["resort_submissions"] });
       toast({
-        title: "Resort deleted",
+        title: "Business deleted",
         description: "The website has been permanently removed.",
       });
       setDeleteDialogOpen(false);
-      setResortToDelete(null);
+      setBusinessToDelete(null);
     },
     onError: (error: Error) => {
       toast({
@@ -63,13 +63,13 @@ const AdminDashboard = () => {
   });
 
   const handleDeleteClick = (id: string, name: string) => {
-    setResortToDelete({ id, name });
+    setBusinessToDelete({ id, name });
     setDeleteDialogOpen(true);
   };
 
   const handleConfirmDelete = () => {
-    if (resortToDelete) {
-      deleteMutation.mutate(resortToDelete.id);
+    if (businessToDelete) {
+      deleteMutation.mutate(businessToDelete.id);
     }
   };
 
@@ -78,119 +78,157 @@ const AdminDashboard = () => {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your resorts...</p>
+          <p className="text-muted-foreground">Loading your businesses...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Resort Submissions</h1>
-          <p className="text-muted-foreground mt-1">Manage and edit your resort websites</p>
-        </div>
-        <Button onClick={() => navigate("/wizard")} className="gap-2">
-          <Plus className="h-4 w-4" /> New Resort
-        </Button>
-      </div>
-
-      {submissions?.length === 0 ? (
-        <div className="text-center py-20 border rounded-lg bg-muted/30">
-          <h2 className="text-xl font-semibold mb-2">No resorts yet</h2>
-          <p className="text-muted-foreground mb-4">Create your first resort website</p>
-          <Button onClick={() => navigate("/wizard")}>
-            <Plus className="h-4 w-4 mr-2" /> Create Resort
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-blue-600 shrink-0" />
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">My Businesses</h1>
+              <p className="text-xs text-gray-400 hidden sm:block">Manage and edit your business websites</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => navigate("/wizard")}
+            className="gap-2 min-h-[44px] bg-blue-600 hover:bg-blue-700 shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Business</span>
           </Button>
         </div>
-      ) : (
-        <div className="grid gap-4">
-          {submissions?.map((s) => (
-            <div
-              key={s.id}
-              className="p-6 border rounded-lg bg-white hover:shadow-md transition-shadow"
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        {submissions?.length === 0 ? (
+          /* Empty state */
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
+              <Building2 className="h-10 w-10 text-blue-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No businesses yet</h2>
+            <p className="text-gray-500 mb-8 max-w-xs leading-relaxed">
+              Create a professional website for your business in minutes — no technical skills needed.
+            </p>
+            <Button
+              onClick={() => navigate("/wizard")}
+              className="min-h-[52px] px-8 gap-2 bg-blue-600 hover:bg-blue-700 text-base font-bold rounded-xl"
             >
-              <div className="flex justify-between items-center">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold">
-                    {s.data?.identity?.resortName || "Untitled"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {s.data?.location?.fullAddress || "No address"}
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        s.status === "published"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+              <Plus className="h-5 w-5" /> Create Your First Site
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {submissions?.map((s) => {
+              const name = s.data?.identity?.resortName || s.data?.identity?.businessName || "Untitled";
+              const address = s.data?.location?.fullAddress || s.data?.identity?.location || "";
+              const isPublished = s.status === "published";
+
+              return (
+                <div
+                  key={s.id}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                >
+                  {/* Card info */}
+                  <div className="p-4 flex items-start gap-3">
+                    <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                      <Building2 className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{name}</h3>
+                      {address && (
+                        <p className="text-sm text-gray-400 mt-0.5 truncate">{address}</p>
+                      )}
+                      <div className="mt-2">
+                        <span
+                          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                            isPublished
+                              ? "bg-green-50 text-green-700"
+                              : "bg-yellow-50 text-yellow-700"
+                          }`}
+                        >
+                          {isPublished ? "● Live" : "○ Draft"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action bar */}
+                  <div className="border-t border-gray-50 px-4 py-3 flex items-center gap-2">
+                    <Button
+                      className="flex-1 min-h-[44px] gap-1.5 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold"
+                      size="sm"
+                      onClick={() => navigate(`/wizard?edit=${s.id}`)}
                     >
-                      {s.status || "draft"}
-                    </span>
+                      <Edit3 className="h-4 w-4" /> Edit Site
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-h-[44px] px-4 gap-1.5 rounded-xl font-semibold"
+                      onClick={() => navigate(`/site/${s.id}`)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="hidden sm:inline">Preview</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="min-h-[44px] min-w-[44px] text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl"
+                      onClick={() => handleDeleteClick(s.id, name)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => navigate(`/resort/${s.id}`)}
-                    title="Preview"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => navigate(`/wizard?edit=${s.id}`)}
-                    title="Edit"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDeleteClick(s.id, s.data?.identity?.resortName || "Untitled")}
-                    title="Delete"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+              );
+            })}
+
+            {/* Add another */}
+            <button
+              onClick={() => navigate("/wizard")}
+              className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors font-semibold text-sm flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" /> Add Another Business
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-md rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">
-              ⚠️ Delete Website Permanently?
+              Delete Website Permanently?
             </AlertDialogTitle>
-            <AlertDialogDescription className="pt-4 space-y-2">
-              <p className="font-semibold">
-                You are about to delete: <span className="text-foreground">"{resortToDelete?.name}"</span>
+            <AlertDialogDescription className="pt-2 space-y-3">
+              <p>
+                You are about to delete: <span className="font-semibold text-foreground">"{businessToDelete?.name}"</span>
               </p>
-              <div className="bg-destructive/10 border border-destructive/30 rounded-md p-3 text-sm">
-                <p className="font-semibold text-destructive">⚠️ WARNING:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>This action <strong>cannot be undone</strong></li>
-                  <li>All website data will be <strong>permanently deleted</strong></li>
-                  <li>All content, images, and settings will be <strong>lost forever</strong></li>
-                  <li>The website URL will <strong>stop working</strong></li>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 space-y-1">
+                <p className="font-semibold">This cannot be undone:</p>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  <li>All website data will be permanently deleted</li>
+                  <li>All content, images, and settings will be lost</li>
+                  <li>The website URL will stop working</li>
                 </ul>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="min-h-[44px] rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="min-h-[44px] rounded-xl bg-red-600 hover:bg-red-700"
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? "Deleting..." : "Yes, Delete Forever"}
