@@ -1,134 +1,220 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Loader2, ArrowLeft, Phone, Mail, 
-  Smartphone, Tablet, Monitor 
-} from "lucide-react";
+import { Loader2, ArrowLeft, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 export default function ResortLandingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [siteData, setSiteData] = useState<any>(null);
-  const [deviceView, setDeviceView] = useState<"mobile" | "tablet" | "desktop">("desktop");
-  const [showDeviceFrame, setShowDeviceFrame] = useState(true);
 
   useEffect(() => {
     const fetchSite = async () => {
-      const { data } = await supabase.from("resort_submissions").select("*").eq("id", id).single();
-      if (data) setSiteData(data.data);
-      setLoading(false);
+      if (!id) return;
+      try {
+        const { data, error } = await supabase
+          .from("resort_submissions")
+          .select("*")
+          .eq("id", id)
+          .single();
+        
+        if (error) throw error;
+        if (data) setSiteData(data.data);
+      } catch (err) {
+        console.error("Error fetching resort:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchSite();
   }, [id]);
 
-  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center flex-col gap-4 bg-white">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+        <p className="text-slate-400 font-medium">Loading your paradise...</p>
+      </div>
+    );
+  }
 
-  const { identity = {}, brandStory = {}, media = {}, colorPalette: colors = {}, typography = {} } = siteData || {};
+  // Fallback defaults if data is missing
+  const { 
+    identity = {}, 
+    brandStory = {}, 
+    media = {}, 
+    colorPalette: colors = {
+      primary: "#0EA5E9",
+      background: "#FFFFFF",
+      text: "#1E293B",
+      accent: "#F59E0B",
+      gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)",
+    },
+    typography = {
+      headingFont: "'Space Grotesk', sans-serif",
+      bodyFont: "'Inter', sans-serif",
+    }
+  } = siteData || {};
+
+  const resortName = identity.resortName || "Resort Name";
   const heroImage = media.heroImage || media.heroImages?.[0];
 
-  const WebsiteContent = () => (
-    <div className="w-full flex flex-col overflow-x-hidden scroll-smooth" style={{ backgroundColor: colors.background, color: colors.text, fontFamily: typography.bodyFont }}>
+  return (
+    <div 
+      className="min-h-screen w-full flex flex-col overflow-x-hidden scroll-smooth" 
+      style={{ 
+        backgroundColor: colors.background, 
+        color: colors.text, 
+        fontFamily: typography.bodyFont 
+      }}
+    >
+      {/* Google Fonts Injection */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+      `}</style>
+
+      {/* DASHBOARD NAVIGATION */}
+      <div className="fixed top-6 left-6 z-[100]">
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          onClick={() => navigate("/dashboard")}
+          className="bg-white/90 backdrop-blur-sm shadow-xl border-none hover:bg-white"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Exit to Dashboard
+        </Button>
+      </div>
+
       {/* HEADER */}
-      <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-          <span className="font-bold text-lg">{identity.resortName}</span>
-          <nav className="hidden md:flex gap-6 text-sm">
-            <a href="#rooms">Rooms</a>
-            <a href="#contact">Contact</a>
+      <header className="w-full bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          <span className="font-bold text-2xl tracking-tight" style={{ fontFamily: typography.headingFont }}>
+            {resortName}
+          </span>
+          <nav className="hidden md:flex gap-10 text-sm font-bold uppercase tracking-widest">
+            <a href="#rooms" className="hover:text-blue-500 transition-colors">Accommodations</a>
+            <a href="#contact" className="hover:text-blue-500 transition-colors">Inquiries</a>
           </nav>
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative min-h-[400px] flex items-center justify-center text-center p-6"
-        style={{ background: heroImage ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.5)), url(${heroImage}) center/cover` : colors.gradient }}>
-        <div className="max-w-2xl text-white">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">{identity.resortName}</h1>
-          <p className="text-base md:text-lg mb-6 opacity-90">{brandStory.tagline}</p>
-          <Button style={{ backgroundColor: colors.accent }}>Book Now</Button>
+      {/* HERO SECTION */}
+      <section 
+        className="relative min-h-[80vh] flex items-center justify-center text-center px-6"
+        style={{ 
+          background: heroImage ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${heroImage}) center/cover no-repeat fixed` : colors.gradient 
+        }}
+      >
+        <div className="max-w-4xl text-white">
+          <h1 className="text-5xl md:text-8xl font-extrabold mb-6 leading-tight" style={{ fontFamily: typography.headingFont }}>
+            {resortName}
+          </h1>
+          <p className="text-xl md:text-3xl mb-10 opacity-90 font-light max-w-2xl mx-auto">
+            {brandStory.tagline}
+          </p>
+          <Button 
+            size="lg" 
+            style={{ backgroundColor: colors.accent }}
+            className="rounded-full px-10 py-8 text-xl font-bold shadow-2xl hover:scale-105 transition-transform"
+          >
+            Check Availability
+          </Button>
         </div>
       </section>
 
-      {/* AMENITIES - STACKING FIX */}
-      <section className="py-12 px-4 bg-white">
-        <h2 className="text-2xl font-bold text-center mb-8">Amenities</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-6xl mx-auto">
+      {/* AMENITIES SECTION */}
+      <section className="py-24 px-6 max-w-7xl mx-auto w-full">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: typography.headingFont }}>
+            World-Class Amenities
+          </h2>
+          <div className="w-20 h-1.5 mx-auto rounded-full" style={{ backgroundColor: colors.primary }} />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {siteData.amenities?.map((item: string, i: number) => (
-            <div key={i} className="flex items-center gap-3 p-4 rounded-lg border bg-slate-50">
-              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colors.primary }} />
-              <span className="text-sm font-medium">{item}</span>
+            <div key={i} className="group flex flex-col items-center text-center gap-6 p-10 rounded-3xl border border-slate-100 bg-white hover:shadow-2xl transition-all duration-300">
+              <div className="w-4 h-4 rounded-full group-hover:scale-150 transition-transform" style={{ backgroundColor: colors.primary }} />
+              <span className="font-bold text-lg text-slate-800">{item}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ROOMS - STACKING FIX */}
-      <section id="rooms" className="py-12 px-4 bg-slate-50">
-        <h2 className="text-2xl font-bold text-center mb-8">Our Rooms</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {siteData.roomTypes?.map((room: any, i: number) => (
-            <div key={i} className="bg-white rounded-xl border shadow-sm overflow-hidden flex flex-col">
-              <div className="aspect-video bg-slate-200">
-                {room.imageUrl && <img src={room.imageUrl} className="w-full h-full object-cover" />}
+      {/* ROOMS SECTION */}
+      <section id="rooms" className="py-24 px-6 bg-slate-50 w-full">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: typography.headingFont }}>
+              Luxury Living
+            </h2>
+            <p className="text-slate-500 text-lg">Choose your perfect escape</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {siteData.roomTypes?.map((room: any, i: number) => (
+              <div key={i} className="bg-white rounded-[2rem] border-none shadow-xl overflow-hidden flex flex-col group">
+                <div className="aspect-[4/3] overflow-hidden bg-slate-200 relative">
+                  {room.imageUrl && (
+                    <img 
+                      src={room.imageUrl} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
+                  )}
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full font-black text-lg" style={{ color: colors.primary }}>
+                    ₱{room.price?.toLocaleString()}
+                  </div>
+                </div>
+                <div className="p-10 flex-1 flex flex-col">
+                  <h3 className="font-bold text-3xl mb-4 text-slate-900">{room.name}</h3>
+                  <p className="text-slate-500 mb-8 leading-relaxed">Experience ultimate comfort with our premium {room.name.toLowerCase()} suites designed for relaxation.</p>
+                  <Button className="mt-auto w-full py-7 rounded-2xl font-black text-lg shadow-lg" style={{ backgroundColor: colors.primary }}>
+                    Book Room
+                  </Button>
+                </div>
               </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="font-bold text-lg mb-1">{room.name}</h3>
-                <p className="text-blue-600 font-bold mb-4">₱{room.price?.toLocaleString()}</p>
-                <Button className="mt-auto w-full" style={{ backgroundColor: colors.primary }}>Details</Button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT SECTION */}
+      <section id="contact" className="py-32 px-6 max-w-6xl mx-auto w-full">
+        <div className="bg-white rounded-[3rem] border shadow-2xl overflow-hidden flex flex-col md:flex-row">
+          <div className="flex-1 p-12 md:p-20 bg-slate-900 text-white space-y-10">
+            <h2 className="text-5xl font-bold mb-6" style={{ fontFamily: typography.headingFont }}>Let's Connect</h2>
+            <p className="text-slate-400 text-xl">Planning a group event or a romantic getaway? Our team is here to help you curate the perfect experience.</p>
+            <div className="space-y-8 pt-6">
+              <div className="flex items-center gap-6">
+                <div className="p-4 rounded-2xl bg-white/10 text-white"><Phone size={28} /></div>
+                <span className="text-2xl font-light">{identity.phone}</span>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="p-4 rounded-2xl bg-white/10 text-white"><Mail size={28} /></div>
+                <span className="text-2xl font-light break-all">{identity.contactEmail}</span>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CONTACT - STACKING FIX */}
-      <section id="contact" className="py-12 px-4 bg-white">
-        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row gap-10">
-          <div className="flex-1 space-y-4">
-            <h2 className="text-2xl font-bold">Contact Us</h2>
-            <div className="flex items-center gap-3"><Phone className="w-5 h-5 text-blue-500" /> <span>{identity.phone}</span></div>
-            <div className="flex items-center gap-3"><Mail className="w-5 h-5 text-blue-500" /> <span className="break-all">{identity.contactEmail}</span></div>
           </div>
-          <div className="flex-1 space-y-3 bg-slate-50 p-6 rounded-xl border">
-            <input className="w-full p-3 border rounded-lg" placeholder="Name" />
-            <textarea className="w-full p-3 border rounded-lg h-24" placeholder="Message" />
-            <Button className="w-full" style={{ backgroundColor: colors.primary }}>Send</Button>
+          <div className="flex-1 p-12 md:p-20 space-y-6">
+            <div className="grid grid-cols-1 gap-6">
+              <input className="w-full p-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Full Name" />
+              <input className="w-full p-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Email Address" />
+              <textarea className="w-full p-5 bg-slate-50 border-none rounded-2xl h-40 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="Your Message..." />
+              <Button className="w-full py-8 rounded-2xl text-xl font-black shadow-xl" style={{ backgroundColor: colors.primary }}>
+                Send Inquiry
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
-      <footer className="py-6 bg-slate-900 text-white text-center text-xs opacity-50">
-        © {new Date().getFullYear()} {identity.resortName}
+      {/* FOOTER */}
+      <footer className="py-16 bg-white border-t text-slate-400 text-center">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-lg font-medium text-slate-900 mb-2">{resortName}</p>
+          <p className="text-sm">© {new Date().getFullYear()} Palawan Collective Hospitality Group. All rights reserved.</p>
+        </div>
       </footer>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-slate-200 flex flex-col">
-      <div className="bg-white border-b px-4 py-2 flex items-center justify-between sticky top-0 z-[100]">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
-        <div className="flex bg-slate-100 p-1 rounded-md">
-          <Button variant={deviceView === "mobile" ? "secondary" : "ghost"} size="sm" onClick={() => setDeviceView("mobile")}><Smartphone className="h-4 w-4" /></Button>
-          <Button variant={deviceView === "tablet" ? "secondary" : "ghost"} size="sm" onClick={() => setDeviceView("tablet")}><Tablet className="h-4 w-4" /></Button>
-          <Button variant={deviceView === "desktop" ? "secondary" : "ghost"} size="sm" onClick={() => setDeviceView("desktop")}><Monitor className="h-4 w-4" /></Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch checked={showDeviceFrame} onCheckedChange={setShowDeviceFrame} />
-          <Label className="text-[10px] uppercase font-bold text-slate-500">Frame</Label>
-        </div>
-      </div>
-
-      <div className="flex-1 flex justify-center items-start p-4 md:p-10 overflow-auto">
-        <div className={`transition-all duration-300 bg-white shadow-2xl ${showDeviceFrame && deviceView !== "desktop" ? "rounded-[2.5rem] border-[8px] border-slate-900" : ""}`}
-          style={{ width: deviceView === "mobile" ? "375px" : deviceView === "tablet" ? "768px" : "100%", height: deviceView === "desktop" ? "auto" : "667px", overflowY: "auto" }}>
-          <WebsiteContent />
-        </div>
-      </div>
     </div>
   );
 }
