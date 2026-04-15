@@ -137,7 +137,6 @@ export default function BusinessLandingPage() {
     { label: "About", href: "#about" },
     ...(offerings.length ? [{ label: offeringsLabel, href: "#offerings" }] : []),
     ...(galleryImages.length ? [{ label: "Gallery", href: "#gallery" }] : []),
-    ...(hasBookingWidget || bookingUrl ? [{ label: "Book", href: "#book" }] : []),
     { label: "Contact", href: "#contact" },
   ];
 
@@ -145,7 +144,9 @@ export default function BusinessLandingPage() {
   const bookingUrl = booking?.url || booking?.embedUrl || null;
   const bookingSystem = booking?.system || null;
   const hasBookingWidget = booking?.embedCode && booking.embedCode.trim().length > 10;
-  const ctaHref = bookingUrl || "#contact";
+  const hasBooking = hasBookingWidget || !!bookingUrl;
+  // All CTAs scroll to #book widget when configured, else go to contact
+  const ctaHref = hasBooking ? "#book" : "#contact";
 
   return (
     <div
@@ -215,7 +216,7 @@ export default function BusinessLandingPage() {
               </a>
             ))}
             <a
-              href="#contact"
+              href={ctaHref}
               className="px-5 py-2 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: colors.primary }}
             >
@@ -248,7 +249,7 @@ export default function BusinessLandingPage() {
                 </a>
               ))}
               <a
-                href="#contact"
+                href={ctaHref}
                 onClick={() => setNavOpen(false)}
                 className="mt-2 px-4 py-3 rounded-xl text-base font-bold text-white text-center"
                 style={{ backgroundColor: colors.primary }}
@@ -307,6 +308,68 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── BOOKING WIDGET — sits just below hero, all CTAs scroll here ── */}
+      {(hasBookingWidget || bookingUrl) && (
+        <section
+          id="book"
+          className="px-4 sm:px-6 py-12 sm:py-16"
+          style={{ backgroundColor: colors.background }}
+        >
+          <div className="max-w-4xl mx-auto">
+            {/* Section header */}
+            <div className="text-center mb-8">
+              <p
+                className="text-xs font-bold tracking-widest uppercase mb-2"
+                style={{ color: colors.primary }}
+              >
+                Reservations
+              </p>
+              <h2
+                className="text-3xl sm:text-4xl font-bold"
+                style={{ fontFamily: typography.headingFont }}
+              >
+                {booking.sectionTitle || "Book Your Stay"}
+              </h2>
+              {booking.sectionSubtitle && (
+                <p className="text-slate-500 mt-2 text-base">{booking.sectionSubtitle}</p>
+              )}
+              {bookingSystem && (
+                <p className="text-xs text-slate-400 mt-1">Powered by {bookingSystem}</p>
+              )}
+            </div>
+
+            {hasBookingWidget ? (
+              /* Full embed — Cloudbeds Immersive, Lodgify widget, etc. */
+              <div
+                className="w-full rounded-3xl overflow-hidden bg-white shadow-lg border border-slate-100"
+                dangerouslySetInnerHTML={{ __html: booking.embedCode }}
+              />
+            ) : (
+              /* URL only — prominent button + trust signals */
+              <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-8 sm:p-12 flex flex-col items-center gap-6 text-center">
+                <p className="text-slate-600 max-w-md leading-relaxed">
+                  Check availability and reserve your stay directly — best rates guaranteed when you book with us.
+                </p>
+                <a
+                  href={bookingUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-bold text-white text-lg shadow-xl transition-transform hover:scale-105 w-full sm:w-auto justify-center"
+                  style={{ backgroundColor: colors.primary }}
+                >
+                  {ctaLabel} <ChevronRight className="h-5 w-5" />
+                </a>
+                <div className="flex flex-wrap justify-center gap-6 text-xs text-slate-400 font-medium">
+                  <span>✓ Instant confirmation</span>
+                  <span>✓ No hidden fees</span>
+                  <span>✓ Best rate guaranteed</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── ABOUT / STORY ── */}
       {(brandStory.fullDescription || brandStory.shortDescription || identity.ownerName) && (
@@ -474,7 +537,7 @@ export default function BusinessLandingPage() {
                       <p className="text-slate-500 text-sm leading-relaxed flex-1 mb-4">{item.description}</p>
                     )}
                     <a
-                      href="#contact"
+                      href={ctaHref}
                       className="mt-auto w-full py-3 rounded-2xl text-sm font-bold text-center text-white transition-opacity hover:opacity-90"
                       style={{ backgroundColor: colors.primary }}
                     >
@@ -584,52 +647,6 @@ export default function BusinessLandingPage() {
                 </details>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── BOOKING WIDGET ── */}
-      {(hasBookingWidget || bookingUrl) && (
-        <section id="book" className="py-16 sm:py-20 px-4 sm:px-6" style={{ backgroundColor: `${colors.primary}08` }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: colors.primary }}>
-                Reservations
-              </p>
-              <h2 className="text-3xl sm:text-4xl font-bold" style={{ fontFamily: typography.headingFont }}>
-                {booking.sectionTitle || "Book Your Stay"}
-              </h2>
-              {booking.sectionSubtitle && (
-                <p className="text-slate-500 mt-3 text-base">{booking.sectionSubtitle}</p>
-              )}
-            </div>
-
-            {hasBookingWidget ? (
-              /* Embed code — Cloudbeds, Lodgify, Little Hotelier, etc. */
-              <div
-                className="w-full rounded-3xl overflow-hidden bg-white shadow-sm"
-                dangerouslySetInnerHTML={{ __html: booking.embedCode }}
-              />
-            ) : bookingUrl ? (
-              /* Fallback — just a big CTA button linking to external booking page */
-              <div className="flex flex-col items-center gap-4">
-                {bookingSystem && (
-                  <p className="text-sm text-slate-400">
-                    Powered by {bookingSystem}
-                  </p>
-                )}
-                <a
-                  href={bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-bold text-white text-lg shadow-xl transition-transform hover:scale-105"
-                  style={{ backgroundColor: colors.primary }}
-                >
-                  {ctaLabel} <ChevronRight className="h-5 w-5" />
-                </a>
-                <p className="text-xs text-slate-400">You'll be redirected to our secure booking page</p>
-              </div>
-            ) : null}
           </div>
         </section>
       )}
