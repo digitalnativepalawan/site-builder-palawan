@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft, ExternalLink, Facebook, Instagram, Youtube, Phone, Mail, MapPinned, Star, Quote, Zap, CheckCircle2, Play, Smartphone, Tablet, Monitor, RotateCcw } from "lucide-react";
+import { Loader2, ArrowLeft, ExternalLink, Facebook, Instagram, Youtube, Phone, Mail, MapPinned, Star, Quote, CheckCircle2, Smartphone, Tablet, Monitor, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -129,14 +129,11 @@ export default function ResortLandingPage() {
 
     return (
       <div
-        className="min-h-screen w-full"
+        className="min-h-screen w-full max-w-full overflow-x-hidden"
         style={{
           backgroundColor: colors.background,
           color: colors.text,
           fontFamily: typography.bodyFont,
-          overflowX: "hidden",
-          width: "100%",
-          maxWidth: "100vw"
         }}
       >
         <style>{`
@@ -153,20 +150,14 @@ export default function ResortLandingPage() {
           input, textarea, button { 
             max-width: 100%; 
           }
-          h1, h2, h3, p, span, a, div, li { 
+          h1, h2, h3, p, span, a, div { 
             overflow-wrap: break-word; 
             word-wrap: break-word; 
             word-break: break-word;
-            white-space: normal;
           }
           
           @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-          @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
           .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
-          .animate-fade-in-down { animation: fade-in-down 0.8s ease-out forwards; }
-          .animation-delay-200 { animation-delay: 0.2s; }
-          .animation-delay-400 { animation-delay: 0.4s; }
-          .animation-delay-600 { animation-delay: 0.6s; }
         `}</style>
 
         {/* HEADER */}
@@ -187,12 +178,7 @@ export default function ResortLandingPage() {
               
               <nav className={`${isSmallPreview ? "hidden" : "hidden md:flex"} items-center gap-6 lg:gap-8`}>
                 {header.navigationLinks?.map((link: any, i: number) => (
-                  <a
-                    key={i}
-                    href={link.url}
-                    className="text-sm font-medium transition-colors hover:opacity-70"
-                    style={{ fontFamily: typography.bodyFont, color: header.transparent ? "#ffffff" : colors.text }}
-                  >
+                  <a key={i} href={link.url} className="text-sm font-medium transition-colors hover:opacity-70" style={{ fontFamily: typography.bodyFont, color: header.transparent ? "#ffffff" : colors.text }}>
                     {link.label}
                   </a>
                 ))}
@@ -203,14 +189,7 @@ export default function ResortLandingPage() {
                   {socialLinks.map((social, i) => {
                     const Icon = social.icon;
                     return (
-                      <a
-                        key={i}
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="transition-transform hover:scale-110"
-                        style={{ color: header.transparent ? "#ffffff" : colors.primary }}
-                      >
+                      <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className="transition-transform hover:scale-110" style={{ color: header.transparent ? "#ffffff" : colors.primary }}>
                         <Icon className="h-4 w-4 lg:h-5 lg:w-5" />
                       </a>
                     );
@@ -240,65 +219,30 @@ export default function ResortLandingPage() {
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
-          
           <div className="relative z-10 text-center px-4 sm:px-6 py-12 sm:py-16 md:py-20 max-w-5xl mx-auto w-full">
             {heroLogoUrl && (
               <div className="mb-4 sm:mb-6 md:mb-8">
-                <img
-                  src={heroLogoUrl}
-                  alt={resortName}
-                  style={{ height: Math.min(heroLogoSize, 100), maxWidth: "100%" }}
-                  className="mx-auto object-contain"
-                />
+                <img src={heroLogoUrl} alt={resortName} style={{ height: Math.min(heroLogoSize, 100), maxWidth: "100%" }} className="mx-auto object-contain" />
               </div>
             )}
-
-            <h1
-              className={`${isMobilePreview ? "text-3xl leading-tight" : "text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl"} font-bold mb-3 sm:mb-4 md:mb-6`}
-              style={{
-                fontFamily: typography.headingFont,
-                color: "#ffffff",
-                textShadow: "0 2px 10px rgba(0,0,0,0.3)",
-              }}
-            >
+            <h1 className={`${isMobilePreview ? "text-3xl leading-tight" : "text-3xl sm:text-4xl md:text-5xl lg:text-6xl"} font-bold mb-3 sm:mb-4 md:mb-6`} style={{ fontFamily: typography.headingFont, color: "#ffffff", textShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
               {resortName}
             </h1>
-
             {brandStory.tagline && (
-              <p
-                className={`${isMobilePreview ? "text-sm font-medium tracking-wide uppercase opacity-90" : "text-base sm:text-lg md:text-xl lg:text-2xl"} mb-4 sm:mb-6 md:mb-8 max-w-2xl mx-auto px-2`}
-                style={{ color: "rgba(255,255,255,0.9)", fontFamily: typography.headingFont }}
-              >
+              <p className={`${isMobilePreview ? "text-sm font-medium tracking-wide uppercase opacity-90" : "text-base sm:text-lg md:text-xl"} mb-4 sm:mb-6 md:mb-8 max-w-2xl mx-auto px-2`} style={{ color: "rgba(255,255,255,0.9)", fontFamily: typography.headingFont }}>
                 {brandStory.tagline}
               </p>
             )}
-
             {brandStory.shortDescription && (
-              <p
-                className="text-sm sm:text-base md:text-lg lg:text-xl max-w-xl mx-auto mb-6 sm:mb-8 md:mb-10 px-2 text-white/90"
-                style={{ lineHeight: 1.6 }}
-              >
+              <p className="text-sm sm:text-base md:text-lg max-w-xl mx-auto mb-6 sm:mb-8 md:mb-10 px-2 text-white/90" style={{ lineHeight: 1.6 }}>
                 {brandStory.shortDescription}
               </p>
             )}
-
-            {/* HERO BUTTONS */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full px-4">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto min-w-[140px] px-6 py-3 rounded-full whitespace-nowrap shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
-                style={{ backgroundColor: colors.accent, color: "#ffffff" }}
-                onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}`}
-              >
+              <Button size="lg" className="w-full sm:w-auto min-w-[140px] px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all" style={{ backgroundColor: colors.accent, color: "#ffffff" }} onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}`}>
                 Book Now
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto min-w-[140px] px-6 py-3 rounded-full whitespace-nowrap border-2 bg-transparent hover:bg-white/10 transition-all duration-200"
-                style={{ borderColor: "#ffffff", color: "#ffffff" }}
-                onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
-              >
+              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[140px] px-6 py-3 rounded-full border-2 bg-transparent hover:bg-white/10 transition-all" style={{ borderColor: "#ffffff", color: "#ffffff" }} onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}>
                 Learn More
               </Button>
             </div>
@@ -309,54 +253,33 @@ export default function ResortLandingPage() {
         {brandStory.fullDescription && (
           <section id="about" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full">
             <div className="max-w-4xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold mb-4 sm:mb-6 md:mb-8 text-center`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold mb-4 sm:mb-6 md:mb-8 text-center`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 About Us
               </h2>
               <div className="w-16 sm:w-20 md:w-24 h-1 mx-auto mb-6 sm:mb-8 rounded-full" style={{ backgroundColor: colors.primary }} />
-              <p
-                className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-2 sm:px-0"
-                style={{ color: colors.text, lineHeight: 1.8, fontFamily: typography.bodyFont }}
-              >
+              <p className="text-sm sm:text-base md:text-lg leading-relaxed px-2 sm:px-0" style={{ color: colors.text, lineHeight: 1.8 }}>
                 {brandStory.fullDescription}
               </p>
             </div>
           </section>
         )}
 
-        {/* FEATURES GRID */}
+        {/* FEATURES */}
         {features.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 Why Choose Us
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What makes our resort special</p>
-              
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {features.map((feature: any, i: number) => (
-                  <div
-                    key={i}
-                    className="group p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
-                  >
+                  <div key={i} className="group p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 w-full">
                     <div className="text-3xl sm:text-4xl md:text-5xl mb-3 sm:mb-4 md:mb-6">{feature.icon || "✨"}</div>
-                    <h3
-                      className={`${isMobilePreview ? "text-lg" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3 break-words`}
-                      style={{ fontFamily: typography.headingFont, color: colors.text }}
-                    >
+                    <h3 className={`${isMobilePreview ? "text-lg" : "text-xl sm:text-2xl"} font-bold mb-2 sm:mb-3 break-words`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                       {feature.title}
                     </h3>
-                    <p 
-                      className="text-sm sm:text-base text-muted-foreground break-words" 
-                      style={{ lineHeight: 1.6 }}
-                    >
-                      {feature.description}
-                    </p>
+                    <p className="text-sm sm:text-base text-muted-foreground break-words" style={{ lineHeight: 1.6 }}>{feature.description}</p>
                   </div>
                 ))}
               </div>
@@ -364,35 +287,20 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* AMENITIES GRID */}
+        {/* AMENITIES */}
         {siteData.amenities?.length > 0 && (
           <section id="amenities" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 Amenities
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Everything you need for a perfect stay</p>
-              
               <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                 {siteData.amenities.map((amenity: string, i: number) => (
-                  <div
-                    key={i}
-                    className="group p-2 sm:p-3 rounded-lg sm:rounded-xl border bg-white shadow-sm hover:shadow-md transition-all duration-300 w-full"
-                  >
+                  <div key={i} className="group p-2 sm:p-3 rounded-lg sm:rounded-xl border bg-white shadow-sm hover:shadow-md transition-all w-full">
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 transition-transform group-hover:scale-125"
-                        style={{ backgroundColor: colors.primary }}
-                      />
-                      <span 
-                        className="text-xs sm:text-sm text-left break-words whitespace-normal line-clamp-2" 
-                        style={{ color: colors.text }}
-                      >
-                        {amenity}
-                      </span>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 transition-transform group-hover:scale-125" style={{ backgroundColor: colors.primary }} />
+                      <span className="text-xs sm:text-sm text-left break-words" style={{ color: colors.text }}>{amenity}</span>
                     </div>
                   </div>
                 ))}
@@ -401,96 +309,42 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* ROOMS GRID - FIXED FOR MOBILE */}
+        {/* ROOMS - FIXED FOR MOBILE */}
         {siteData.roomTypes?.length > 0 && (
-          <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
+          <section id="rooms" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full overflow-x-hidden" style={{ backgroundColor: colors.background }}>
             <div className="max-w-6xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 Our Rooms
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Choose your perfect accommodation</p>
               
-              {/* Responsive grid - 1 column on mobile, 2 on tablet, 3 on desktop */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+              {/* Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full">
                 {siteData.roomTypes.map((room: any, i: number) => (
-                  <div
-                    key={i}
-                    className="group rounded-2xl sm:rounded-3xl border bg-white shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col w-full h-full"
-                  >
-                    {/* Room Image - Responsive height */}
+                  <div key={i} className="rounded-2xl border bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden w-full min-w-0">
                     {room.imageUrl ? (
-                      <div className="h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden w-full">
-                        <img
-                          src={room.imageUrl}
-                          alt={room.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
+                      <div className="aspect-[4/3] w-full overflow-hidden">
+                        <img src={room.imageUrl} alt={room.name} className="w-full h-full object-cover transition-transform hover:scale-105 duration-500" />
                       </div>
                     ) : (
-                      <div
-                        className="h-48 sm:h-56 md:h-64 lg:h-72 flex items-center justify-center w-full"
-                        style={{ background: `${colors.primary}15` }}
-                      >
-                        <span className="text-5xl sm:text-6xl md:text-7xl">🏨</span>
+                      <div className="aspect-[4/3] w-full flex items-center justify-center" style={{ background: `${colors.primary}15` }}>
+                        <span className="text-5xl">🏨</span>
                       </div>
                     )}
-                    
-                    {/* Room Content - Responsive padding */}
-                    <div className="p-4 sm:p-5 md:p-6 lg:p-8 flex-1 flex flex-col">
-                      <h3
-                        className={`${isMobilePreview ? "text-xl" : "text-xl sm:text-2xl md:text-2xl"} font-bold mb-2 break-words`}
-                        style={{ fontFamily: typography.headingFont, color: colors.text }}
-                      >
+                    <div className="p-4 sm:p-5 md:p-6">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-2 break-words" style={{ fontFamily: typography.headingFont, color: colors.text }}>
                         {room.name || "Room"}
                       </h3>
-                      
-                      {/* Price - Responsive sizing */}
-                      <div className="flex items-baseline gap-1 mb-3 sm:mb-4 flex-wrap">
-                        <span className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: colors.primary }}>
+                      <div className="flex items-baseline gap-1 mb-3 flex-wrap">
+                        <span className="text-2xl sm:text-3xl font-bold" style={{ color: colors.primary }}>
                           ₱{room.price?.toLocaleString() || "0"}
                         </span>
                         <span className="text-xs sm:text-sm text-muted-foreground">/night</span>
                       </div>
-                      
-                      {/* Description - Responsive text with proper wrapping */}
-                      <p 
-                        className="text-xs sm:text-sm md:text-base mb-4 sm:mb-5 md:mb-6 flex-1 break-words" 
-                        style={{ color: colors.text, lineHeight: 1.5 }}
-                      >
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-5 break-words" style={{ lineHeight: 1.5 }}>
                         {room.description || "Experience luxury and comfort in our beautifully appointed room."}
                       </p>
-                      
-                      {/* Room features if available */}
-                      {room.features && room.features.length > 0 && (
-                        <div className="mb-4 sm:mb-5">
-                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                            {room.features.slice(0, 3).map((feature: string, idx: number) => (
-                              <span
-                                key={idx}
-                                className="text-xs px-2 py-1 rounded-full"
-                                style={{ backgroundColor: `${colors.primary}10`, color: colors.primary }}
-                              >
-                                {feature}
-                              </span>
-                            ))}
-                            {room.features.length > 3 && (
-                              <span className="text-xs px-2 py-1 rounded-full text-muted-foreground">
-                                +{room.features.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Book Now Button - Responsive */}
-                      <Button
-                        className="w-full py-2.5 sm:py-3 md:py-4 text-sm sm:text-base font-semibold rounded-full shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
-                        style={{ backgroundColor: colors.primary, color: "#ffffff" }}
-                        onClick={() => window.location.href = `mailto:${identity.contactEmail || ""}?subject=Booking inquiry for ${room.name}`}
-                      >
+                      <Button className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-full" style={{ backgroundColor: colors.primary, color: "#ffffff" }}>
                         Book Now
                       </Button>
                     </div>
@@ -501,30 +355,18 @@ export default function ResortLandingPage() {
           </section>
         )}
 
-        {/* GALLERY GRID */}
+        {/* GALLERY */}
         {media.galleryImages?.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 Photo Gallery
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Explore our resort</p>
-              
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                 {media.galleryImages.map((url: string, i: number) => (
-                  <div
-                    key={i}
-                    className="group relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full cursor-pointer"
-                    onClick={() => window.open(url, "_blank")}
-                  >
-                    <img
-                      src={url}
-                      alt={`Gallery ${i + 1}`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                  <div key={i} className="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer" onClick={() => window.open(url, "_blank")}>
+                    <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 ))}
@@ -537,65 +379,39 @@ export default function ResortLandingPage() {
         {videoId && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-5xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 Video Tour
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Take a virtual tour of our resort</p>
-              <div className="relative aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl w-full">
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-                  title="Resort Video Tour"
-                  className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl w-full">
+                <iframe src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`} title="Resort Video Tour" className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
               </div>
             </div>
           </section>
         )}
 
-        {/* TESTIMONIALS GRID */}
+        {/* TESTIMONIALS */}
         {testimonials.length > 0 && (
           <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: `${colors.primary}08` }}>
             <div className="max-w-6xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 Guest Reviews
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">What our guests say about us</p>
-              
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {testimonials.map((testimonial: any, i: number) => (
-                  <div
-                    key={i}
-                    className="p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-white border shadow-sm hover:shadow-xl transition-all duration-300 h-full w-full"
-                  >
+                  <div key={i} className="p-5 sm:p-6 md:p-8 rounded-2xl bg-white border shadow-sm hover:shadow-xl transition-all w-full">
                     <div className="flex gap-1 mb-3 sm:mb-4">
                       {[...Array(5)].map((_, j) => (
-                        <Star
-                          key={j}
-                          className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5"
-                          style={{
-                            fill: j < (testimonial.rating || 5) ? colors.accent : "none",
-                            color: j < (testimonial.rating || 5) ? colors.accent : "#d1d5db",
-                          }}
-                        />
+                        <Star key={j} className="h-3 w-3 sm:h-4 sm:w-4" style={{ fill: j < (testimonial.rating || 5) ? colors.accent : "none", color: j < (testimonial.rating || 5) ? colors.accent : "#d1d5db" }} />
                       ))}
                     </div>
-                    <Quote className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mb-3 sm:mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
+                    <Quote className="h-5 w-5 sm:h-6 sm:w-6 mb-3 sm:mb-4" style={{ color: colors.primary, opacity: 0.3 }} />
                     <p className="text-xs sm:text-sm md:text-base text-muted-foreground mb-4 sm:mb-6 break-words" style={{ lineHeight: 1.6, fontStyle: "italic" }}>
                       "{testimonial.text}"
                     </p>
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div
-                        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm md:text-base"
-                        style={{ backgroundColor: colors.primary }}
-                      >
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm" style={{ backgroundColor: colors.primary }}>
                         {testimonial.name?.charAt(0) || "G"}
                       </div>
                       <div>
@@ -614,24 +430,15 @@ export default function ResortLandingPage() {
         {siteData.faq?.length > 0 && (
           <section id="faq" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
             <div className="max-w-4xl mx-auto w-full">
-              <h2
-                className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-                style={{ fontFamily: typography.headingFont, color: colors.text }}
-              >
+              <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
                 FAQ
               </h2>
               <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">Common questions answered</p>
               <div className="space-y-3 sm:space-y-4 w-full">
                 {siteData.faq.map((item: any, i: number) => (
-                  <div
-                    key={i}
-                    className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full"
-                  >
-                    <h3
-                      className={`${isMobilePreview ? "text-base" : "text-base sm:text-lg md:text-xl"} font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3`}
-                      style={{ fontFamily: typography.headingFont, color: colors.text }}
-                    >
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 mt-0.5 flex-shrink-0" style={{ color: colors.primary }} />
+                  <div key={i} className="p-4 sm:p-5 md:p-6 rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow w-full">
+                    <h3 className={`${isMobilePreview ? "text-base" : "text-base sm:text-lg md:text-xl"} font-semibold mb-2 sm:mb-3 flex items-start gap-2 sm:gap-3`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 flex-shrink-0" style={{ color: colors.primary }} />
                       <span className="break-words">{item.question}</span>
                     </h3>
                     <p className="text-xs sm:text-sm md:text-base text-muted-foreground break-words pl-6 sm:pl-7 md:pl-8" style={{ lineHeight: 1.6 }}>{item.answer}</p>
@@ -645,105 +452,66 @@ export default function ResortLandingPage() {
         {/* CONTACT */}
         <section id="contact" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 w-full" style={{ backgroundColor: colors.background }}>
           <div className="max-w-6xl mx-auto w-full">
-            <h2
-              className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"} font-bold text-center mb-3 sm:mb-4`}
-              style={{ fontFamily: typography.headingFont, color: colors.text }}
-            >
+            <h2 className={`${isMobilePreview ? "text-2xl" : "text-2xl sm:text-3xl md:text-4xl"} font-bold text-center mb-3 sm:mb-4`} style={{ fontFamily: typography.headingFont, color: colors.text }}>
               Contact Us
             </h2>
             <p className="text-center text-muted-foreground mb-8 sm:mb-10 md:mb-12 text-sm sm:text-base">We'd love to hear from you</p>
-            
-            <div className={isMobilePreview ? "flex flex-col gap-8 w-full" : "grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 w-full"}>
-              <div className="space-y-6 sm:space-y-8 w-full">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 w-full">
+              <div className="flex-1 space-y-6 sm:space-y-8">
                 {identity.contactEmail && (
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="p-2 sm:p-3 rounded-full flex-shrink-0" style={{ backgroundColor: `${colors.primary}15` }}>
-                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" style={{ color: colors.primary }} />
+                      <Mail className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary }} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Email</p>
-                      <a href={`mailto:${identity.contactEmail}`} className="text-xs sm:text-sm md:text-base hover:underline break-all" style={{ color: colors.text }}>
-                        {identity.contactEmail}
-                      </a>
+                      <a href={`mailto:${identity.contactEmail}`} className="text-xs sm:text-sm break-all hover:underline" style={{ color: colors.text }}>{identity.contactEmail}</a>
                     </div>
                   </div>
                 )}
                 {identity.phone && (
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="p-2 sm:p-3 rounded-full flex-shrink-0" style={{ backgroundColor: `${colors.primary}15` }}>
-                      <Phone className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" style={{ color: colors.primary }} />
+                      <Phone className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary }} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Phone</p>
-                      <a href={`tel:${identity.phone}`} className="text-xs sm:text-sm md:text-base hover:underline break-all" style={{ color: colors.text }}>
-                        {identity.phone}
-                      </a>
+                      <a href={`tel:${identity.phone}`} className="text-xs sm:text-sm hover:underline" style={{ color: colors.text }}>{identity.phone}</a>
                     </div>
                   </div>
                 )}
                 {identity.fullAddress && (
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="p-2 sm:p-3 rounded-full flex-shrink-0" style={{ backgroundColor: `${colors.primary}15` }}>
-                      <MapPinned className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" style={{ color: colors.primary }} />
+                      <MapPinned className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary }} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: colors.text }}>Address</p>
-                      <p className="text-xs sm:text-sm md:text-base break-words" style={{ color: colors.text }}>{identity.fullAddress}</p>
+                      <p className="text-xs sm:text-sm break-words" style={{ color: colors.text }}>{identity.fullAddress}</p>
                     </div>
                   </div>
                 )}
                 {identity.googleMapsLink && (
-                  <a
-                    href={identity.googleMapsLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs sm:text-sm md:text-base font-medium hover:underline"
-                    style={{ color: colors.primary }}
-                  >
+                  <a href={identity.googleMapsLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium hover:underline" style={{ color: colors.primary }}>
                     View on Google Maps →
                   </a>
                 )}
               </div>
-
-              <div className="p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border bg-white shadow-lg w-full">
+              <div className="flex-1 p-5 sm:p-6 md:p-8 rounded-2xl border bg-white shadow-lg">
                 <form className="space-y-4 sm:space-y-6 w-full">
-                  <div className="w-full">
-                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
-                      style={{ borderColor: `${colors.primary}30` }}
-                      placeholder="John Doe"
-                    />
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>Your Name</label>
+                    <input type="text" className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base" style={{ borderColor: `${colors.primary}30` }} placeholder="John Doe" />
                   </div>
-                  <div className="w-full">
-                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
-                      style={{ borderColor: `${colors.primary}30` }}
-                      placeholder="john@example.com"
-                    />
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>Email Address</label>
+                    <input type="email" className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm sm:text-base" style={{ borderColor: `${colors.primary}30` }} placeholder="john@example.com" />
                   </div>
-                  <div className="w-full">
-                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>
-                      Message
-                    </label>
-                    <textarea
-                      rows={4}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all resize-none text-sm sm:text-base"
-                      style={{ borderColor: `${colors.primary}30` }}
-                      placeholder="Your message..."
-                    />
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium mb-2" style={{ color: colors.text }}>Message</label>
+                    <textarea rows={4} className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all resize-none text-sm sm:text-base" style={{ borderColor: `${colors.primary}30` }} placeholder="Your message..." />
                   </div>
-                  <Button
-                    className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200"
-                    style={{ backgroundColor: colors.primary, color: "#ffffff" }}
-                  >
+                  <Button className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-semibold rounded-full shadow-md hover:shadow-lg transition-all" style={{ backgroundColor: colors.primary, color: "#ffffff" }}>
                     Send Message
                   </Button>
                 </form>
@@ -753,56 +521,25 @@ export default function ResortLandingPage() {
         </section>
 
         {/* FOOTER */}
-        <footer
-          className="py-12 px-4 w-full"
-          style={{ backgroundColor: colors.text || "#1E293B", color: "#ffffff" }}
-        >
+        <footer className="py-12 px-4 w-full" style={{ backgroundColor: colors.text || "#1E293B", color: "#ffffff" }}>
           <div className="max-w-7xl mx-auto w-full">
-            
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
-              
               <div className="text-center sm:text-left">
                 {headerLogoUrl ? (
-                  <img
-                    src={headerLogoUrl}
-                    alt={resortName}
-                    style={{ height: Math.min(headerLogoSize || 120, 45), filter: "brightness(0) invert(1)" }}
-                    className="mb-3 object-contain mx-auto sm:mx-0"
-                  />
+                  <img src={headerLogoUrl} alt={resortName} style={{ height: Math.min(headerLogoSize || 120, 45), filter: "brightness(0) invert(1)" }} className="mb-3 object-contain mx-auto sm:mx-0" />
                 ) : (
-                  <h3 className="text-xl font-bold mb-2 break-words" style={{ fontFamily: typography.headingFont }}>
-                    {resortName}
-                  </h3>
+                  <h3 className="text-xl font-bold mb-2 break-words" style={{ fontFamily: typography.headingFont }}>{resortName}</h3>
                 )}
                 <p className="text-xs opacity-60 break-words">{brandStory.tagline || "paradise found"}</p>
               </div>
-
               <div className="text-center sm:text-left">
                 <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider opacity-70">CONTACT</h4>
                 <div className="space-y-2 text-sm opacity-70">
-                  {identity.phone && (
-                    <p className="hover:opacity-100 transition-opacity">
-                      <a href={`tel:${identity.phone}`} className="hover:underline break-all">
-                        {identity.phone}
-                      </a>
-                    </p>
-                  )}
-                  {identity.contactEmail && (
-                    <p className="hover:opacity-100 transition-opacity break-all">
-                      <a href={`mailto:${identity.contactEmail}`} className="hover:underline break-all">
-                        {identity.contactEmail}
-                      </a>
-                    </p>
-                  )}
-                  {!identity.phone && !identity.contactEmail && (
-                    <>
-                      <p>+63 947 444 5678</p>
-                      <p>info@palawancollective.com</p>
-                    </>
-                  )}
+                  {identity.phone && <p><a href={`tel:${identity.phone}`} className="hover:underline break-all">{identity.phone}</a></p>}
+                  {identity.contactEmail && <p><a href={`mailto:${identity.contactEmail}`} className="hover:underline break-all">{identity.contactEmail}</a></p>}
+                  {!identity.phone && !identity.contactEmail && <><p>+63 947 444 5678</p><p>info@palawancollective.com</p></>}
                 </div>
               </div>
-
               <div className="text-center sm:text-left">
                 <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider opacity-70">QUICK LINKS</h4>
                 <div className="space-y-2 text-sm opacity-70">
@@ -813,31 +550,20 @@ export default function ResortLandingPage() {
                 </div>
               </div>
             </div>
-
             <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row justify-between items-center gap-4">
               {footer.showSocialIcons && socialLinks.length > 0 && (
                 <div className="flex gap-4 order-2 sm:order-1">
                   {socialLinks.map((social, i) => {
                     const Icon = social.icon;
                     return (
-                      <a
-                        key={i}
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-110"
-                      >
+                      <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all hover:scale-110">
                         <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                       </a>
                     );
                   })}
                 </div>
               )}
-              
-              <p className="text-xs opacity-50 text-center order-1 sm:order-2 break-words">
-                {footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}
-              </p>
-              
+              <p className="text-xs opacity-50 text-center order-1 sm:order-2 break-words">{footer.copyrightText || `© ${new Date().getFullYear()} ${resortName}. All rights reserved.`}</p>
               <div className="hidden sm:block w-24 order-3" />
             </div>
           </div>
@@ -856,49 +582,23 @@ export default function ResortLandingPage() {
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Back to Dashboard</span>
             </Button>
-
             <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-              <Button
-                variant={deviceView === "mobile" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setDeviceView("mobile")}
-                className="gap-2"
-                title="Mobile View (375px)"
-              >
+              <Button variant={deviceView === "mobile" ? "default" : "ghost"} size="sm" onClick={() => setDeviceView("mobile")} className="gap-2">
                 <Smartphone className="w-4 h-4" />
                 <span className="hidden sm:inline">Mobile</span>
               </Button>
-              <Button
-                variant={deviceView === "tablet" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setDeviceView("tablet")}
-                className="gap-2"
-                title="Tablet View (768px)"
-              >
+              <Button variant={deviceView === "tablet" ? "default" : "ghost"} size="sm" onClick={() => setDeviceView("tablet")} className="gap-2">
                 <Tablet className="w-4 h-4" />
                 <span className="hidden sm:inline">Tablet</span>
               </Button>
-              <Button
-                variant={deviceView === "desktop" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setDeviceView("desktop")}
-                className="gap-2"
-                title="Desktop View (1920px)"
-              >
+              <Button variant={deviceView === "desktop" ? "default" : "ghost"} size="sm" onClick={() => setDeviceView("desktop")} className="gap-2">
                 <Monitor className="w-4 h-4" />
                 <span className="hidden sm:inline">Desktop</span>
               </Button>
             </div>
-
             <div className="flex items-center gap-4">
               {deviceView === "mobile" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMobileRotation(mobileRotation === "portrait" ? "landscape" : "portrait")}
-                  className="gap-2"
-                  title="Toggle Orientation"
-                >
+                <Button variant="outline" size="sm" onClick={() => setMobileRotation(mobileRotation === "portrait" ? "landscape" : "portrait")} className="gap-2">
                   <RotateCcw className={`w-4 h-4 transition-transform ${mobileRotation === "landscape" ? "rotate-90" : ""}`} />
                 </Button>
               )}
@@ -917,28 +617,13 @@ export default function ResortLandingPage() {
 
       {/* Preview Container */}
       <div className="pt-20 pb-8 px-4 min-h-screen flex items-start justify-center">
-        <div
-          className="transition-all duration-500 ease-in-out overflow-hidden"
-          style={{
-            width: deviceView === "desktop" ? "100%" : currentWidth,
-            maxWidth: deviceView === "desktop" ? "1920px" : currentWidth,
-          }}
-        >
-          {showDeviceFrame && deviceView !== "desktop" && (
-            <div
-              className="rounded-3xl overflow-hidden shadow-2xl border-8 border-gray-800"
-              style={{
-                borderRadius: deviceView === "mobile" ? "40px" : "20px",
-              }}
-            >
-              {deviceView === "mobile" && mobileRotation === "portrait" && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-[101]" />
-              )}
+        <div className="transition-all duration-500 ease-in-out overflow-x-hidden" style={{ width: deviceView === "desktop" ? "100%" : currentWidth, maxWidth: deviceView === "desktop" ? "1920px" : currentWidth }}>
+          {showDeviceFrame && deviceView !== "desktop" ? (
+            <div className="rounded-3xl overflow-hidden shadow-2xl border-8 border-gray-800" style={{ borderRadius: deviceView === "mobile" ? "40px" : "20px" }}>
+              {deviceView === "mobile" && mobileRotation === "portrait" && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-[101]" />}
               <WebsiteContent />
             </div>
-          )}
-          
-          {(!showDeviceFrame || deviceView === "desktop") && (
+          ) : (
             <WebsiteContent />
           )}
         </div>
