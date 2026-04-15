@@ -70,6 +70,7 @@ export function FullWizard() {
       sticky: true, transparent: true,
     },
     footer: { copyrightText: "", showSocialIcons: true, showContactInfo: true, showNavigation: true, columns: 3 },
+    booking: { system: "", url: "", embedCode: "", sectionTitle: "Book Your Stay", sectionSubtitle: "" },
     hero: { showLogo: true, heroLogoUrl: "", heroLogoSize: 180, useSameAsHeader: true },
   });
 
@@ -90,6 +91,7 @@ export function FullWizard() {
             typography: submission.data.typography || prev.typography,
             testimonials: submission.data.testimonials || [],
             features: submission.data.features || [],
+            booking: submission.data.booking || prev.booking,
           }));
         }
       } catch (err: any) {
@@ -832,6 +834,94 @@ export function FullWizard() {
           <h2 className="text-lg font-bold mb-4">Video Tour</h2>
           <Label>YouTube / Vimeo URL</Label>
           <Input className="mt-1 min-h-[44px]" value={formData.media?.videoUrl || ""} onChange={(e) => setFormData((p: any) => ({ ...p, media: { ...p.media, videoUrl: e.target.value } }))} placeholder="https://youtube.com/watch?v=..." />
+        </div>
+
+        {/* BOOKING INTEGRATION */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+            <span>🗓️</span> Booking Integration
+          </h2>
+          <p className="text-sm text-gray-400 mb-4">
+            Connect a booking system so guests can reserve directly from your site. If you use Cloudbeds, Lodgify, Little Hotelier, or similar — paste their embed code here.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <Label>Booking System</Label>
+              <Select
+                value={formData.booking?.system || ""}
+                onValueChange={(v) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, system: v } }))}
+              >
+                <SelectTrigger className="mt-1 min-h-[44px]">
+                  <SelectValue placeholder="Select a system..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="Cloudbeds">Cloudbeds</SelectItem>
+                  <SelectItem value="Lodgify">Lodgify</SelectItem>
+                  <SelectItem value="Little Hotelier">Little Hotelier</SelectItem>
+                  <SelectItem value="Smoobu">Smoobu</SelectItem>
+                  <SelectItem value="Booking.com">Booking.com</SelectItem>
+                  <SelectItem value="Airbnb">Airbnb</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Booking Page URL</Label>
+              <Input
+                className="mt-1 min-h-[44px]"
+                value={formData.booking?.url || ""}
+                onChange={(e) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, url: e.target.value } }))}
+                placeholder="https://hotels.cloudbeds.com/en/reserve/yourproperty"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                The "Book Now" button will link here. If you also paste embed code below, the full widget shows on the site instead.
+              </p>
+            </div>
+
+            <div>
+              <Label>
+                Embed Code{" "}
+                <span className="text-gray-400 font-normal text-xs">(optional — paste from your booking system)</span>
+              </Label>
+              <Textarea
+                className="mt-1 font-mono text-xs"
+                rows={6}
+                value={formData.booking?.embedCode || ""}
+                onChange={(e) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, embedCode: e.target.value } }))}
+                placeholder={'<script src="https://hotels.cloudbeds.com/..."></script>\n<div id="cb-booking-widget"></div>'}
+              />
+              <div className="mt-2 bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 space-y-1">
+                <p className="font-semibold">Where to get your embed code:</p>
+                <p>• <strong>Cloudbeds:</strong> Settings → Booking Engine → Embeds tab → copy the widget code</p>
+                <p>• <strong>Lodgify:</strong> Dashboard → Booking Widget → Copy Code</p>
+                <p>• <strong>Little Hotelier:</strong> Settings → Booking Engine → Widget → Get Code</p>
+                <p>• <strong>Smoobu:</strong> Settings → Booking Widget → Embed</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>Section Title</Label>
+                <Input
+                  className="mt-1 min-h-[44px]"
+                  value={formData.booking?.sectionTitle || ""}
+                  onChange={(e) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, sectionTitle: e.target.value } }))}
+                  placeholder="Book Your Stay"
+                />
+              </div>
+              <div>
+                <Label>Section Subtitle</Label>
+                <Input
+                  className="mt-1 min-h-[44px]"
+                  value={formData.booking?.sectionSubtitle || ""}
+                  onChange={(e) => setFormData((p: any) => ({ ...p, booking: { ...p.booking, sectionSubtitle: e.target.value } }))}
+                  placeholder="Best rates guaranteed when booking direct."
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Bottom save */}
