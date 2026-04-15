@@ -9,9 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type, Star, Quote, MapPinned, Zap } from "lucide-react";
+import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type, Star, Zap } from "lucide-react";
 
-// 🎨 PROFESSIONAL COLOR PALETTES
 const COLOR_PRESETS = [
   { name: "Ocean Breeze", primary: "#0EA5E9", background: "#FFFFFF", text: "#1E293B", accent: "#F59E0B", gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)" },
   { name: "Tropical Sunset", primary: "#F97316", background: "#FFFBEB", text: "#1C1917", accent: "#EC4899", gradient: "linear-gradient(135deg, #F97316 0%, #EC4899 100%)" },
@@ -21,7 +20,6 @@ const COLOR_PRESETS = [
   { name: "Beach Vibes", primary: "#06B6D4", background: "#F0F9FF", text: "#0C4A6E", accent: "#FBBF24", gradient: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)" },
 ];
 
-// 📐 TYPOGRAPHY PRESETS
 const TYPOGRAPHY_PRESETS = [
   { name: "Modern Clean", headingFont: "'Space Grotesk', sans-serif", bodyFont: "'Inter', sans-serif", scale: "comfortable" },
   { name: "Elegant Classic", headingFont: "'Playfair Display', serif", bodyFont: "'Lato', sans-serif", scale: "comfortable" },
@@ -33,18 +31,22 @@ export function FullWizard() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const editId = searchParams.get("edit");
+
+  // ── Upload refs — one per upload target ──
   const logoInputRef = useRef<HTMLInputElement>(null);
   const heroLogoInputRef = useRef<HTMLInputElement>(null);
   const heroImageInputRef = useRef<HTMLInputElement>(null);
-  
+  const galleryInputRef = useRef<HTMLInputElement>(null); // ← FIX: proper ref instead of createElement
+
   const [loading, setLoading] = useState(!!editId);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [activeColorPreset, setActiveColorPreset] = useState<number | null>(null);
   const [activeTypographyPreset, setActiveTypographyPreset] = useState<number | null>(null);
-  
+  const [currentId, setCurrentId] = useState<string | null>(editId);
+
   const [formData, setFormData] = useState<any>({
     identity: { resortName: "", location: "" },
     brandStory: { tagline: "", shortDescription: "", fullDescription: "" },
@@ -57,585 +59,496 @@ export function FullWizard() {
     media: { heroImages: [], heroImage: "", videoUrl: "", galleryImages: [] },
     colorPalette: COLOR_PRESETS[0],
     typography: TYPOGRAPHY_PRESETS[0],
-    socialMedia: {
-      facebook: "",
-      instagram: "",
-      tiktok: "",
-      youtube: "",
-      whatsapp: "",
-      showInHeader: true,
-      showInFooter: true,
-    },
+    socialMedia: { facebook: "", instagram: "", tiktok: "", youtube: "", whatsapp: "", showInHeader: true, showInFooter: true },
     header: {
-      showLogo: true,
-      logoUrl: "",
-      logoSize: 120,
-      logoPosition: "left",
+      showLogo: true, logoUrl: "", logoSize: 120, logoPosition: "left",
       showNavigation: true,
-      navigationLinks: [{ label: "Home", url: "#home" }, { label: "About", url: "#about" }, { label: "Rooms", url: "#rooms" }, { label: "Contact", url: "#contact" }],
-      sticky: true,
-      transparent: true,
+      navigationLinks: [
+        { label: "Home", url: "#home" }, { label: "About", url: "#about" },
+        { label: "Rooms", url: "#rooms" }, { label: "Contact", url: "#contact" },
+      ],
+      sticky: true, transparent: true,
     },
-    footer: {
-      copyrightText: "",
-      showSocialIcons: true,
-      showContactInfo: true,
-      showNavigation: true,
-      columns: 3,
-    },
-    hero: {
-      showLogo: true,
-      heroLogoUrl: "",
-      heroLogoSize: 180,
-      useSameAsHeader: true,
-    },
+    footer: { copyrightText: "", showSocialIcons: true, showContactInfo: true, showNavigation: true, columns: 3 },
+    hero: { showLogo: true, heroLogoUrl: "", heroLogoSize: 180, useSameAsHeader: true },
   });
 
   useEffect(() => {
-    if (!editId) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchResortData = async () => {
+    if (!editId) { setLoading(false); return; }
+    const fetchData = async () => {
       try {
-        const { data: submission, error } = await supabase
-          .from("resort_submissions")
-          .select("*")
-          .eq("id", editId)
-          .single();
-
+        const { data: submission, error } = await supabase.from("resort_submissions").select("*").eq("id", editId).single();
         if (error) throw error;
-
-        if (submission && submission.data) {
-          setFormData({
-            ...formData,
-            ...submission.data,
-            socialMedia: { ...formData.socialMedia, ...submission.data.socialMedia },
-            header: { ...formData.header, ...submission.data.header },
-            footer: { ...formData.footer, ...submission.data.footer },
-            hero: { ...formData.hero, ...submission.data.hero },
-            colorPalette: submission.data.colorPalette || formData.colorPalette,
-            typography: submission.data.typography || formData.typography,
+        if (submission?.data) {
+          setFormData((prev: any) => ({
+            ...prev, ...submission.data,
+            socialMedia: { ...prev.socialMedia, ...submission.data.socialMedia },
+            header: { ...prev.header, ...submission.data.header },
+            footer: { ...prev.footer, ...submission.data.footer },
+            hero: { ...prev.hero, ...submission.data.hero },
+            colorPalette: submission.data.colorPalette || prev.colorPalette,
+            typography: submission.data.typography || prev.typography,
             testimonials: submission.data.testimonials || [],
             features: submission.data.features || [],
-          });
+          }));
         }
       } catch (err: any) {
-        console.error("Handshake Error:", err.message);
+        toast({ variant: "destructive", title: "Load failed", description: err.message });
       } finally {
         setLoading(false);
       }
     };
-
-    fetchResortData();
+    fetchData();
   }, [editId]);
+
+  // ── Auto-save to get an ID before uploading ──
+  const ensureId = async (): Promise<string | null> => {
+    if (currentId) return currentId;
+    try {
+      const { data, error } = await supabase
+        .from("resort_submissions")
+        .insert([{ data: formData, updated_at: new Date().toISOString() }])
+        .select()
+        .single();
+      if (error) throw error;
+      setCurrentId(data.id);
+      // Update URL without reload
+      window.history.replaceState(null, "", `/wizard?edit=${data.id}`);
+      return data.id;
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Auto-save failed", description: err.message });
+      return null;
+    }
+  };
 
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
-      const payload = {
-        data: formData,
-        updated_at: new Date().toISOString(),
-      };
-
-      if (editId) {
-        const { error } = await supabase
-          .from("resort_submissions")
-          .update(payload)
-          .eq("id", editId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("resort_submissions")
-          .insert([payload]);
-        if (error) throw error;
-      }
-
-      toast({ title: "Success", description: "Resort saved." });
+      const id = await ensureId();
+      if (!id) return;
+      const { error } = await supabase
+        .from("resort_submissions")
+        .update({ data: formData, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+      toast({ title: "Saved!", description: "Your business site has been saved." });
       navigate("/dashboard");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message });
+      toast({ variant: "destructive", title: "Save failed", description: err.message });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handlePreview = () => {
-    if (editId) {
-      navigate(`/resort/${editId}`);
-    } else {
-      toast({ title: "Save First", description: "Please save the resort before previewing." });
-    }
+    if (currentId) navigate(`/site/${currentId}`);
+    else toast({ title: "Save first", description: "Please save before previewing." });
   };
 
-  const updateNested = (section: string, field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [section]: { ...prev[section], [field]: value },
-    }));
-  };
-
+  const updateNested = (section: string, field: string, value: any) =>
+    setFormData((prev: any) => ({ ...prev, [section]: { ...prev[section], [field]: value } }));
+  const updateSocial = (field: string, value: any) =>
+    setFormData((prev: any) => ({ ...prev, socialMedia: { ...prev.socialMedia, [field]: value } }));
+  const updateHeader = (field: string, value: any) =>
+    setFormData((prev: any) => ({ ...prev, header: { ...prev.header, [field]: value } }));
+  const updateFooter = (field: string, value: any) =>
+    setFormData((prev: any) => ({ ...prev, footer: { ...prev.footer, [field]: value } }));
+  const updateHero = (field: string, value: any) =>
+    setFormData((prev: any) => ({ ...prev, hero: { ...prev.hero, [field]: value } }));
   const applyColorPreset = (preset: any, index: number) => {
     setFormData((prev: any) => ({ ...prev, colorPalette: preset }));
     setActiveColorPreset(index);
-    toast({ title: "Color scheme applied!", description: preset.name });
   };
-
   const applyTypographyPreset = (preset: any, index: number) => {
     setFormData((prev: any) => ({ ...prev, typography: preset }));
     setActiveTypographyPreset(index);
-    toast({ title: "Typography applied!", description: preset.name });
   };
 
-  const updateSocial = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, socialMedia: { ...prev.socialMedia, [field]: value } }));
-  };
-
-  const updateHeader = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, header: { ...prev.header, [field]: value } }));
-  };
-
-  const updateFooter = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, footer: { ...prev.footer, [field]: value } }));
-  };
-
-  const updateHero = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, hero: { ...prev.hero, [field]: value } }));
-  };
-
-  // 🔥 UNIVERSAL IMAGE UPLOAD FUNCTION
-  const uploadImage = async (file: File, folder: string) => {
-    if (!editId) {
-      toast({ variant: "destructive", title: "Save First", description: "Please save the resort before uploading images." });
-      return null;
-    }
-
+  // ── Core upload function ──
+  const uploadImage = async (file: File, folder: string, id: string): Promise<string | null> => {
     setUploading(folder);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${folder}-${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${editId}/${folder}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("resort-assets")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("resort-assets")
-        .getPublicUrl(filePath);
-
-      return urlData.publicUrl;
+      const ext = file.name.split(".").pop();
+      const filePath = `${id}/${folder}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("resort-assets").upload(filePath, file);
+      if (error) throw error;
+      return supabase.storage.from("resort-assets").getPublicUrl(filePath).data.publicUrl;
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Upload Failed", description: err.message });
+      toast({ variant: "destructive", title: "Upload failed", description: err.message });
       return null;
     } finally {
       setUploading(null);
     }
   };
 
+  // ── Logo upload ──
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "header" | "hero") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file" });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File Too Large", description: "Image must be less than 5MB" });
-      return;
-    }
-    const url = await uploadImage(file, "logos");
+    if (!file.type.startsWith("image/")) { toast({ variant: "destructive", title: "Not an image" }); return; }
+    if (file.size > 5 * 1024 * 1024) { toast({ variant: "destructive", title: "File too large", description: "Max 5MB" }); return; }
+    const id = await ensureId();
+    if (!id) return;
+    const url = await uploadImage(file, "logos", id);
     if (url) {
       if (type === "header") updateHeader("logoUrl", url);
       else updateHero("heroLogoUrl", url);
-      toast({ title: "Logo uploaded!", description: `${type} logo saved.` });
+      toast({ title: "Logo uploaded!" });
     }
+    e.target.value = ""; // reset so same file can be re-selected
   };
 
+  // ── Hero image upload ──
   const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file" });
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "File Too Large", description: "Image must be less than 10MB" });
-      return;
-    }
-    const url = await uploadImage(file, "hero");
+    if (!file.type.startsWith("image/")) { toast({ variant: "destructive", title: "Not an image" }); return; }
+    if (file.size > 10 * 1024 * 1024) { toast({ variant: "destructive", title: "File too large", description: "Max 10MB" }); return; }
+    const id = await ensureId();
+    if (!id) return;
+    const url = await uploadImage(file, "hero", id);
     if (url) {
       setFormData((prev: any) => ({
         ...prev,
         media: { ...prev.media, heroImage: url, heroImages: [url, ...(prev.media?.heroImages?.slice(1) || [])] },
       }));
-      toast({ title: "Hero image uploaded!", description: "Background image saved." });
+      toast({ title: "Hero image uploaded!" });
     }
+    e.target.value = "";
   };
 
+  // ── Room image upload ──
   const handleRoomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, roomIndex: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ variant: "destructive", title: "Invalid File", description: "Please upload an image file" });
-      return;
-    }
-    const url = await uploadImage(file, "rooms");
+    if (!file.type.startsWith("image/")) { toast({ variant: "destructive", title: "Not an image" }); return; }
+    const id = await ensureId();
+    if (!id) return;
+    const url = await uploadImage(file, "rooms", id);
     if (url) {
-      const newRooms = [...(formData.roomTypes || [])];
-      newRooms[roomIndex] = { ...newRooms[roomIndex], imageUrl: url };
-      setFormData({ ...formData, roomTypes: newRooms });
-      toast({ title: "Room image uploaded!", description: "Room photo saved." });
+      setFormData((prev: any) => {
+        const newRooms = [...(prev.roomTypes || [])];
+        newRooms[roomIndex] = { ...newRooms[roomIndex], imageUrl: url };
+        return { ...prev, roomTypes: newRooms };
+      });
+      toast({ title: "Room image uploaded!" });
     }
+    e.target.value = "";
   };
 
+  // ── Gallery upload — FIX: uses ref, not createElement ──
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    
+    const id = await ensureId();
+    if (!id) return;
     setUploading("gallery");
-    try {
-      const urls: string[] = [];
-      for (const file of files) {
-        if (!file.type.startsWith("image/")) continue;
-        const url = await uploadImage(file, "gallery");
-        if (url) urls.push(url);
+    const urls: string[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+      const ext = file.name.split(".").pop();
+      const filePath = `${id}/gallery/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("resort-assets").upload(filePath, file);
+      if (!error) {
+        const url = supabase.storage.from("resort-assets").getPublicUrl(filePath).data.publicUrl;
+        urls.push(url);
       }
-      if (urls.length) {
-        setFormData((prev: any) => ({
-          ...prev,
-          media: { ...prev.media, galleryImages: [...(prev.media?.galleryImages || []), ...urls] },
-        }));
-        toast({ title: "Gallery images uploaded!", description: `${urls.length} image(s) saved.` });
-      }
-    } finally {
-      setUploading(null);
     }
+    if (urls.length) {
+      setFormData((prev: any) => ({
+        ...prev,
+        media: { ...prev.media, galleryImages: [...(prev.media?.galleryImages || []), ...urls] },
+      }));
+      toast({ title: `${urls.length} image(s) uploaded!` });
+    }
+    setUploading(null);
+    e.target.value = "";
   };
 
   const removeGalleryImage = (index: number) => {
     setFormData((prev: any) => ({
       ...prev,
-      media: { ...prev.media, galleryImages: prev.media?.galleryImages?.filter((_: any, i: number) => i !== index) || [] },
+      media: { ...prev.media, galleryImages: (prev.media?.galleryImages || []).filter((_: any, i: number) => i !== index) },
     }));
   };
 
-  const isJpg = (url: string) => url.toLowerCase().endsWith(".jpg") || url.toLowerCase().endsWith(".jpeg");
-  const isPng = (url: string) => url.toLowerCase().endsWith(".png");
+  const isJpg = (url: string) => /\.(jpg|jpeg)$/i.test(url);
+  const isPng = (url: string) => /\.png$/i.test(url);
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
+  if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
   return (
-    <div className="container mx-auto py-10 max-w-5xl">
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">{editId ? "Edit Resort" : "New Resort"}</h1>
-        <div className="space-x-4">
-          <Button variant="outline" onClick={() => navigate("/dashboard")}>Cancel</Button>
-          {editId && (
-            <Button variant="outline" onClick={handlePreview}>
-              <Eye className="h-4 w-4 mr-2" /> Preview
+    <div className="min-h-screen bg-gray-50">
+      {/* Sticky header */}
+      <header className="bg-white border-b sticky top-0 z-40">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <h1 className="font-bold text-lg truncate">
+            {currentId ? "Edit Business" : "New Business"}
+          </h1>
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")} className="min-h-[40px]">Cancel</Button>
+            {currentId && (
+              <Button variant="outline" size="sm" onClick={handlePreview} className="min-h-[40px] gap-1">
+                <Eye className="h-4 w-4" /> Preview
+              </Button>
+            )}
+            <Button size="sm" onClick={handleSave} disabled={isSubmitting} className="min-h-[40px] bg-blue-600 hover:bg-blue-700">
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (currentId ? "Save" : "Create")}
             </Button>
-          )}
-          <Button onClick={handleSave} disabled={isSubmitting}>
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (editId ? "Update" : "Save")}
-          </Button>
+          </div>
         </div>
       </header>
 
-      {/* 🎨 COLOR PALETTE PRESETS */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Palette className="h-5 w-5" /> Color Scheme</h2>
-        <p className="text-sm text-muted-foreground mb-4">Choose a professional color palette for your website</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {COLOR_PRESETS.map((preset, index) => (
-            <button
-              key={index}
-              onClick={() => applyColorPreset(preset, index)}
-              className={`p-4 rounded-lg border-2 transition-all ${activeColorPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"}`}
-            >
-              <div className="flex gap-1 mb-3">
-                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.primary }} />
-                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.background }} />
-                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.text }} />
-                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: preset.accent }} />
-              </div>
-              <p className="font-medium text-sm">{preset.name}</p>
-              <div className="h-2 rounded-full mt-2" style={{ background: preset.gradient }} />
-            </button>
-          ))}
-        </div>
-        <div className="mt-6 pt-6 border-t">
-          <Label className="text-sm font-medium mb-3 block">Or Customize Colors</Label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <Label className="text-xs">Primary</Label>
-              <Input type="color" value={formData.colorPalette?.primary || "#0EA5E9"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, primary: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
-            </div>
-            <div>
-              <Label className="text-xs">Background</Label>
-              <Input type="color" value={formData.colorPalette?.background || "#FFFFFF"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, background: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
-            </div>
-            <div>
-              <Label className="text-xs">Text</Label>
-              <Input type="color" value={formData.colorPalette?.text || "#1E293B"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, text: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
-            </div>
-            <div>
-              <Label className="text-xs">Accent</Label>
-              <Input type="color" value={formData.colorPalette?.accent || "#F59E0B"} onChange={(e) => { setFormData({ ...formData, colorPalette: { ...formData.colorPalette, accent: e.target.value } }); setActiveColorPreset(null); }} className="h-10 w-full" />
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+
+        {/* COLOR SCHEME */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2"><Palette className="h-5 w-5 text-blue-500" /> Color Scheme</h2>
+          <p className="text-sm text-gray-400 mb-4">Choose a professional color palette for your website</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {COLOR_PRESETS.map((preset, index) => (
+              <button key={index} onClick={() => applyColorPreset(preset, index)}
+                className={`p-3 rounded-xl border-2 transition-all text-left ${activeColorPreset === index ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200 hover:border-blue-300"}`}>
+                <div className="flex gap-1 mb-2">
+                  {[preset.primary, preset.accent, preset.background].map((c, i) => (
+                    <div key={i} className="w-5 h-5 rounded-full border border-gray-100" style={{ backgroundColor: c }} />
+                  ))}
+                </div>
+                <p className="font-semibold text-xs">{preset.name}</p>
+                <div className="h-1.5 rounded-full mt-2" style={{ background: preset.gradient }} />
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t">
+            <Label className="text-sm font-semibold mb-3 block">Customize Colors</Label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {["primary", "background", "text", "accent"].map((key) => (
+                <div key={key}>
+                  <Label className="text-xs capitalize text-gray-500">{key}</Label>
+                  <Input type="color" value={formData.colorPalette?.[key] || "#000000"}
+                    onChange={(e) => { setFormData((p: any) => ({ ...p, colorPalette: { ...p.colorPalette, [key]: e.target.value } })); setActiveColorPreset(null); }}
+                    className="h-10 w-full mt-1 p-1 rounded-lg cursor-pointer" />
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 📐 TYPOGRAPHY PRESETS */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Type className="h-5 w-5" /> Typography</h2>
-        <p className="text-sm text-muted-foreground mb-4">Choose professional font pairings</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {TYPOGRAPHY_PRESETS.map((preset, index) => (
-            <button
-              key={index}
-              onClick={() => applyTypographyPreset(preset, index)}
-              className={`p-4 rounded-lg border-2 transition-all text-left ${activeTypographyPreset === index ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"}`}
-            >
-              <p className="font-semibold mb-2">{preset.name}</p>
-              <p className="text-sm text-muted-foreground mb-1" style={{ fontFamily: preset.headingFont }}>Heading: {preset.headingFont.split("'")[1] || preset.headingFont}</p>
-              <p className="text-sm text-muted-foreground" style={{ fontFamily: preset.bodyFont }}>Body: {preset.bodyFont.split("'")[1] || preset.bodyFont}</p>
-            </button>
-          ))}
+        {/* TYPOGRAPHY */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2"><Type className="h-5 w-5 text-blue-500" /> Typography</h2>
+          <p className="text-sm text-gray-400 mb-4">Choose professional font pairings</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {TYPOGRAPHY_PRESETS.map((preset, index) => (
+              <button key={index} onClick={() => applyTypographyPreset(preset, index)}
+                className={`p-4 rounded-xl border-2 transition-all text-left ${activeTypographyPreset === index ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200 hover:border-blue-300"}`}>
+                <p className="font-bold text-sm mb-1">{preset.name}</p>
+                <p className="text-xs text-gray-500" style={{ fontFamily: preset.headingFont }}>Heading: {preset.headingFont.split("'")[1] || preset.headingFont}</p>
+                <p className="text-xs text-gray-500" style={{ fontFamily: preset.bodyFont }}>Body: {preset.bodyFont.split("'")[1] || preset.bodyFont}</p>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Logo Best Practices */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><CheckCircle className="h-5 w-5 text-blue-600" /> Image Guidelines</h2>
-        <div className="grid md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <h3 className="font-semibold mb-2">✅ Recommended</h3>
-            <ul className="space-y-1 text-muted-foreground">
+        {/* IMAGE GUIDELINES */}
+        <div className="bg-blue-50 border border-blue-200 p-5 rounded-2xl">
+          <h2 className="font-bold mb-3 flex items-center gap-2 text-blue-800"><CheckCircle className="h-5 w-5" /> Image Guidelines</h2>
+          <div className="grid sm:grid-cols-2 gap-4 text-sm text-blue-700">
+            <ul className="space-y-1">
               <li>• Logo: PNG with transparency (200×60px)</li>
               <li>• Hero Image: JPG/WebP (1920×1080px)</li>
-              <li>• Room Photos: JPG (800×600px)</li>
+              <li>• Photos: JPG (800×600px)</li>
               <li>• Max file size: 10MB</li>
             </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">⚠️ Tips</h3>
-            <ul className="space-y-1 text-muted-foreground">
-              <li>• Use high-quality, professional photos</li>
+            <ul className="space-y-1">
+              <li>• Use high-quality professional photos</li>
               <li>• Compress images before upload</li>
-              <li>• Hero images work best with dark overlay</li>
+              <li>• Hero images work best with dark areas</li>
               <li>• Room photos should be well-lit</li>
             </ul>
           </div>
         </div>
-      </div>
 
-      {/* Basic Information */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>Resort Name</Label>
-            <Input value={formData.identity?.resortName || ""} onChange={(e) => updateNested("identity", "resortName", e.target.value)} placeholder="Enter resort name" />
-          </div>
-          <div>
-            <Label>Location</Label>
-            <Input value={formData.identity?.location || ""} onChange={(e) => updateNested("identity", "location", e.target.value)} placeholder="e.g. Palawan, Philippines" />
+        {/* BASIC INFO */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">Basic Information</h2>
+          <div className="space-y-4">
+            <div>
+              <Label>Business Name <span className="text-red-500">*</span></Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.identity?.resortName || ""} onChange={(e) => updateNested("identity", "resortName", e.target.value)} placeholder="Enter business name" />
+            </div>
+            <div>
+              <Label>Location</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.identity?.location || ""} onChange={(e) => updateNested("identity", "location", e.target.value)} placeholder="e.g. Palawan, Philippines" />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Header Logo */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Image className="h-5 w-5" /> Header Logo</h2>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.header?.showLogo || false} onCheckedChange={(v) => updateHeader("showLogo", v)} />
-            <Label>Show Logo in Header</Label>
-          </div>
-          {formData.header?.showLogo && (
-            <>
-              <div>
-                <Label>Upload Logo</Label>
-                <div className="mt-2 flex gap-4 items-start">
-                  <Button variant="outline" onClick={() => logoInputRef.current?.click()} disabled={uploading !== null || !editId} className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    {uploading === "logos" ? "Uploading..." : "Choose File"}
-                  </Button>
-                  <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, "header")} />
-                  {!editId && <p className="text-sm text-muted-foreground">Save resort first to upload images</p>}
-                </div>
-              </div>
-              {formData.header?.logoUrl && (
-                <div className="border rounded-lg p-4 bg-muted/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>Current Logo</Label>
-                    <Button variant="ghost" size="sm" onClick={() => updateHeader("logoUrl", "")} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                  <div className="flex gap-4 items-center">
-                    <img src={formData.header.logoUrl} alt="Header logo" style={{ height: formData.header.logoSize || 120, objectFit: "contain" }} className="border rounded bg-white p-2" />
-                    <div className="flex-1 space-y-2">
-                      <div>
-                        <Label>Logo Size: {formData.header.logoSize}px</Label>
-                        <Slider min={60} max={200} step={10} value={[formData.header.logoSize || 120]} onValueChange={([v]) => updateHeader("logoSize", v)} className="mt-2" />
-                      </div>
-                      {isJpg(formData.header.logoUrl) && (
-                        <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-2">
-                          <AlertTriangle className="h-4 w-4 shrink-0" />
-                          <span>JPG format detected. Consider using PNG with transparency.</span>
-                        </div>
-                      )}
-                      {isPng(formData.header.logoUrl) && (
-                        <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md p-2">
-                          <CheckCircle className="h-4 w-4 shrink-0" />
-                          <span>PNG format - Great for transparency!</span>
-                        </div>
-                      )}
+        {/* HEADER LOGO */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Image className="h-5 w-5 text-blue-500" /> Header Logo</h2>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={formData.header?.showLogo || false} onCheckedChange={(v) => updateHeader("showLogo", v)} />
+              <Label>Show Logo in Header</Label>
+            </div>
+            {formData.header?.showLogo && (
+              <>
+                {/* Hidden input — connected via ref */}
+                <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, "header")} />
+                <Button variant="outline" className="gap-2 min-h-[44px]"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploading !== null}>
+                  <Upload className="h-4 w-4" />
+                  {uploading === "logos" ? "Uploading…" : "Upload Logo"}
+                </Button>
+                {formData.header?.logoUrl && (
+                  <div className="border rounded-xl p-4 bg-gray-50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Current Logo</Label>
+                      <Button variant="ghost" size="sm" onClick={() => updateHeader("logoUrl", "")} className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
                     </div>
-                  </div>
-                </div>
-              )}
-              <div>
-                <Label>Logo Position</Label>
-                <Select value={formData.header?.logoPosition || "left"} onValueChange={(v) => updateHeader("logoPosition", v)}>
-                  <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="left">Left Aligned</SelectItem>
-                    <SelectItem value="center">Centered</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Hero Section Logo */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Image className="h-5 w-5" /> Hero Section Logo</h2>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.hero?.showLogo || false} onCheckedChange={(v) => updateHero("showLogo", v)} />
-            <Label>Show Large Logo in Hero Section</Label>
-          </div>
-          {formData.hero?.showLogo && (
-            <>
-              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                <Switch checked={formData.hero?.useSameAsHeader || false} onCheckedChange={(v) => updateHero("useSameAsHeader", v)} />
-                <div>
-                  <Label className="font-medium">Use Same Logo as Header</Label>
-                  <p className="text-sm text-muted-foreground">Enable to use the header logo, or disable to upload a different one</p>
-                </div>
-              </div>
-              {!formData.hero?.useSameAsHeader && (
-                <div>
-                  <Label>Upload Hero Logo</Label>
-                  <div className="mt-2 flex gap-4 items-start">
-                    <Button variant="outline" onClick={() => heroLogoInputRef.current?.click()} disabled={uploading !== null || !editId} className="gap-2">
-                      <Upload className="h-4 w-4" />
-                      {uploading === "logos" ? "Uploading..." : "Choose File"}
-                    </Button>
-                    <input ref={heroLogoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, "hero")} />
-                  </div>
-                </div>
-              )}
-              {(formData.hero?.heroLogoUrl || (formData.hero?.useSameAsHeader && formData.header?.logoUrl)) && (
-                <div className="border rounded-lg p-4 bg-muted/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>Current Hero Logo</Label>
-                    {!formData.hero?.useSameAsHeader && (
-                      <Button variant="ghost" size="sm" onClick={() => updateHero("heroLogoUrl", "")} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                    <img src={formData.header.logoUrl} alt="Logo" style={{ height: formData.header.logoSize || 120 }} className="object-contain border rounded bg-white p-2" />
+                    {isJpg(formData.header.logoUrl) && (
+                      <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 shrink-0" /> JPG detected — consider PNG for transparency
+                      </p>
                     )}
-                  </div>
-                  <div className="flex flex-col items-center gap-4">
-                    <img src={formData.hero?.useSameAsHeader ? formData.header?.logoUrl : formData.hero?.heroLogoUrl} alt="Hero logo" style={{ height: formData.hero.heroLogoSize || 180, objectFit: "contain" }} className="border rounded bg-white p-4" />
-                    <div className="w-full space-y-2">
-                      <div>
-                        <Label>Hero Logo Size: {formData.hero.heroLogoSize}px</Label>
-                        <Slider min={100} max={400} step={20} value={[formData.hero.heroLogoSize || 180]} onValueChange={([v]) => updateHero("heroLogoSize", v)} className="mt-2" />
-                      </div>
+                    {isPng(formData.header.logoUrl) && (
+                      <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 shrink-0" /> PNG — great for transparency!
+                      </p>
+                    )}
+                    <div>
+                      <Label className="text-xs">Size: {formData.header.logoSize || 120}px</Label>
+                      <Slider min={60} max={200} step={10} value={[formData.header.logoSize || 120]} onValueChange={([v]) => updateHeader("logoSize", v)} className="mt-2" />
                     </div>
                   </div>
+                )}
+                <div>
+                  <Label>Logo Position</Label>
+                  <Select value={formData.header?.logoPosition || "left"} onValueChange={(v) => updateHeader("logoPosition", v)}>
+                    <SelectTrigger className="mt-1 min-h-[44px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left Aligned</SelectItem>
+                      <SelectItem value="center">Centered</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* 🖼️ HERO BACKGROUND IMAGE */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Image className="h-5 w-5" /> Hero Background Image</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>Upload Hero Image</Label>
-            <div className="mt-2 flex gap-4 items-start">
-              <Button variant="outline" onClick={() => heroImageInputRef.current?.click()} disabled={uploading !== null || !editId} className="gap-2">
-                <Upload className="h-4 w-4" />
-                {uploading === "hero" ? "Uploading..." : "Choose File"}
-              </Button>
-              <input ref={heroImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleHeroImageUpload} />
-              {!editId && <p className="text-sm text-muted-foreground">Save resort first to upload images</p>}
+        {/* HERO SECTION LOGO */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Image className="h-5 w-5 text-blue-500" /> Hero Section Logo</h2>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={formData.hero?.showLogo || false} onCheckedChange={(v) => updateHero("showLogo", v)} />
+              <Label>Show Large Logo in Hero Section</Label>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Recommended: 1920×1080px JPG or WebP. Best with dark areas for text overlay.</p>
+            {formData.hero?.showLogo && (
+              <>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <Switch checked={formData.hero?.useSameAsHeader || false} onCheckedChange={(v) => updateHero("useSameAsHeader", v)} />
+                  <div>
+                    <Label className="font-medium">Use Same Logo as Header</Label>
+                    <p className="text-xs text-gray-400 mt-0.5">Disable to upload a different hero logo</p>
+                  </div>
+                </div>
+                {!formData.hero?.useSameAsHeader && (
+                  <>
+                    <input ref={heroLogoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, "hero")} />
+                    <Button variant="outline" className="gap-2 min-h-[44px]"
+                      onClick={() => heroLogoInputRef.current?.click()}
+                      disabled={uploading !== null}>
+                      <Upload className="h-4 w-4" />
+                      {uploading === "logos" ? "Uploading…" : "Upload Hero Logo"}
+                    </Button>
+                  </>
+                )}
+                {(formData.hero?.heroLogoUrl || (formData.hero?.useSameAsHeader && formData.header?.logoUrl)) && (
+                  <div className="border rounded-xl p-4 bg-gray-50 space-y-3">
+                    <Label>Hero Logo Preview</Label>
+                    <img
+                      src={formData.hero?.useSameAsHeader ? formData.header?.logoUrl : formData.hero?.heroLogoUrl}
+                      alt="Hero logo"
+                      style={{ height: formData.hero.heroLogoSize || 180 }}
+                      className="object-contain border rounded bg-white p-3 mx-auto block"
+                    />
+                    <div>
+                      <Label className="text-xs">Size: {formData.hero.heroLogoSize || 180}px</Label>
+                      <Slider min={100} max={400} step={20} value={[formData.hero.heroLogoSize || 180]} onValueChange={([v]) => updateHero("heroLogoSize", v)} className="mt-2" />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-          {formData.media?.heroImage && (
-            <div className="border rounded-lg p-4 bg-muted/30">
-              <div className="flex items-center justify-between mb-2">
-                <Label>Current Hero Image</Label>
-                <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, media: { ...formData.media, heroImage: "", heroImages: [] } })} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+        </div>
+
+        {/* HERO BACKGROUND IMAGE */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Image className="h-5 w-5 text-blue-500" /> Hero Background Image</h2>
+          <div className="space-y-4">
+            <input ref={heroImageInputRef} type="file" accept="image/*" className="hidden" onChange={handleHeroImageUpload} />
+            <Button variant="outline" className="gap-2 min-h-[44px]"
+              onClick={() => heroImageInputRef.current?.click()}
+              disabled={uploading !== null}>
+              <Upload className="h-4 w-4" />
+              {uploading === "hero" ? "Uploading…" : "Upload Hero Image"}
+            </Button>
+            <p className="text-xs text-gray-400">Recommended: 1920×1080px JPG or WebP. Best with dark areas for text overlay.</p>
+            {formData.media?.heroImage && (
+              <div className="border rounded-xl p-4 bg-gray-50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Current Hero Image</Label>
+                  <Button variant="ghost" size="sm" onClick={() => setFormData((p: any) => ({ ...p, media: { ...p.media, heroImage: "", heroImages: [] } }))} className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                </div>
+                <img src={formData.media.heroImage} alt="Hero" className="w-full h-48 object-cover rounded-lg" />
               </div>
-              <img src={formData.media.heroImage} alt="Hero" className="w-full h-48 object-cover rounded-lg" />
+            )}
+          </div>
+        </div>
+
+        {/* BRAND STORY */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">Brand Story</h2>
+          <div className="space-y-4">
+            <div>
+              <Label>Tagline</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.brandStory?.tagline || ""} onChange={(e) => updateNested("brandStory", "tagline", e.target.value)} placeholder="Short catchy tagline" />
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Brand Story */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Brand Story</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>Tagline</Label>
-            <Input value={formData.brandStory?.tagline || ""} onChange={(e) => updateNested("brandStory", "tagline", e.target.value)} placeholder="Short catchy tagline" />
-          </div>
-          <div>
-            <Label>Short Description</Label>
-            <Textarea rows={3} value={formData.brandStory?.shortDescription || ""} onChange={(e) => updateNested("brandStory", "shortDescription", e.target.value)} placeholder="Brief description" />
-          </div>
-          <div>
-            <Label>Full Description</Label>
-            <Textarea rows={5} value={formData.brandStory?.fullDescription || ""} onChange={(e) => updateNested("brandStory", "fullDescription", e.target.value)} placeholder="Detailed description about your resort" />
+            <div>
+              <Label>Short Description</Label>
+              <Textarea className="mt-1" rows={3} value={formData.brandStory?.shortDescription || ""} onChange={(e) => updateNested("brandStory", "shortDescription", e.target.value)} placeholder="Brief description" />
+            </div>
+            <div>
+              <Label>Full Description</Label>
+              <Textarea className="mt-1" rows={5} value={formData.brandStory?.fullDescription || ""} onChange={(e) => updateNested("brandStory", "fullDescription", e.target.value)} placeholder="Detailed description about your business" />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ⭐ TESTIMONIALS */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Star className="h-5 w-5" /> Testimonials</h2>
-        <p className="text-sm text-muted-foreground mb-4">Add guest reviews to build trust</p>
-        <div className="space-y-4">
-          {(formData.testimonials || []).map((testimonial: any, i: number) => (
-            <div key={i} className="p-4 border rounded-lg space-y-3">
-              <div className="flex justify-between">
-                <span className="font-medium">Review {i + 1}</span>
-                <Button variant="ghost" size="sm" onClick={() => { const newTestimonials = (formData.testimonials || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, testimonials: newTestimonials }); }}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Input value={testimonial.name || ""} onChange={(e) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], name: e.target.value }; setFormData({ ...formData, testimonials: newTestimonials }); }} placeholder="Guest name" />
-                <Input value={testimonial.location || ""} onChange={(e) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], location: e.target.value }; setFormData({ ...formData, testimonials: newTestimonials }); }} placeholder="Location (e.g. Manila)" />
-              </div>
-              <Textarea rows={3} value={testimonial.text || ""} onChange={(e) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], text: e.target.value }; setFormData({ ...formData, testimonials: newTestimonials }); }} placeholder="Review text" />
-              <div className="flex items-center gap-2">
-                <Label>Rating:</Label>
-                <Select value={String(testimonial.rating || 5)} onValueChange={(v) => { const newTestimonials = [...(formData.testimonials || [])]; newTestimonials[i] = { ...newTestimonials[i], rating: Number(v) }; setFormData({ ...formData, testimonials: newTestimonials }); }}>
-                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+        {/* TESTIMONIALS */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2"><Star className="h-5 w-5 text-yellow-500" /> Testimonials</h2>
+          <p className="text-sm text-gray-400 mb-4">Add guest reviews to build trust</p>
+          <div className="space-y-4">
+            {(formData.testimonials || []).map((t: any, i: number) => (
+              <div key={i} className="p-4 border rounded-xl space-y-3 bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-sm">Review {i + 1}</span>
+                  <Button variant="ghost" size="sm" className="text-red-400" onClick={() => setFormData((p: any) => ({ ...p, testimonials: p.testimonials.filter((_: any, idx: number) => idx !== i) }))}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input className="min-h-[44px]" value={t.name || ""} placeholder="Guest name" onChange={(e) => { const arr = [...formData.testimonials]; arr[i] = { ...arr[i], name: e.target.value }; setFormData((p: any) => ({ ...p, testimonials: arr })); }} />
+                  <Input className="min-h-[44px]" value={t.location || ""} placeholder="Location" onChange={(e) => { const arr = [...formData.testimonials]; arr[i] = { ...arr[i], location: e.target.value }; setFormData((p: any) => ({ ...p, testimonials: arr })); }} />
+                </div>
+                <Textarea rows={3} value={t.text || ""} placeholder="Review text" onChange={(e) => { const arr = [...formData.testimonials]; arr[i] = { ...arr[i], text: e.target.value }; setFormData((p: any) => ({ ...p, testimonials: arr })); }} />
+                <Select value={String(t.rating || 5)} onValueChange={(v) => { const arr = [...formData.testimonials]; arr[i] = { ...arr[i], rating: Number(v) }; setFormData((p: any) => ({ ...p, testimonials: arr })); }}>
+                  <SelectTrigger className="w-40 min-h-[44px]"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="5">⭐⭐⭐⭐⭐ (5)</SelectItem>
                     <SelectItem value="4">⭐⭐⭐⭐ (4)</SelectItem>
@@ -643,273 +556,292 @@ export function FullWizard() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          ))}
-          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, testimonials: [...(formData.testimonials || []), { name: "", location: "", text: "", rating: 5 }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Testimonial</Button>
+            ))}
+            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, testimonials: [...(p.testimonials || []), { name: "", location: "", text: "", rating: 5 }] }))}>
+              <Plus className="h-4 w-4 mr-2" /> Add Testimonial
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* ✨ FEATURES */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Zap className="h-5 w-5" /> Features / Why Choose Us</h2>
-        <p className="text-sm text-muted-foreground mb-4">Highlight what makes your resort special</p>
-        <div className="space-y-4">
-          {(formData.features || []).map((feature: any, i: number) => (
-            <div key={i} className="p-4 border rounded-lg space-y-3">
-              <div className="flex justify-between">
-                <span className="font-medium">Feature {i + 1}</span>
-                <Button variant="ghost" size="sm" onClick={() => { const newFeatures = (formData.features || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, features: newFeatures }); }}><Trash2 className="h-4 w-4" /></Button>
+        {/* FEATURES */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2"><Zap className="h-5 w-5 text-blue-500" /> Features / Why Choose Us</h2>
+          <p className="text-sm text-gray-400 mb-4">Highlight what makes your business special</p>
+          <div className="space-y-4">
+            {(formData.features || []).map((f: any, i: number) => (
+              <div key={i} className="p-4 border rounded-xl space-y-3 bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-sm">Feature {i + 1}</span>
+                  <Button variant="ghost" size="sm" className="text-red-400" onClick={() => setFormData((p: any) => ({ ...p, features: p.features.filter((_: any, idx: number) => idx !== i) }))}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input className="min-h-[44px]" value={f.title || ""} placeholder="Feature title" onChange={(e) => { const arr = [...formData.features]; arr[i] = { ...arr[i], title: e.target.value }; setFormData((p: any) => ({ ...p, features: arr })); }} />
+                  <Input className="min-h-[44px]" value={f.icon || ""} placeholder="Emoji icon 🏖️" onChange={(e) => { const arr = [...formData.features]; arr[i] = { ...arr[i], icon: e.target.value }; setFormData((p: any) => ({ ...p, features: arr })); }} />
+                </div>
+                <Textarea rows={2} value={f.description || ""} placeholder="Brief description" onChange={(e) => { const arr = [...formData.features]; arr[i] = { ...arr[i], description: e.target.value }; setFormData((p: any) => ({ ...p, features: arr })); }} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Input value={feature.title || ""} onChange={(e) => { const newFeatures = [...(formData.features || [])]; newFeatures[i] = { ...newFeatures[i], title: e.target.value }; setFormData({ ...formData, features: newFeatures }); }} placeholder="Feature title (e.g. Beachfront)" />
-                <Input value={feature.icon || ""} onChange={(e) => { const newFeatures = [...(formData.features || [])]; newFeatures[i] = { ...newFeatures[i], icon: e.target.value }; setFormData({ ...formData, features: newFeatures }); }} placeholder="Emoji icon (e.g. 🏖️)" />
-              </div>
-              <Textarea rows={2} value={feature.description || ""} onChange={(e) => { const newFeatures = [...(formData.features || [])]; newFeatures[i] = { ...newFeatures[i], description: e.target.value }; setFormData({ ...formData, features: newFeatures }); }} placeholder="Brief description" />
-            </div>
-          ))}
-          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, features: [...(formData.features || []), { title: "", icon: "✨", description: "" }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Feature</Button>
-        </div>
-      </div>
-
-      {/* Social Media */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Facebook className="h-5 w-5" /> Social Media Links</h2>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Facebook URL</Label>
-              <Input value={formData.socialMedia?.facebook || ""} onChange={(e) => updateSocial("facebook", e.target.value)} placeholder="https://facebook.com/yourpage" />
-            </div>
-            <div>
-              <Label>Instagram URL</Label>
-              <Input value={formData.socialMedia?.instagram || ""} onChange={(e) => updateSocial("instagram", e.target.value)} placeholder="https://instagram.com/yourpage" />
-            </div>
-            <div>
-              <Label>TikTok URL</Label>
-              <Input value={formData.socialMedia?.tiktok || ""} onChange={(e) => updateSocial("tiktok", e.target.value)} placeholder="https://tiktok.com/@yourpage" />
-            </div>
-            <div>
-              <Label>YouTube URL</Label>
-              <Input value={formData.socialMedia?.youtube || ""} onChange={(e) => updateSocial("youtube", e.target.value)} placeholder="https://youtube.com/@yourchannel" />
-            </div>
-          </div>
-          <div>
-            <Label>WhatsApp Number</Label>
-            <Input value={formData.socialMedia?.whatsapp || ""} onChange={(e) => updateSocial("whatsapp", e.target.value)} placeholder="+63 xxx xxx xxxx" />
-          </div>
-          <div className="flex gap-6 pt-4 border-t">
-            <div className="flex items-center gap-2">
-              <Switch checked={formData.socialMedia?.showInHeader || false} onCheckedChange={(v) => updateSocial("showInHeader", v)} />
-              <Label>Show in Header</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={formData.socialMedia?.showInFooter || false} onCheckedChange={(v) => updateSocial("showInFooter", v)} />
-              <Label>Show in Footer</Label>
-            </div>
+            ))}
+            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, features: [...(p.features || []), { title: "", icon: "✨", description: "" }] }))}>
+              <Plus className="h-4 w-4 mr-2" /> Add Feature
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Header Settings */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Monitor className="h-5 w-5" /> Header Settings</h2>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.header?.sticky || false} onCheckedChange={(v) => updateHeader("sticky", v)} />
-            <Label>Sticky Header (stays on scroll)</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.header?.transparent || false} onCheckedChange={(v) => updateHeader("transparent", v)} />
-            <Label>Transparent Header (over hero image)</Label>
-          </div>
-          <div>
-            <Label>Navigation Links</Label>
-            <div className="space-y-2 mt-2">
-              {formData.header?.navigationLinks?.map((link: any, i: number) => (
-                <div key={i} className="flex gap-2">
-                  <Input value={link.label} onChange={(e) => { const newLinks = [...formData.header.navigationLinks]; newLinks[i] = { ...newLinks[i], label: e.target.value }; updateHeader("navigationLinks", newLinks); }} placeholder="Label" className="flex-1" />
-                  <Input value={link.url} onChange={(e) => { const newLinks = [...formData.header.navigationLinks]; newLinks[i] = { ...newLinks[i], url: e.target.value }; updateHeader("navigationLinks", newLinks); }} placeholder="#section" className="flex-1" />
-                  <Button variant="ghost" size="icon" onClick={() => { const newLinks = formData.header.navigationLinks.filter((_: any, idx: number) => idx !== i); updateHeader("navigationLinks", newLinks); }}><Trash2 className="h-4 w-4" /></Button>
+        {/* SOCIAL MEDIA */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Facebook className="h-5 w-5 text-blue-500" /> Social Media Links</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { key: "facebook", label: "Facebook URL", placeholder: "https://facebook.com/yourpage" },
+                { key: "instagram", label: "Instagram URL", placeholder: "https://instagram.com/yourpage" },
+                { key: "tiktok", label: "TikTok URL", placeholder: "https://tiktok.com/@yourpage" },
+                { key: "youtube", label: "YouTube URL", placeholder: "https://youtube.com/@yourchannel" },
+              ].map(({ key, label, placeholder }) => (
+                <div key={key}>
+                  <Label>{label}</Label>
+                  <Input className="mt-1 min-h-[44px]" value={formData.socialMedia?.[key] || ""} onChange={(e) => updateSocial(key, e.target.value)} placeholder={placeholder} />
                 </div>
               ))}
-              <Button variant="outline" className="w-full" onClick={() => { updateHeader("navigationLinks", [...(formData.header.navigationLinks || []), { label: "", url: "" }]); }}><Plus className="h-4 w-4 mr-2" /> Add Link</Button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Settings */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Wifi className="h-5 w-5" /> Footer Settings</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>Copyright Text</Label>
-            <Input value={formData.footer?.copyrightText || ""} onChange={(e) => updateFooter("copyrightText", e.target.value)} placeholder="© 2025 My Resort. All rights reserved." />
-          </div>
-          <div>
-            <Label>Footer Columns</Label>
-            <Select value={String(formData.footer?.columns || 3)} onValueChange={(v) => updateFooter("columns", Number(v))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2">2 Columns</SelectItem>
-                <SelectItem value="3">3 Columns</SelectItem>
-                <SelectItem value="4">4 Columns</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.footer?.showSocialIcons || false} onCheckedChange={(v) => updateFooter("showSocialIcons", v)} />
-            <Label>Show Social Icons in Footer</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.footer?.showContactInfo || false} onCheckedChange={(v) => updateFooter("showContactInfo", v)} />
-            <Label>Show Contact Info in Footer</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.footer?.showNavigation || false} onCheckedChange={(v) => updateFooter("showNavigation", v)} />
-            <Label>Show Navigation Links in Footer</Label>
-          </div>
-        </div>
-      </div>
-
-      {/* Amenities */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Amenities</h2>
-        <div className="space-y-2">
-          {(formData.amenities || []).map((amenity: string, i: number) => (
-            <div key={i} className="flex gap-2">
-              <Input value={amenity} onChange={(e) => { const newAmenities = [...(formData.amenities || [])]; newAmenities[i] = e.target.value; setFormData({ ...formData, amenities: newAmenities }); }} placeholder="Amenity name" />
-              <Button variant="destructive" size="icon" onClick={() => { const newAmenities = (formData.amenities || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, amenities: newAmenities }); }}><X className="h-4 w-4" /></Button>
+            <div>
+              <Label>WhatsApp Number</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.socialMedia?.whatsapp || ""} onChange={(e) => updateSocial("whatsapp", e.target.value)} placeholder="+63 xxx xxx xxxx" />
             </div>
-          ))}
-          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, amenities: [...(formData.amenities || []), ""] }); }}><Plus className="h-4 w-4 mr-2" /> Add Amenity</Button>
-        </div>
-      </div>
-
-      {/* Room Types */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Room Types</h2>
-        <div className="space-y-4">
-          {(formData.roomTypes || []).map((room: any, i: number) => (
-            <div key={i} className="p-4 border rounded-lg space-y-3">
-              <div className="flex justify-between">
-                <span className="font-medium">Room {i + 1}</span>
-                <Button variant="ghost" size="sm" onClick={() => { const newRooms = (formData.roomTypes || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, roomTypes: newRooms }); }}><Trash2 className="h-4 w-4" /></Button>
+            <div className="flex gap-6 pt-3 border-t flex-wrap">
+              <div className="flex items-center gap-2">
+                <Switch checked={formData.socialMedia?.showInHeader || false} onCheckedChange={(v) => updateSocial("showInHeader", v)} />
+                <Label>Show in Header</Label>
               </div>
-              <div>
-                <Label>Room Image</Label>
-                <div className="flex gap-2 items-center mt-2">
-                  <Button variant="outline" size="sm" onClick={() => document.getElementById(`room-image-${i}`)?.click()} className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    {room.imageUrl ? "Replace Image" : "Upload Image"}
+              <div className="flex items-center gap-2">
+                <Switch checked={formData.socialMedia?.showInFooter || false} onCheckedChange={(v) => updateSocial("showInFooter", v)} />
+                <Label>Show in Footer</Label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* HEADER SETTINGS */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Monitor className="h-5 w-5 text-blue-500" /> Header Settings</h2>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Switch checked={formData.header?.sticky || false} onCheckedChange={(v) => updateHeader("sticky", v)} />
+              <Label>Sticky Header (stays on scroll)</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={formData.header?.transparent || false} onCheckedChange={(v) => updateHeader("transparent", v)} />
+              <Label>Transparent Header (over hero image)</Label>
+            </div>
+            <div>
+              <Label className="mb-2 block">Navigation Links</Label>
+              <div className="space-y-2">
+                {formData.header?.navigationLinks?.map((link: any, i: number) => (
+                  <div key={i} className="flex gap-2">
+                    <Input className="min-h-[44px]" value={link.label} placeholder="Label" onChange={(e) => { const arr = [...formData.header.navigationLinks]; arr[i] = { ...arr[i], label: e.target.value }; updateHeader("navigationLinks", arr); }} />
+                    <Input className="min-h-[44px]" value={link.url} placeholder="#section" onChange={(e) => { const arr = [...formData.header.navigationLinks]; arr[i] = { ...arr[i], url: e.target.value }; updateHeader("navigationLinks", arr); }} />
+                    <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] text-red-400" onClick={() => updateHeader("navigationLinks", formData.header.navigationLinks.filter((_: any, idx: number) => idx !== i))}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                ))}
+                <Button variant="outline" className="w-full min-h-[44px]" onClick={() => updateHeader("navigationLinks", [...(formData.header.navigationLinks || []), { label: "", url: "" }])}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Link
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER SETTINGS */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><Wifi className="h-5 w-5 text-blue-500" /> Footer Settings</h2>
+          <div className="space-y-4">
+            <div>
+              <Label>Copyright Text</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.footer?.copyrightText || ""} onChange={(e) => updateFooter("copyrightText", e.target.value)} placeholder={`© ${new Date().getFullYear()} My Business. All rights reserved.`} />
+            </div>
+            <div>
+              <Label>Footer Columns</Label>
+              <Select value={String(formData.footer?.columns || 3)} onValueChange={(v) => updateFooter("columns", Number(v))}>
+                <SelectTrigger className="mt-1 min-h-[44px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2 Columns</SelectItem>
+                  <SelectItem value="3">3 Columns</SelectItem>
+                  <SelectItem value="4">4 Columns</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {[
+              { key: "showSocialIcons", label: "Show Social Icons in Footer" },
+              { key: "showContactInfo", label: "Show Contact Info in Footer" },
+              { key: "showNavigation", label: "Show Navigation Links in Footer" },
+            ].map(({ key, label }) => (
+              <div key={key} className="flex items-center gap-3">
+                <Switch checked={formData.footer?.[key] || false} onCheckedChange={(v) => updateFooter(key, v)} />
+                <Label>{label}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* AMENITIES */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">Amenities</h2>
+          <div className="space-y-2">
+            {(formData.amenities || []).map((a: string, i: number) => (
+              <div key={i} className="flex gap-2">
+                <Input className="min-h-[44px]" value={a} placeholder="Amenity name" onChange={(e) => { const arr = [...formData.amenities]; arr[i] = e.target.value; setFormData((p: any) => ({ ...p, amenities: arr })); }} />
+                <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px] text-red-400" onClick={() => setFormData((p: any) => ({ ...p, amenities: p.amenities.filter((_: any, idx: number) => idx !== i) }))}><X className="h-4 w-4" /></Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, amenities: [...(p.amenities || []), ""] }))}>
+              <Plus className="h-4 w-4 mr-2" /> Add Amenity
+            </Button>
+          </div>
+        </div>
+
+        {/* ROOM TYPES */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">Room Types / Services</h2>
+          <div className="space-y-4">
+            {(formData.roomTypes || []).map((room: any, i: number) => (
+              <div key={i} className="p-4 border rounded-xl space-y-3 bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-sm">Item {i + 1}</span>
+                  <Button variant="ghost" size="sm" className="text-red-400" onClick={() => setFormData((p: any) => ({ ...p, roomTypes: p.roomTypes.filter((_: any, idx: number) => idx !== i) }))}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+                <div>
+                  <input id={`room-img-${i}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleRoomImageUpload(e, i)} />
+                  <Button variant="outline" size="sm" className="gap-2 min-h-[44px]" onClick={() => document.getElementById(`room-img-${i}`)?.click()} disabled={uploading !== null}>
+                    <Upload className="h-4 w-4" /> {room.imageUrl ? "Replace Image" : "Upload Image"}
                   </Button>
-                  <input id={`room-image-${i}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleRoomImageUpload(e, i)} />
                   {room.imageUrl && (
-                    <Button variant="ghost" size="sm" onClick={() => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], imageUrl: "" }; setFormData({ ...formData, roomTypes: newRooms }); }} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                    <div className="mt-2 relative">
+                      <img src={room.imageUrl} alt="Room" className="w-full h-36 object-cover rounded-xl" />
+                      <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={() => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], imageUrl: "" }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    </div>
                   )}
                 </div>
-                {room.imageUrl && <img src={room.imageUrl} alt="Room" className="w-full h-32 object-cover rounded-lg mt-2" />}
+                {[
+                  { key: "name", placeholder: "Room / service name" },
+                  { key: "price", placeholder: "Price (e.g. ₱2,500/night)" },
+                  { key: "description", placeholder: "Description" },
+                ].map(({ key, placeholder }) => (
+                  <Input key={key} className="min-h-[44px]" value={room[key] || ""} placeholder={placeholder}
+                    onChange={(e) => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], [key]: e.target.value }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }} />
+                ))}
               </div>
-              <Input value={room.name || ""} onChange={(e) => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], name: e.target.value }; setFormData({ ...formData, roomTypes: newRooms }); }} placeholder="Room name" />
-              <Input value={room.price || ""} onChange={(e) => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], price: e.target.value }; setFormData({ ...formData, roomTypes: newRooms }); }} placeholder="Price per night" />
-              <Input value={room.description || ""} onChange={(e) => { const newRooms = [...(formData.roomTypes || [])]; newRooms[i] = { ...newRooms[i], description: e.target.value }; setFormData({ ...formData, roomTypes: newRooms }); }} placeholder="Description" />
-            </div>
-          ))}
-          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, roomTypes: [...(formData.roomTypes || []), { name: "", price: "", description: "", imageUrl: "" }] }); }}><Plus className="h-4 w-4 mr-2" /> Add Room Type</Button>
+            ))}
+            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, roomTypes: [...(p.roomTypes || []), { name: "", price: "", description: "", imageUrl: "" }] }))}>
+              <Plus className="h-4 w-4 mr-2" /> Add Room / Service
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* 🖼️ PHOTO GALLERY */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Image className="h-5 w-5" /> Photo Gallery</h2>
-        <p className="text-sm text-muted-foreground mb-4">Upload multiple photos for your gallery section</p>
-        <div className="space-y-4">
-          <div>
-            <Label>Upload Gallery Images</Label>
-            <div className="mt-2 flex gap-4 items-start">
-              <Button variant="outline" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.multiple = true; input.onchange = handleGalleryUpload; input.click(); }} disabled={uploading !== null || !editId} className="gap-2">
-                <Upload className="h-4 w-4" />
-                {uploading === "gallery" ? "Uploading..." : "Choose Images"}
-              </Button>
-              {!editId && <p className="text-sm text-muted-foreground">Save resort first to upload images</p>}
+        {/* PHOTO GALLERY — FIX: uses galleryInputRef */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2"><Image className="h-5 w-5 text-blue-500" /> Photo Gallery</h2>
+          <p className="text-sm text-gray-400 mb-4">Upload multiple photos for your gallery section</p>
+          <div className="space-y-4">
+            {/* Hidden input connected via ref */}
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleGalleryUpload}
+            />
+            <Button
+              variant="outline"
+              className="gap-2 min-h-[44px]"
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={uploading !== null}
+            >
+              <Upload className="h-4 w-4" />
+              {uploading === "gallery" ? "Uploading…" : "Upload Photos"}
+            </Button>
+            {formData.media?.galleryImages?.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {formData.media.galleryImages.map((url: string, i: number) => (
+                  <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border bg-gray-100">
+                    <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      className="absolute top-1 right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeGalleryImage(i)}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* LOCATION & CONTACT */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">Location & Contact</h2>
+          <div className="space-y-4">
+            <div>
+              <Label>Full Address</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.location?.fullAddress || ""} onChange={(e) => updateNested("location", "fullAddress", e.target.value)} placeholder="Complete address" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>Email</Label>
+                <Input className="mt-1 min-h-[44px]" value={formData.location?.contactEmail || ""} onChange={(e) => updateNested("location", "contactEmail", e.target.value)} placeholder="contact@business.com" />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input className="mt-1 min-h-[44px]" value={formData.location?.phone || ""} onChange={(e) => updateNested("location", "phone", e.target.value)} placeholder="+63 xxx xxx xxxx" />
+              </div>
+            </div>
+            <div>
+              <Label>WhatsApp</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.location?.whatsapp || ""} onChange={(e) => updateNested("location", "whatsapp", e.target.value)} placeholder="+63 xxx xxx xxxx" />
+            </div>
+            <div>
+              <Label>Google Maps Link</Label>
+              <Input className="mt-1 min-h-[44px]" value={formData.location?.googleMapsLink || ""} onChange={(e) => updateNested("location", "googleMapsLink", e.target.value)} placeholder="https://maps.google.com/..." />
             </div>
           </div>
-          {formData.media?.galleryImages?.length > 0 && (
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-              {formData.media.galleryImages.map((url: string, i: number) => (
-                <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border">
-                  <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-1 right-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeGalleryImage(i)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+        </div>
+
+        {/* FAQ */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">FAQ</h2>
+          <div className="space-y-4">
+            {(formData.faq || []).map((item: any, i: number) => (
+              <div key={i} className="p-4 border rounded-xl space-y-3 bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-sm">Q&A {i + 1}</span>
+                  <Button variant="ghost" size="sm" className="text-red-400" onClick={() => setFormData((p: any) => ({ ...p, faq: p.faq.filter((_: any, idx: number) => idx !== i) }))}><Trash2 className="h-4 w-4" /></Button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Location & Contact */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Location & Contact</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>Full Address</Label>
-            <Input value={formData.location?.fullAddress || ""} onChange={(e) => updateNested("location", "fullAddress", e.target.value)} placeholder="Complete address" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Email</Label>
-              <Input value={formData.location?.contactEmail || ""} onChange={(e) => updateNested("location", "contactEmail", e.target.value)} placeholder="contact@resort.com" />
-            </div>
-            <div>
-              <Label>Phone</Label>
-              <Input value={formData.location?.phone || ""} onChange={(e) => updateNested("location", "phone", e.target.value)} placeholder="+63 xxx xxx xxxx" />
-            </div>
-          </div>
-          <div>
-            <Label>WhatsApp</Label>
-            <Input value={formData.location?.whatsapp || ""} onChange={(e) => updateNested("location", "whatsapp", e.target.value)} placeholder="WhatsApp number" />
-          </div>
-          <div>
-            <Label>Google Maps Link</Label>
-            <Input value={formData.location?.googleMapsLink || ""} onChange={(e) => updateNested("location", "googleMapsLink", e.target.value)} placeholder="https://maps.google.com/..." />
-          </div>
-        </div>
-      </div>
-
-      {/* FAQ */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">FAQ</h2>
-        <div className="space-y-4">
-          {(formData.faq || []).map((item: any, i: number) => (
-            <div key={i} className="p-4 border rounded-lg space-y-3">
-              <div className="flex justify-between">
-                <span className="font-medium">Q&A {i + 1}</span>
-                <Button variant="ghost" size="sm" onClick={() => { const newFaq = (formData.faq || []).filter((_: any, idx: number) => idx !== i); setFormData({ ...formData, faq: newFaq }); }}><Trash2 className="h-4 w-4" /></Button>
+                <Input className="min-h-[44px]" value={item.question || ""} placeholder="Question" onChange={(e) => { const arr = [...formData.faq]; arr[i] = { ...arr[i], question: e.target.value }; setFormData((p: any) => ({ ...p, faq: arr })); }} />
+                <Textarea rows={3} value={item.answer || ""} placeholder="Answer" onChange={(e) => { const arr = [...formData.faq]; arr[i] = { ...arr[i], answer: e.target.value }; setFormData((p: any) => ({ ...p, faq: arr })); }} />
               </div>
-              <Input value={item.question || ""} onChange={(e) => { const newFaq = [...(formData.faq || [])]; newFaq[i] = { ...newFaq[i], question: e.target.value }; setFormData({ ...formData, faq: newFaq }); }} placeholder="Question" />
-              <Textarea rows={3} value={item.answer || ""} onChange={(e) => { const newFaq = [...(formData.faq || [])]; newFaq[i] = { ...newFaq[i], answer: e.target.value }; setFormData({ ...formData, faq: newFaq }); }} placeholder="Answer" />
-            </div>
-          ))}
-          <Button variant="outline" className="w-full" onClick={() => { setFormData({ ...formData, faq: [...(formData.faq || []), { question: "", answer: "" }] }); }}><Plus className="h-4 w-4 mr-2" /> Add FAQ</Button>
-        </div>
-      </div>
-
-      {/* Media - Video URL */}
-      <div className="bg-white p-6 rounded border mb-6">
-        <h2 className="text-xl font-semibold mb-4">Video Tour</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>YouTube/Vimeo URL</Label>
-            <Input value={formData.media?.videoUrl || ""} onChange={(e) => setFormData({ ...formData, media: { ...formData.media, videoUrl: e.target.value } })} placeholder="https://youtube.com/watch?v=..." />
+            ))}
+            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, faq: [...(p.faq || []), { question: "", answer: "" }] }))}>
+              <Plus className="h-4 w-4 mr-2" /> Add FAQ
+            </Button>
           </div>
         </div>
+
+        {/* VIDEO TOUR */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-4">Video Tour</h2>
+          <Label>YouTube / Vimeo URL</Label>
+          <Input className="mt-1 min-h-[44px]" value={formData.media?.videoUrl || ""} onChange={(e) => setFormData((p: any) => ({ ...p, media: { ...p.media, videoUrl: e.target.value } }))} placeholder="https://youtube.com/watch?v=..." />
+        </div>
+
+        {/* Bottom save */}
+        <div className="pb-8">
+          <Button className="w-full min-h-[52px] text-base font-bold bg-blue-600 hover:bg-blue-700 rounded-xl" onClick={handleSave} disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
+            {isSubmitting ? "Saving…" : (currentId ? "Save Changes" : "Create Business Site")}
+          </Button>
+        </div>
+
       </div>
     </div>
   );
