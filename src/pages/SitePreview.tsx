@@ -317,8 +317,14 @@ export default function SitePreview() {
             {/* ═══ HEADER ═══ */}
             {headerSettings.visible && (
               <header
-                className={`px-5 ${device !== "mobile" ? "sm:px-6 lg:px-8" : ""} border-b ${headerSettings.sticky ? "sticky top-0 z-50" : ""}`}
-                style={{ backgroundColor: headerBg, minHeight: headerSettings.height }}
+                className={`px-5 ${device !== "mobile" ? "sm:px-6 lg:px-8" : ""} border-b transition-all duration-300 ${headerSettings.sticky ? "sticky top-0 z-50" : ""}`}
+                style={{
+                  backgroundColor: headerSettings.sticky ? `${headerBg}e6` : headerBg,
+                  backdropFilter: headerSettings.sticky ? "blur(12px)" : undefined,
+                  WebkitBackdropFilter: headerSettings.sticky ? "blur(12px)" : undefined,
+                  minHeight: headerSettings.height,
+                  borderBottomColor: `${headerTextColor}14`,
+                }}
               >
                 {/* Desktop header */}
                 {device !== "mobile" && (
