@@ -637,14 +637,11 @@ export default function BusinessLandingPage() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              {galleryImages.slice(0, 6).map((img: string, i: number) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {galleryImages.map((img: string, i: number) => (
                 <div
                   key={i}
-                  className={cn(
-                    "rounded-[1.5rem] bg-slate-200 img-zoom",
-                    i === 0 ? "col-span-2 row-span-2 aspect-[4/3]" : i % 2 === 0 ? "aspect-[3/4]" : "aspect-square"
-                  )}
+                  className="aspect-[4/3] rounded-[1.5rem] bg-slate-200 img-zoom"
                 >
                   <img
                     src={img}
@@ -655,12 +652,6 @@ export default function BusinessLandingPage() {
                 </div>
               ))}
             </div>
-
-            {galleryImages.length > 6 && (
-              <p className="text-center text-sm text-slate-400 font-medium mt-8">
-                +{galleryImages.length - 6} more photos available
-              </p>
-            )}
           </div>
         </section>
       )}
