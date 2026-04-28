@@ -810,111 +810,24 @@ export default function BusinessLandingPage() {
                 We'd love to<br className="hidden sm:block" /> hear from you
               </h2>
 
-              <div className="space-y-3 mb-10">
+              <div className="space-y-2">
                 {(identity.phone || location.phone) && (
-                  <a
-                    href={`tel:${identity.phone || location.phone}`}
-                    className="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all group"
-                  >
-                    <span
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0"
-                      style={{ backgroundColor: colors.primary }}
-                    >
-                      <Phone className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium mb-0.5">Phone</p>
-                      <span className="font-semibold text-slate-800 text-sm group-hover:underline">
-                        {identity.phone || location.phone}
-                      </span>
-                    </div>
-                  </a>
+                  <p className="text-sm text-slate-600 flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    {identity.phone || location.phone}
+                  </p>
                 )}
                 {(identity.contactEmail || location.contactEmail || location.email) && (
-                  <a
-                    href={`mailto:${identity.contactEmail || location.contactEmail || location.email}`}
-                    className="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all group"
-                  >
-                    <span
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0"
-                      style={{ backgroundColor: colors.primary }}
-                    >
-                      <Mail className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium mb-0.5">Email</p>
-                      <span className="font-semibold text-slate-800 text-sm group-hover:underline break-all">
-                        {identity.contactEmail || location.contactEmail || location.email}
-                      </span>
-                    </div>
-                  </a>
+                  <p className="text-sm text-slate-600 flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    {identity.contactEmail || location.contactEmail || location.email}
+                  </p>
                 )}
                 {(location.fullAddress || identity.location) && (
-                  <div className="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50">
-                    <span
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0"
-                      style={{ backgroundColor: colors.primary }}
-                    >
-                      <MapPin className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs text-slate-400 font-medium mb-0.5">Address</p>
-                      <span className="font-semibold text-slate-800 text-sm leading-relaxed">
-                        {location.fullAddress || identity.location}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {(socialMedia.whatsapp || location.whatsapp) && (
-                  <a
-                    href={`https://wa.me/${(socialMedia.whatsapp || location.whatsapp).replace(/[^0-9]/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-all"
-                  >
-                    <span className="w-11 h-11 rounded-xl bg-emerald-500 flex items-center justify-center text-white shrink-0">
-                      <MessageCircle className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs text-emerald-600 font-medium mb-0.5">WhatsApp</p>
-                      <span className="font-semibold text-emerald-800 text-sm">Chat with us</span>
-                    </div>
-                  </a>
-                )}
-              </div>
-
-              {/* Social icons */}
-              <div className="flex gap-2.5">
-                {socialMedia.facebook && (
-                  <a
-                    href={socialMedia.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-11 h-11 rounded-xl flex items-center justify-center transition-all hover:scale-110"
-                    style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}
-                  >
-                    <Facebook className="h-5 w-5" />
-                  </a>
-                )}
-                {socialMedia.instagram && (
-                  <a
-                    href={socialMedia.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-11 h-11 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center transition-all hover:scale-110"
-                  >
-                    <Instagram className="h-5 w-5" />
-                  </a>
-                )}
-                {socialMedia.youtube && (
-                  <a
-                    href={socialMedia.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center transition-all hover:scale-110"
-                  >
-                    <YoutubeIcon className="h-5 w-5" />
-                  </a>
+                  <p className="text-sm text-slate-600 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    {location.fullAddress || identity.location}
+                  </p>
                 )}
               </div>
             </div>
@@ -933,19 +846,14 @@ export default function BusinessLandingPage() {
                     placeholder="Your Name"
                   />
                   <input
-                    type="tel"
+                    type="email"
                     className="w-full px-4 py-3.5 bg-slate-50 rounded-2xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all"
-                    placeholder="Phone Number"
+                    placeholder="Email Address"
                   />
                 </div>
-                <input
-                  type="email"
-                  className="w-full px-4 py-3.5 bg-slate-50 rounded-2xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all"
-                  placeholder="Email Address"
-                />
                 <textarea
                   className="w-full px-4 py-3.5 bg-slate-50 rounded-2xl text-sm h-32 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none"
-                  placeholder="How can we help you?"
+                  placeholder="Message"
                 />
                 <button
                   type="submit"
