@@ -5,6 +5,7 @@ import {
   Loader2, ArrowLeft, Phone, Mail, MapPin,
   Instagram, Facebook, Youtube as YoutubeIcon,
   MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight, CheckCircle2,
+  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -494,33 +495,114 @@ export default function BusinessLandingPage() {
 
       {/* ── AMENITIES ───────────────────────────────────────── */}
       {amenities.length > 0 && (
-        <section className="py-16 sm:py-20 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}07` }}>
+        <section className="py-20 sm:py-28 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
+            <div className="text-center mb-16">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>
                 Amenities
               </p>
               <h2
-                className="text-3xl sm:text-4xl font-bold tracking-tight"
+                className="text-4xl sm:text-5xl font-bold tracking-tight"
                 style={{ fontFamily: typography.headingFont }}
               >
-                Everything Included
+                Luxury Amenities
               </h2>
             </div>
-            <div className="flex flex-wrap justify-center gap-3">
-              {amenities.map((a: string, i: number) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2.5 px-5 py-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all text-sm font-medium text-slate-700 cursor-default"
-                >
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: colors.primary }}
-                  />
-                  {a}
-                </div>
-              ))}
-            </div>
+
+            {(() => {
+              const iconMap = {
+                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, CheckCircle2
+              };
+
+              const getAmenityData = (amenity: string) => {
+                const lower = amenity.toLowerCase();
+                if (lower.includes('wifi')) return { iconName: 'Wifi', desc: 'High-speed internet access throughout the property.' };
+                if (lower.includes('pool') || lower.includes('swimming')) return { iconName: 'Waves', desc: 'Crystal-clear swimming pool with stunning views.' };
+                if (lower.includes('restaurant') || lower.includes('dining')) return { iconName: 'Utensils', desc: 'Fine dining with local and international cuisine.' };
+                if (lower.includes('bar')) return { iconName: 'Wine', desc: 'Relax with cocktails at our beachfront bar.' };
+                if (lower.includes('spa')) return { iconName: 'Sparkles', desc: 'Rejuvenate with our full-service spa treatments.' };
+                if (lower.includes('gym')) return { iconName: 'Dumbbell', desc: 'State-of-the-art fitness center for your workout needs.' };
+                if (lower.includes('beach')) return { iconName: 'Waves', desc: 'Direct access to pristine white-sand beaches.' };
+                if (lower.includes('garden')) return { iconName: 'Leaf', desc: 'Lush tropical gardens for peaceful strolls.' };
+                if (lower.includes('jacuzzi')) return { iconName: 'Droplets', desc: 'Soak in our luxurious jacuzzi tubs.' };
+                if (lower.includes('kayak') || lower.includes('water')) return { iconName: 'Anchor', desc: 'Explore the waters with our kayak rentals.' };
+                if (lower.includes('snorkel') || lower.includes('dive')) return { iconName: 'Fish', desc: 'Discover underwater wonders with snorkeling gear.' };
+                if (lower.includes('tennis')) return { iconName: 'Trophy', desc: 'Challenge yourself on our tennis courts.' };
+                if (lower.includes('golf')) return { iconName: 'Flag', desc: 'Play a round on our championship golf course.' };
+                if (lower.includes('massage')) return { iconName: 'Hand', desc: 'Indulge in therapeutic massages.' };
+                if (lower.includes('yoga')) return { iconName: 'Sparkles', desc: 'Find balance with our yoga sessions.' };
+                if (lower.includes('air')) return { iconName: 'Snowflake', desc: 'Climate-controlled comfort in every room.' };
+                if (lower.includes('parking')) return { iconName: 'Car', desc: 'Secure parking facilities available.' };
+                if (lower.includes('service')) return { iconName: 'Bell', desc: '24/7 room service for your convenience.' };
+                if (lower.includes('laundry')) return { iconName: 'Shirt', desc: 'On-site laundry services.' };
+                if (lower.includes('safe')) return { iconName: 'Shield', desc: 'In-room safes for your valuables.' };
+                if (lower.includes('tv')) return { iconName: 'Tv', desc: 'Entertainment with cable TV.' };
+                if (lower.includes('coffee')) return { iconName: 'Coffee', desc: 'Fresh coffee in your room.' };
+                if (lower.includes('mini bar')) return { iconName: 'Wine', desc: 'Stocked mini bar with refreshments.' };
+                if (lower.includes('balcony')) return { iconName: 'Mountain', desc: 'Private balconies with scenic views.' };
+                return { iconName: 'CheckCircle2', desc: 'Premium amenity for your comfort.' };
+              };
+
+              const categoryKeywords: { [key: string]: string[] } = {
+                'Beach & Nature': ['beach', 'pool', 'garden', 'jacuzzi', 'kayak', 'snorkel', 'dive', 'nature', 'ocean', 'waves', 'leaf'],
+                'Comfort & Tech': ['wifi', 'air', 'spa', 'gym', 'service', 'laundry', 'safe', 'tv', 'coffee', 'mini', 'balcony', 'comfort', 'sparkles', 'dumbbell', 'snowflake', 'bell', 'shirt', 'shield', 'tv', 'coffee', 'mountain'],
+                'Dining & Entertainment': ['restaurant', 'bar', 'tennis', 'golf', 'massage', 'yoga', 'dining', 'entertainment', 'utensils', 'wine', 'trophy', 'flag', 'hand']
+              };
+
+              const groupedAmenities: { [key: string]: string[] } = {};
+              amenities.forEach((a: string) => {
+                const lower = a.toLowerCase();
+                let assigned = false;
+                for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+                  if (keywords.some(k => lower.includes(k))) {
+                    if (!groupedAmenities[cat]) groupedAmenities[cat] = [];
+                    groupedAmenities[cat].push(a);
+                    assigned = true;
+                    break;
+                  }
+                }
+                if (!assigned) {
+                  if (!groupedAmenities['Other']) groupedAmenities['Other'] = [];
+                  groupedAmenities['Other'].push(a);
+                }
+              });
+
+              return Object.entries(groupedAmenities).map(([category, amens]) => (
+                amens.length > 0 && (
+                  <div key={category} className="mb-16 last:mb-0">
+                    <h3 className="text-2xl sm:text-3xl font-bold mb-8 text-center" style={{ fontFamily: typography.headingFont }}>
+                      {category}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {amens.map((amenity, i) => {
+                        const data = getAmenityData(amenity);
+                        const Icon = iconMap[data.iconName as keyof typeof iconMap];
+                        return (
+                          <div
+                            key={i}
+                            className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-slate-100 hover:border-slate-200 cursor-default"
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.boxShadow = `0 20px 40px -10px rgba(0,0,0,0.1), 0 0 30px ${colors.primary}30`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.boxShadow = `0 1px 3px rgba(0,0,0,0.1)`;
+                            }}
+                          >
+                            <div className="text-center">
+                              <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <Icon className="h-7 w-7 text-slate-600" />
+                              </div>
+                              <h4 className="font-bold text-slate-900 mb-2 text-lg">{amenity}</h4>
+                              <p className="text-sm text-slate-500 leading-relaxed">{data.desc}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )
+              ));
+            })()}
           </div>
         </section>
       )}
