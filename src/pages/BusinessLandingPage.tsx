@@ -961,38 +961,150 @@ export default function BusinessLandingPage() {
       </section>
 
       {/* ── FOOTER ──────────────────────────────────────────── */}
-      <footer className="py-12 sm:py-16 border-t border-slate-100" style={{ backgroundColor: colors.background }}>
+      <footer className="relative py-16 sm:py-20 backdrop-blur-sm" style={{ backgroundColor: `${colors.background}F0` }}>
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          {/* 4 Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+            {/* Logo + About */}
             <div>
-              {media.logoUrl && (
-                <img src={media.logoUrl} alt={businessName} className="h-7 w-auto object-contain mb-2" />
-              )}
-              <p className="font-bold text-base tracking-tight" style={{ fontFamily: typography.headingFont }}>
-                {businessName}
-              </p>
-              {location.fullAddress && (
-                <p className="text-xs text-slate-400 mt-1">{location.fullAddress}</p>
-              )}
-            </div>
-            <div className="flex flex-col sm:items-end gap-3">
-              <div className="flex flex-wrap gap-x-5 gap-y-1">
-                {navLinks.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors font-medium"
-                  >
-                    {l.label}
-                  </a>
-                ))}
+              <div className="flex items-center gap-3 mb-4">
+                {media.logoUrl && (
+                  <img src={media.logoUrl} alt={businessName} className="h-8 w-auto object-contain" />
+                )}
+                <span
+                  className="font-bold text-lg tracking-tight"
+                  style={{ fontFamily: typography.headingFont, color: colors.text }}
+                >
+                  {businessName}
+                </span>
               </div>
-              <p className="text-xs text-slate-300">
-                © {new Date().getFullYear()} {businessName}. All rights reserved.
+              <p className="text-slate-500 text-sm leading-relaxed">
+                {brandStory.shortDescription || "Experience the best in luxury and comfort."}
               </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      className="text-slate-500 hover:text-slate-900 transition-colors text-sm"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4">Contact Info</h3>
+              <div className="space-y-3">
+                {(identity.phone || location.phone) && (
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-slate-400" />
+                    <span className="text-slate-600 text-sm">{identity.phone || location.phone}</span>
+                  </div>
+                )}
+                {(identity.contactEmail || location.contactEmail || location.email) && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-slate-400" />
+                    <span className="text-slate-600 text-sm break-all">
+                      {identity.contactEmail || location.contactEmail || location.email}
+                    </span>
+                  </div>
+                )}
+                {(location.fullAddress || identity.location) && (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-slate-400" />
+                    <span className="text-slate-600 text-sm leading-relaxed">
+                      {location.fullAddress || identity.location}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Newsletter Signup */}
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4">Newsletter</h3>
+              <p className="text-slate-500 text-sm mb-4">Subscribe for updates and exclusive offers.</p>
+              <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all"
+                  style={{ "--tw-ring-color": colors.primary } as React.CSSProperties}
+                />
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: colors.primary }}
+                >
+                  Subscribe
+                </button>
+              </form>
             </div>
           </div>
+
+          {/* Bottom Section */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-slate-200">
+            {/* Social Icons */}
+            <div className="flex gap-3">
+              {socialMedia.facebook && (
+                <a
+                  href={socialMedia.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+              )}
+              {socialMedia.instagram && (
+                <a
+                  href={socialMedia.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center transition-all hover:scale-110"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
+              {socialMedia.youtube && (
+                <a
+                  href={socialMedia.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all hover:scale-110"
+                >
+                  <YoutubeIcon className="h-5 w-5" />
+                </a>
+              )}
+            </div>
+
+            {/* Copyright */}
+            <p className="text-slate-400 text-sm">
+              © {new Date().getFullYear()} {businessName}. All rights reserved.
+            </p>
+          </div>
         </div>
+
+        {/* Back-to-Top Button */}
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className={`fixed bottom-6 left-6 w-12 h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${
+            scrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}
+          aria-label="Back to top"
+        >
+          <ArrowUpRight className="h-5 w-5" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
+        </button>
       </footer>
 
       {/* Floating WhatsApp */}
