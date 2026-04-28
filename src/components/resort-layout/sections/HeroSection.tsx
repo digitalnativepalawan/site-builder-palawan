@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { SectionProps } from "./types";
 
 export function HeroSection({ data, device, settings }: SectionProps) {
@@ -6,16 +7,36 @@ export function HeroSection({ data, device, settings }: SectionProps) {
   const primaryColor = settings?.colors.primary || "#0EA5E9";
   const headingFont = settings?.typography.headingFont || "'Space Grotesk', sans-serif";
 
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (bgRef.current) {
+        const scrolled = window.pageYOffset;
+        const rate = scrolled * -0.5;
+        bgRef.current.style.transform = `translateY(${rate}px)`;
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <section
       className="relative min-h-[85vh] md:min-h-[95vh] flex items-center justify-center overflow-hidden"
-      style={{
-        backgroundImage: hasBg ? `url(${data.backgroundImage})` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundColor: hasBg ? undefined : primaryColor,
-      }}
     >
+      {/* Parallax Background */}
+      <div
+        ref={bgRef}
+        className="absolute inset-0"
+        style={{
+          backgroundImage: hasBg ? `url(${data.backgroundImage})` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundColor: hasBg ? undefined : primaryColor,
+        }}
+      />
+
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60" />
 
@@ -28,7 +49,7 @@ export function HeroSection({ data, device, settings }: SectionProps) {
         )}
 
         <h1
-          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-4 leading-[1.1]"
+          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-4 leading-[1.1] opacity-0 animate-fade-in"
           style={{ fontFamily: headingFont }}
         >
           {data.headline}
@@ -50,8 +71,7 @@ export function HeroSection({ data, device, settings }: SectionProps) {
           {data.buttonText && (
             <a
               href={data.buttonUrl || "#"}
-              className="inline-flex items-center justify-center px-8 py-3 md:px-10 md:py-4 text-base md:text-lg font-semibold text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              style={{ backgroundColor: primaryColor }}
+              className="inline-flex items-center justify-center px-8 py-3 md:px-10 md:py-4 text-base md:text-lg font-semibold text-white bg-white/10 backdrop-blur-md border border-white/20 rounded-full transition-all duration-300 hover:bg-white/20 hover:scale-105 hover:shadow-xl"
             >
               {data.buttonText}
             </a>
@@ -60,7 +80,7 @@ export function HeroSection({ data, device, settings }: SectionProps) {
           {data.buttonText2 && (
             <a
               href={data.buttonUrl2 || "#"}
-              className="inline-flex items-center justify-center px-8 py-3 md:px-10 md:py-4 text-base md:text-lg font-semibold text-white border-2 border-white/80 rounded-full backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-white"
+              className="inline-flex items-center justify-center px-8 py-3 md:px-10 md:py-4 text-base md:text-lg font-semibold text-white bg-white/10 backdrop-blur-md border border-white/20 rounded-full transition-all duration-300 hover:bg-white/20 hover:border-white"
             >
               {data.buttonText2}
             </a>
