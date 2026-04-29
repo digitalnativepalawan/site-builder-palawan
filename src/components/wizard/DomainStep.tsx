@@ -30,8 +30,7 @@ interface DomainStepProps {
 
 export function DomainStep({ data, onChange }: DomainStepProps) {
   const {
-    handleSubmit,
-    control,
+    register,
     watch,
     setValue,
     formState: { errors },
@@ -197,7 +196,7 @@ export function DomainStep({ data, onChange }: DomainStepProps) {
                     id="customDomain"
                     placeholder="yourdomain.com"
                     className="flex-1"
-                    {...control.register('customDomain')}
+                    {...register('customDomain')}
                     disabled={checking || purchasing || purchased}
                   />
                   <Button
