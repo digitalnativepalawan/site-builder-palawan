@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type, Star, Zap } from "lucide-react";
+import { DomainStep } from './DomainStep';
 
 const COLOR_PRESETS = [
   { name: "Ocean Breeze", primary: "#0EA5E9", background: "#FFFFFF", text: "#1E293B", accent: "#F59E0B", gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)" },
@@ -72,6 +73,7 @@ export function FullWizard() {
     footer: { copyrightText: "", showSocialIcons: true, showContactInfo: true, showNavigation: true, columns: 3 },
     booking: { system: "", url: "", embedCode: "", sectionTitle: "Book Your Stay", sectionSubtitle: "" },
     hero: { showLogo: true, heroLogoUrl: "", heroLogoSize: 180, useSameAsHeader: true },
+    domain: { purchaseDomain: false, customDomain: '' },
   });
 
   useEffect(() => {
@@ -89,6 +91,7 @@ export function FullWizard() {
             hero: { ...prev.hero, ...submission.data.hero },
             colorPalette: submission.data.colorPalette || prev.colorPalette,
             typography: submission.data.typography || prev.typography,
+        domain: submission.data.domain || prev.domain,
             testimonials: submission.data.testimonials || [],
             features: submission.data.features || [],
             booking: submission.data.booking || prev.booking,
@@ -925,6 +928,15 @@ export function FullWizard() {
         </div>
 
         {/* Bottom save */}
+        {/* DOMAIN */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <DomainStep
+            data={formData.domain || { purchaseDomain: false, customDomain: '' }}
+            onChange={(domainData) => setFormData(prev => ({ ...prev, domain: domainData }))}
+          />
+        </div>
+
+
         <div className="pb-8">
           <Button className="w-full min-h-[52px] text-base font-bold bg-blue-600 hover:bg-blue-700 rounded-xl" onClick={handleSave} disabled={isSubmitting}>
             {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
