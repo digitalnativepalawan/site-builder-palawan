@@ -11,7 +11,7 @@ const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://api.hostinger.
 const HOSTINGER_TOKEN = process.env.HOSTINGER_API_KEY;
 
 if (!HOSTINGER_TOKEN) {
-  console.warn('HOSTINGER_API_KEY is not set – domain features will fail.');
+  throw new Error('HOSTINGER_API_KEY environment variable is required');
 }
 
 /* ── Types ─────────────────────────────────────────────────────────── */
