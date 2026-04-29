@@ -1,4 +1,4 @@
-import { purchaseAndConfigureDomain } from '@/lib/hostinger';
+import { purchaseAndConfigureDomain } from '../../src/lib/hostinger';
 import { createClient } from '@supabase/supabase-js';
 
 // Server-side Supabase client (service role for writes)

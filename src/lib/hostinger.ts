@@ -8,10 +8,11 @@
  */
 
 const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://api.hostinger.com';
-const HOSTINGER_TOKEN = process.env.HOSTINGER_API_KEY;
 
-if (!HOSTINGER_TOKEN) {
-  throw new Error('HOSTINGER_API_KEY environment variable is required');
+function getToken(): string {
+  const token = process.env.HOSTINGER_API_KEY;
+  if (!token) throw new Error('HOSTINGER_API_KEY environment variable is required');
+  return token;
 }
 
 /* ── Types ─────────────────────────────────────────────────────────── */
@@ -46,7 +47,7 @@ export async function checkDomainAvailability(domain: string): Promise<DomainChe
   const res = await fetch(url, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${HOSTINGER_TOKEN}`,
+      Authorization: `Bearer ${getToken()}`,
       'Content-Type': 'application/json',
     },
   });
@@ -94,7 +95,7 @@ export async function purchaseDomain({
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${HOSTINGER_TOKEN}`,
+      Authorization: `Bearer ${getToken()}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
@@ -119,7 +120,7 @@ export async function setDNSRecords(
   const res = await fetch(url, {
     method: 'PUT',
     headers: {
-      Authorization: `Bearer ${HOSTINGER_TOKEN}`,
+      Authorization: `Bearer ${getToken()}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ records }),
