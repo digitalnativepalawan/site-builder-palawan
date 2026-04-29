@@ -55,7 +55,7 @@ export function DomainStep({ data, onChange }: DomainStepProps) {
     domain?: string;
   } | null>(null);
   const [purchasing, setPurchasing] = useState(false);
-  const [purchased, setPurchasing] = useState(false);
+  const [purchased, setPurchased] = useState(false);
 
   const onCheckDomain = async () => {
     if (!customDomain) {
