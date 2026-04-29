@@ -1,4 +1,4 @@
-import { purchaseAndConfigureDomain } from '../_lib/hostinger';
+import { purchaseAndConfigureDomain } from '../_lib/hostinger.js';
 import { createClient } from '@supabase/supabase-js';
 
 // Server-side Supabase client (service role for writes)
@@ -55,6 +55,7 @@ export default async function handler(req: Request): Promise<Response> {
         }
       | undefined;
 
+    let existingData: any = null;
     if (submissionId) {
       const { data: submission, error: subErr } = await supabase
         .from('resort_submissions')
@@ -63,6 +64,7 @@ export default async function handler(req: Request): Promise<Response> {
         .single();
 
       if (!subErr && submission?.data) {
+        existingData = submission.data;
         const bi = submission.data.basicInfo || {};
         const loc = submission.data.location || {};
         contact = {
@@ -89,7 +91,7 @@ export default async function handler(req: Request): Promise<Response> {
         .from('resort_submissions')
         .update({
           data: {
-            ...(submission?.data || {}),
+            ...(existingData || {}),
             domain: {
               customDomain: domain,
               purchased: true,
