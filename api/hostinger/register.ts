@@ -8,6 +8,20 @@ const supabase = createClient(
 );
 
 export default async function handler(req: Request): Promise<Response> {
+  // Validate required env vars
+  if (!process.env.HOSTINGER_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Hostinger API key not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
