@@ -1,4 +1,4 @@
-import { checkDomainAvailability } from '@/lib/hostinger';
+import { checkDomainAvailability } from '../../src/lib/hostinger';
 
 export default async function handler(req: Request): Promise<Response> {
   // Validate API key early
