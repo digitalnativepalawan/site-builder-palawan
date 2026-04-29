@@ -1,6 +1,14 @@
 import { checkDomainAvailability } from '@/lib/hostinger';
 
 export default async function handler(req: Request): Promise<Response> {
+  // Validate API key early
+  if (!process.env.HOSTINGER_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Hostinger API key not configured on server' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
