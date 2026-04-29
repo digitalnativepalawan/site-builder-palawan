@@ -4,10 +4,10 @@
  *
  * Environment variables (Vercel):
  * - HOSTINGER_API_KEY
- * - HOSTINGER_BASE_URL (optional, defaults to https://api.hostinger.com)
+ * - HOSTINGER_BASE_URL (optional, defaults to https://developers.hostinger.com)
  */
 
-const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://api.hostinger.com';
+const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://developers.hostinger.com';
 
 function getToken(): string {
   const token = process.env.HOSTINGER_API_KEY;
@@ -42,22 +42,30 @@ export interface DNSRecord {
 /* ── Check Domain Availability ─────────────────────────────────────── */
 
 export async function checkDomainAvailability(domain: string): Promise<DomainCheckResponse> {
-  const url = `${HOSTINGER_BASE}/v2/domains/check-availability/${encodeURIComponent(domain)}`;
+  const dotIndex = domain.indexOf('.');
+  if (dotIndex === -1) throw new Error('Invalid domain: must include a TLD (e.g. example.com)');
+  const sld = domain.slice(0, dotIndex);
+  const tld = domain.slice(dotIndex + 1);
 
+  const url = `${HOSTINGER_BASE}/api/domains/v1/availability`;
   const res = await fetch(url, {
-    method: 'GET',
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${getToken()}`,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ domain: sld, tlds: [tld] }),
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    const err = await res.json().catch(() => ({})) as any;
     throw new Error(err.message || `Hostinger API error ${res.status}`);
   }
 
-  return res.json();
+  const results = await res.json() as Array<{ domain: string; is_available: boolean; restriction?: string | null }>;
+  const result = results[0];
+  if (!result) throw new Error('No availability data returned for this domain');
+  return { domain: result.domain, available: result.is_available };
 }
 
 /* ── Purchase Domain ───────────────────────────────────────────────── */

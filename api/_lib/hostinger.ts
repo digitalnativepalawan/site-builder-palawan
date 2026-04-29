@@ -1,4 +1,4 @@
-const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://api.hostinger.com';
+const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://developers.hostinger.com';
 const FETCH_TIMEOUT_MS = 8000;
 
 function getToken(): string {
@@ -34,16 +34,25 @@ export interface DNSRecord {
 }
 
 export async function checkDomainAvailability(domain: string): Promise<DomainCheckResponse> {
-  const url = `${HOSTINGER_BASE}/v2/domains/check-availability/${encodeURIComponent(domain)}`;
+  const dotIndex = domain.indexOf('.');
+  if (dotIndex === -1) throw new Error('Invalid domain: must include a TLD (e.g. example.com)');
+  const sld = domain.slice(0, dotIndex);
+  const tld = domain.slice(dotIndex + 1);
+
+  const url = `${HOSTINGER_BASE}/api/domains/v1/availability`;
   const res = await timedFetch(url, {
-    method: 'GET',
+    method: 'POST',
     headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ domain: sld, tlds: [tld] }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as any;
     throw new Error(err.message || `Hostinger API error ${res.status}`);
   }
-  return res.json();
+  const results = await res.json() as Array<{ domain: string; is_available: boolean; restriction?: string | null }>;
+  const result = results[0];
+  if (!result) throw new Error('No availability data returned for this domain');
+  return { domain: result.domain, available: result.is_available };
 }
 
 export async function purchaseDomain({
