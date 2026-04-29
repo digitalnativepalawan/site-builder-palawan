@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import { useWizard } from '@/context/wizard-context';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,9 +18,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Globe, CheckCircle2, XCircle } from 'lucide-react';
 import { domainSchema, type DomainFormValues } from '@/lib/domain-schema';
 
-export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
-  const { submissionId, saveStepData } = useWizard();
+interface DomainStepProps {
+  data: {
+    purchaseDomain?: boolean;
+    customDomain?: string;
+    purchased?: boolean;
+    purchaseResult?: any;
+  };
+  onChange: (data: any) => void;
+}
 
+export function DomainStep({ data, onChange }: DomainStepProps) {
   const {
     handleSubmit,
     control,
@@ -30,7 +37,10 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
     formState: { errors },
   } = useForm<DomainFormValues>({
     resolver: zodResolver(domainSchema),
-    defaultValues: { purchaseDomain: false, customDomain: '' },
+    defaultValues: {
+      purchaseDomain: data.purchaseDomain ?? false,
+      customDomain: data.customDomain ?? '',
+    },
   });
 
   const purchaseDomain = watch('purchaseDomain');
@@ -45,9 +55,8 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
     domain?: string;
   } | null>(null);
   const [purchasing, setPurchasing] = useState(false);
-  const [purchased, setPurchased] = useState(false);
+  const [purchased, setPurchasing] = useState(false);
 
-  // ── Check domain availability ──
   const onCheckDomain = async () => {
     if (!customDomain) {
       toast.error('Please enter a domain name');
@@ -70,7 +79,6 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
     }
   };
 
-  // ── Purchase domain ──
   const onPurchaseDomain = async () => {
     if (!availability?.available || !customDomain) return;
     setPurchasing(true);
@@ -81,23 +89,25 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
         body: JSON.stringify({
           domain: customDomain,
           years: 1,
-          submissionId,
+          // submissionId optional – not needed for inline save
         }),
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Purchase failed');
 
-      await saveStepData('domain', {
-        purchaseDomain: true,
-        customDomain,
-        purchased: true,
-        purchaseResult: result,
+      // Update parent form data
+      onChange({
+        ...data,
+        domain: {
+          purchaseDomain: true,
+          customDomain,
+          purchased: true,
+          purchaseResult: result,
+        },
       });
 
       setPurchased(true);
       toast.success('Domain purchased and DNS configured!');
-      // Slight delay so user sees success state
-      setTimeout(() => onStepComplete(), 1500);
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -105,7 +115,6 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
     }
   };
 
-  // ── Continue / Submit ──
   const onSubmit = async () => {
     if (purchasing) return;
 
@@ -118,28 +127,29 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
       return;
     }
 
-    // Save final state (skip or already purchased)
-    const stepData: Record<string, unknown> = { purchaseDomain };
-    if (purchased && customDomain) {
-      stepData.customDomain = customDomain;
-    }
-    await saveStepData('domain', stepData);
-    onStepComplete();
+    // Just update parent with current domain preferences
+    onChange({
+      ...data,
+      domain: {
+        purchaseDomain,
+        customDomain: customDomain || '',
+        purchased: purchased || false,
+      },
+    });
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-2xl mx-auto space-y-6"
+      className="w-full space-y-6"
     >
-      {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-heading font-semibold tracking-tight">
+        <h2 className="text-2xl font-heading font-semibold tracking-tight">
           Your Domain
-        </h1>
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Step 5 — Get a custom domain or use a free subdomain.
+          Get a custom domain or use a free subdomain for your resort.
         </p>
       </div>
 
@@ -155,7 +165,6 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Custom domain toggle */}
           <div className="flex items-start space-x-3">
             <Checkbox
               id="purchaseDomain"
@@ -179,7 +188,6 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
             </div>
           </div>
 
-          {/* Custom domain input (shown when checkbox is checked) */}
           {purchaseDomain && (
             <div className="space-y-4 pl-8">
               <div className="space-y-2">
@@ -213,7 +221,6 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
                 )}
               </div>
 
-              {/* Availability result card */}
               {availability && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -271,7 +278,6 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
                 </motion.div>
               )}
 
-              {/* Post-purchase success message */}
               {purchased && (
                 <div className="rounded-md bg-blue-50 p-4 border border-blue-200 text-sm text-blue-800">
                   <p>
@@ -279,14 +285,14 @@ export function DomainStep({ onStepComplete }: { onStepComplete: () => void }) {
                     propagation takes <strong>24–48 hours</strong>.
                   </p>
                   <p className="mt-1">
-                    Your site will be live at: <strong>https://{customDomain}</strong>
+                    Your site will be live at:{' '}
+                    <strong>https://{customDomain}</strong>
                   </p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Free subdomain fallback */}
           {!purchaseDomain && (
             <div className="pl-8 rounded-md bg-muted p-4">
               <p className="text-sm text-muted-foreground">
