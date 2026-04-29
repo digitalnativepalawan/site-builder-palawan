@@ -1,9 +1,14 @@
 const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://api.hostinger.com';
+const FETCH_TIMEOUT_MS = 8000;
 
 function getToken(): string {
   const token = process.env.HOSTINGER_API_KEY;
   if (!token) throw new Error('HOSTINGER_API_KEY environment variable is required');
   return token;
+}
+
+function timedFetch(url: string, init: RequestInit): Promise<Response> {
+  return fetch(url, { ...init, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
 }
 
 export interface DomainCheckResponse {
@@ -30,7 +35,7 @@ export interface DNSRecord {
 
 export async function checkDomainAvailability(domain: string): Promise<DomainCheckResponse> {
   const url = `${HOSTINGER_BASE}/v2/domains/check-availability/${encodeURIComponent(domain)}`;
-  const res = await fetch(url, {
+  const res = await timedFetch(url, {
     method: 'GET',
     headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
   });
@@ -65,7 +70,7 @@ export async function purchaseDomain({
   const url = `${HOSTINGER_BASE}/v2/domains/purchase`;
   const body: any = { domain, period: years, privacy_protection: privacyProtection };
   if (contact) body.registrant = contact;
-  const res = await fetch(url, {
+  const res = await timedFetch(url, {
     method: 'POST',
     headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -82,7 +87,7 @@ export async function setDNSRecords(
   records: DNSRecord[]
 ): Promise<{ success: boolean; message?: string }> {
   const url = `${HOSTINGER_BASE}/v2/domains/${encodeURIComponent(domain)}/dns`;
-  const res = await fetch(url, {
+  const res = await timedFetch(url, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ records }),

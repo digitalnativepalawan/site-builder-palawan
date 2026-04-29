@@ -31,10 +31,11 @@ export default async function handler(req: Request): Promise<Response> {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
+    const isTimeout = err?.name === 'TimeoutError' || err?.name === 'AbortError';
     return new Response(
-      JSON.stringify({ error: err.message || 'Failed to check domain' }),
+      JSON.stringify({ error: isTimeout ? 'Domain check timed out — Hostinger API did not respond in time' : (err.message || 'Failed to check domain') }),
       {
-        status: 500,
+        status: isTimeout ? 504 : 500,
         headers: { 'Content-Type': 'application/json' },
       }
     );
