@@ -495,7 +495,7 @@ export default function BusinessLandingPage() {
                 <div className="flex flex-wrap justify-center gap-5 text-xs text-slate-400 font-medium">
                   {["Instant confirmation", "No hidden fees", "Best rate guaranteed"].map((t) => (
                     <span key={t} className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      <Icons.CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
                       {t}
                     </span>
                   ))}
@@ -586,7 +586,7 @@ export default function BusinessLandingPage() {
                             className="w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0 mt-0.5"
                             style={{ backgroundColor: colors.primary }}
                           >
-                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            <Icons.CheckCircle className="h-3.5 w-3.5" />
                           </span>
                           <div>
                             <span className="font-semibold text-slate-800 text-sm">{label}</span>
