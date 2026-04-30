@@ -5,7 +5,7 @@ import {
   Loader2, ArrowLeft, Phone, Mail, MapPin,
   Instagram, Facebook, Youtube as YoutubeIcon,
   MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight,
-  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
+  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Ship, Compass, Bike, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -625,7 +625,7 @@ export default function BusinessLandingPage() {
             {(() => {
               const iconMap = {
                 Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets,
-                Ship, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand,
+                Ship, Compass, Bike, Anchor, Fish, Trophy, Flag, Hand,
                 Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
               };
 
@@ -642,7 +642,7 @@ export default function BusinessLandingPage() {
                 if (lower.includes('jacuzzi')) return { iconName: 'Droplets', desc: 'Soak in our luxurious jacuzzi tubs.' };
                 if (lower.includes('kayak') || lower.includes('water') || lower.includes('boat') || lower.includes('island')) return { iconName: 'Anchor', desc: 'Explore the waters with island hopping and water sports.' };
                 if (lower.includes('snorkel') || lower.includes('dive')) return { iconName: 'Fish', desc: 'Discover underwater wonders with snorkeling and diving gear.' };
-                if (lower.includes('scooter') || lower.includes('bike') || lower.includes('rental')) return { iconName: 'Scooter', desc: 'Explore the island at your own pace.' };
+                if (lower.includes('scooter') || lower.includes('bike') || lower.includes('rental')) return { iconName: 'Bike', desc: 'Explore the island at your own pace.' };
                 if (lower.includes('tennis')) return { iconName: 'Trophy', desc: 'Challenge yourself on our tennis courts.' };
                 if (lower.includes('golf')) return { iconName: 'Flag', desc: 'Play a round on our championship golf course.' };
                 if (lower.includes('massage')) return { iconName: 'Hand', desc: 'Indulge in therapeutic massages.' };
