@@ -388,7 +388,7 @@ export default function BusinessLandingPage() {
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section
-        className="hero-bg relative min-h-[60vh] sm:min-h-[70vh] flex items-end pb-24 sm:pb-28 px-5 sm:px-8 pt-16"
+        className="hero-bg relative min-h-[100svh] flex items-end pb-10 sm:pb-16 px-5 sm:px-8 pt-16"
         style={{
           background: heroImage
             ? `url(${heroImage}) center/cover no-repeat`
@@ -444,77 +444,6 @@ export default function BusinessLandingPage() {
             )}
           </div>
         </div>
-
-        {/* Dark gradient overlay (bottom 40%) */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 30%, transparent 60%)'
-          }}
-        />
-
-        {/* Floating amenities card */}
-        {amenities.length > 0 && (
-          <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 z-10 bg-white/75 backdrop-blur-md rounded-2xl shadow-lg p-3 sm:p-4 border border-slate-100 transition-all hover:shadow-xl">
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.18em] mb-2">
-              Top Amenities
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {amenities.slice(0, 4).map((a: string, i: number) => {
-                const lower = a.toLowerCase();
-                let Icon: any = null;
-                if (lower.includes('wifi')) Icon = Icons.Wifi;
-                else if (lower.includes('pool') || lower.includes('swimming')) Icon = Icons.Waves;
-                else if (lower.includes('restaurant') || lower.includes('dining')) Icon = Icons.Utensils;
-                else if (lower.includes('bar')) Icon = Icons.Wine;
-                else if (lower.includes('spa')) Icon = Icons.Sparkles;
-                else if (lower.includes('gym')) Icon = Icons.Dumbbell;
-                else if (lower.includes('beach')) Icon = Icons.Waves;
-                else if (lower.includes('garden')) Icon = Icons.Leaf;
-                else if (lower.includes('jacuzzi')) Icon = Icons.Droplets;
-                else if (lower.includes('kayak') || lower.includes('water') || lower.includes('boat') || lower.includes('island')) Icon = Icons.Anchor;
-                else if (lower.includes('snorkel') || lower.includes('dive')) Icon = Icons.Fish;
-                else if (lower.includes('scooter') || lower.includes('bike') || lower.includes('rental')) Icon = Icons.Bike;
-                else if (lower.includes('tennis')) Icon = Icons.Trophy;
-                else if (lower.includes('golf')) Icon = Icons.Flag;
-                else if (lower.includes('massage')) Icon = Icons.Hand;
-                else if (lower.includes('yoga')) Icon = Icons.Sparkles;
-                else if (lower.includes('air')) Icon = Icons.Snowflake;
-                else if (lower.includes('parking')) Icon = Icons.Car;
-                else if (lower.includes('service')) Icon = Icons.Bell;
-                else if (lower.includes('laundry')) Icon = Icons.Shirt;
-                else if (lower.includes('safe')) Icon = Icons.Shield;
-                else if (lower.includes('tv')) Icon = Icons.Tv;
-                else if (lower.includes('coffee')) Icon = Icons.Coffee;
-                else if (lower.includes('mini bar')) Icon = Icons.Wine;
-                else if (lower.includes('balcony')) Icon = Icons.Mountain;
-                return (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all hover:bg-primary/5 active:scale-95"
-                    style={{
-                      borderColor: `${colors.primary}20`,
-                      color: colors.text,
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    {Icon && <Icon className="h-3.5 w-3.5" style={{ color: colors.primary }} />}
-                    {a}
-                  </span>
-                );
-              })}
-            </div>
-            {amenities.length > 4 && (
-              <a
-                href="#amenities"
-                className="mt-1.5 block text-[10px] font-semibold"
-                style={{ color: colors.primary }}
-              >
-                View all amenities
-              </a>
-            )}
-          </div>
-        )}
 
         {/* scroll hint */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-40 pointer-events-none">
@@ -678,7 +607,7 @@ export default function BusinessLandingPage() {
 
       {/* ── AMENITIES ───────────────────────────────────────── */}
             {amenities.length > 0 && (
-        <section id="amenities" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
+        <section className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Amenities</p>
@@ -746,34 +675,19 @@ export default function BusinessLandingPage() {
 
               return Object.entries(groupedAmenities).map(([category, amens]) => (
                 amens.length > 0 && (
-                  <div key={category} className="mb-12 last:mb-0">
-                    <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-center" style={{ color: colors.primary }}>
+                  <div key={category} className="mb-8 last:mb-0">
+                    <h3 className="text-sm font-bold tracking-[0.15em] uppercase mb-3 text-center" style={{ color: colors.primary }}>
                       {category}
                     </h3>
-                    {/* Featured amenity (first) */}
-                    {amens.length > 0 && (() => {
-                      const first = amens[0];
-                      const { icon: FirstIcon, desc } = getAmenityData(first);
-                      return (
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 max-w-3xl mx-auto mb-4">
-                          {FirstIcon && <FirstIcon className="h-5 w-5 shrink-0" style={{ color: colors.primary }} />}
-                          <div className="min-w-0">
-                            <p className="font-semibold text-sm leading-tight">{first}</p>
-                            {desc && <p className="text-slate-500 text-xs line-clamp-1 mt-0.5">{desc}</p>}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    {/* Remaining amenities (excluding first) */}
-                    <div className="flex flex-wrap justify-center gap-1.5">
-                      {amens.slice(1).map((amenity, i) => {
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {amens.map((amenity, i) => {
                         const { icon: Icon, desc } = getAmenityData(amenity);
                         return (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all hover:bg-primary/5 active:scale-95"
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm transition-all hover:bg-primary/5 active:scale-95"
                             style={{
-                              borderColor: `${colors.primary}20`,
+                              border: `1px solid ${colors.primary}20`,
                               color: colors.text,
                               backgroundColor: 'transparent',
                             }}
@@ -1118,7 +1032,7 @@ export default function BusinessLandingPage() {
       {/* ── LOCATION ───────────────────────────────────────────── */}
       {(location.fullAddress || location.phone || location.contactEmail || location.googleMapsPlaceId) && (
         <section id="location" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="text-center mb-10">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Location</p>
               <h2
@@ -1126,23 +1040,59 @@ export default function BusinessLandingPage() {
                 style={{ fontFamily: typography.headingFont }}
               >Find Us</h2>
             </div>
-            <div className="aspect-video rounded-2xl overflow-hidden bg-slate-200">
-              {location.googleMapsPlaceId ? (
-                <iframe
-                  title="Map"
-                  src={`https://www.google.com/maps/embed/v1/place?key=${(location as any).googleMapsApiKey || 'YOUR_API_KEY'}&q=${encodeURIComponent(location.googleMapsPlaceId)}`}
-                  className="w-full h-full border-0"
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              ) : (
-                <img
-                  src={media.logoUrl || galleryImages[0] || undefined}
-                  alt="Location view"
-                  className="w-full h-full object-cover"
-                />
-              )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+              {/* Map / Image */}
+              <div className="aspect-video rounded-2xl overflow-hidden bg-slate-200">
+                {location.googleMapsPlaceId ? (
+                  <iframe
+                    title="Map"
+                    src={`https://www.google.com/maps/embed/v1/place?key=${(location as any).googleMapsApiKey || 'YOUR_API_KEY'}&q=${encodeURIComponent(location.googleMapsPlaceId)}`}
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : (
+                  <img
+                    src={media.logoUrl || galleryImages[0] || undefined}
+                    alt="Location view"
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+              {/* Details */}
+              <div>
+                <div className="space-y-6">
+                  {location.fullAddress && (
+                    <div className="flex items-start gap-3">
+                      <Icons.MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: colors.primary }} />
+                      <p className="text-slate-600 leading-relaxed">{location.fullAddress}</p>
+                    </div>
+                  )}
+                  {(location.phone || identity.phone) && (
+                    <div className="flex items-center gap-3">
+                      <Icons.Phone className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
+                      <p className="text-slate-600">{location.phone || identity.phone}</p>
+                    </div>
+                  )}
+                  {(location.contactEmail || identity.contactEmail) && (
+                    <div className="flex items-center gap-3">
+                      <Icons.Mail className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
+                      <p className="text-slate-600">{location.contactEmail || identity.contactEmail}</p>
+                    </div>
+                  )}
+                </div>
+                {(location.phone || location.contactEmail) && (
+                  <a
+                    href={whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}` : `tel:${location.phone || identity.phone}`}
+                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
+                    style={{ backgroundColor: colors.primary }}
+                  >
+                    <Icons.MessageCircle className="h-4 w-4" />
+                    Get in Touch
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -1158,7 +1108,7 @@ export default function BusinessLandingPage() {
                 Get In Touch
               </p>
               <h2
-                className="text-3xl sm:text-4xl font-bold tracking-tight mb-8 leading-tight"
+                className="text-4xl sm:text-5xl font-bold tracking-tight mb-10 leading-tight"
                 style={{ fontFamily: typography.headingFont }}
               >
                 We'd love to<br className="hidden sm:block" /> hear from you
@@ -1167,19 +1117,19 @@ export default function BusinessLandingPage() {
               <div className="space-y-2">
                 {(identity.phone || location.phone) && (
                   <p className="text-sm text-slate-600 flex items-center gap-2">
-                    <Icons.Phone className="h-3.5 w-3.5" />
+                    <Icons.Phone className="h-4 w-4" />
                     {identity.phone || location.phone}
                   </p>
                 )}
                 {(identity.contactEmail || location.contactEmail || location.email) && (
                   <p className="text-sm text-slate-600 flex items-center gap-2">
-                    <Icons.Mail className="h-3.5 w-3.5" />
+                    <Icons.Mail className="h-4 w-4" />
                     {identity.contactEmail || location.contactEmail || location.email}
                   </p>
                 )}
                 {(location.fullAddress || identity.location) && (
                   <p className="text-sm text-slate-600 flex items-center gap-2">
-                    <Icons.MapPin className="h-3.5 w-3.5" />
+                    <Icons.MapPin className="h-4 w-4" />
                     {location.fullAddress || identity.location}
                   </p>
                 )}
@@ -1223,9 +1173,9 @@ export default function BusinessLandingPage() {
       </section>
 
       {/* ── FOOTER ──────────────────────────────────────────── */}
-      <footer className="relative py-8 sm:py-10 border-t border-slate-100" style={{ backgroundColor: colors.background }}>
+      <footer className="relative py-10 sm:py-12 border-t border-slate-100" style={{ backgroundColor: colors.background }}>
   <div className="max-w-7xl mx-auto px-5 sm:px-8">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Brand */}
       <div>
         <div className="flex items-center gap-3 mb-3">
@@ -1252,15 +1202,15 @@ export default function BusinessLandingPage() {
       {/* Contact + WhatsApp */}
       <div>
         <h4 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Contact</h4>
-        <div className="space-y-2 text-sm">
+        <div className="space-y-3 text-sm">
           {(identity.phone || location.phone) && (
             <a href={`tel:${identity.phone || location.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-              <Icons.Phone className="h-3.5 w-3.5" /> {identity.phone || location.phone}
+              <Icons.Phone className="h-4 w-4" /> {identity.phone || location.phone}
             </a>
           )}
           {(identity.contactEmail || location.contactEmail) && (
             <a href={`mailto:${identity.contactEmail || location.contactEmail}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-              <Icons.Mail className="h-3.5 w-3.5" /> {identity.contactEmail || location.contactEmail}
+              <Icons.Mail className="h-4 w-4" /> {identity.contactEmail || location.contactEmail}
             </a>
           )}
         </div>
@@ -1269,10 +1219,10 @@ export default function BusinessLandingPage() {
             href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold text-white"
-            style={{ backgroundColor: colors.primary }}
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
+            style={{ backgroundColor: '#25D366' }}
           >
-            <Icons.MessageCircle className="h-3.5 w-3.5" /> Chat on WhatsApp
+            <Icons.MessageCircle className="h-4 w-4" /> Chat on WhatsApp
           </a>
         )}
       </div>
@@ -1283,18 +1233,18 @@ export default function BusinessLandingPage() {
       <p className="text-slate-400 text-xs">© {new Date().getFullYear()} {businessName}. All rights reserved.</p>
       <div className="flex gap-3">
         {socialMedia.facebook && (
-          <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}>
-            <Icons.Facebook className="h-3.5 w-3.5" />
+          <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}>
+            <Icons.Facebook className="h-4 w-4" />
           </a>
         )}
         {socialMedia.instagram && (
           <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center transition-all hover:scale-110">
-            <Icons.Instagram className="h-3.5 w-3.5" />
+            <Icons.Instagram className="h-4 w-4" />
           </a>
         )}
         {socialMedia.youtube && (
           <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all hover:scale-110">
-            <Icons.Youtube className="h-3.5 w-3.5" />
+            <Icons.Youtube className="h-4 w-4" />
           </a>
         )}
       </div>
@@ -1304,12 +1254,12 @@ export default function BusinessLandingPage() {
   {/* Back-to-Top Button */}
   <button
     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-    className={`fixed bottom-8 left-6 w-8 h-8 bg-white/60 backdrop-blur-sm rounded-full shadow flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-      scrolled ? 'opacity-80 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+    className={`fixed bottom-6 left-6 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${
+      scrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
     }`}
     aria-label="Back to top"
   >
-    <Icons.ArrowUpRight className="h-3 w-3" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
+    <Icons.ArrowUpRight className="h-4 w-4" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
   </button>
 </footer>
 
@@ -1319,11 +1269,10 @@ export default function BusinessLandingPage() {
           href={`https://wa.me/${(socialMedia.whatsapp || location.whatsapp).replace(/[^0-9]/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-6 right-4 z-50 w-8 h-8 text-white rounded-full shadow-md flex items-center justify-center transition-all hover:scale-110"
-          style={{ backgroundColor: colors.primary }}
+          className="fixed bottom-4 right-4 z-50 w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-md flex items-center justify-center transition-all hover:scale-110"
           aria-label="Chat on WhatsApp"
         >
-          <Icons.MessageCircle className="h-4 w-4" />
+          <Icons.MessageCircle className="h-5 w-5" />
         </a>
       )}
     </div>
