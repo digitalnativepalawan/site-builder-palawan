@@ -5,7 +5,7 @@ import {
   Loader2, ArrowLeft, Phone, Mail, MapPin,
   Instagram, Facebook, Youtube as YoutubeIcon,
   MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight,
-  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet, Boat, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
+  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -624,8 +624,8 @@ export default function BusinessLandingPage() {
 
             {(() => {
               const iconMap = {
-                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet,
-                Boat, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand,
+                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets,
+                Ship, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand,
                 Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
               };
 
