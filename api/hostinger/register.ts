@@ -2,13 +2,24 @@ import { purchaseAndConfigureDomain } from '../_lib/hostinger.js';
 import { createClient } from '@supabase/supabase-js';
 
 // Server-side Supabase client (service role for writes)
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize lazily after env var validation to avoid module init crashes
+let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
+
+function getSupabase() {
+  if (!supabase) {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Supabase configuration missing');
+    }
+    supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+  }
+  return supabase;
+}
 
 export default async function handler(req: Request): Promise<Response> {
-  // Validate required env vars
+  // Validate required env vars early
   if (!process.env.HOSTINGER_API_KEY) {
     return new Response(JSON.stringify({ error: 'Hostinger API key not configured' }), {
       status: 500,
@@ -21,6 +32,9 @@ export default async function handler(req: Request): Promise<Response> {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Initialize Supabase after validation
+  const sb = getSupabase();
 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -57,7 +71,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     let existingData: any = null;
     if (submissionId) {
-      const { data: submission, error: subErr } = await supabase
+      const { data: submission, error: subErr } = await sb
         .from('resort_submissions')
         .select('data')
         .eq('id', submissionId)
@@ -87,7 +101,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     // Persist purchase info to submission (fire-and-forget)
     if (submissionId) {
-      await supabase
+      await sb
         .from('resort_submissions')
         .update({
           data: {

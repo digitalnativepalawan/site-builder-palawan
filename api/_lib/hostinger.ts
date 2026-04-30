@@ -1,10 +1,8 @@
 const HOSTINGER_BASE = process.env.HOSTINGER_BASE_URL || 'https://developers.hostinger.com';
 const FETCH_TIMEOUT_MS = 8000;
 
-function getToken(): string {
-  const token = process.env.HOSTINGER_API_KEY;
-  if (!token) throw new Error('HOSTINGER_API_KEY environment variable is required');
-  return token;
+function getToken(): string | undefined {
+  return process.env.HOSTINGER_API_KEY;
 }
 
 function timedFetch(url: string, init: RequestInit): Promise<Response> {
@@ -42,7 +40,7 @@ export async function checkDomainAvailability(domain: string): Promise<DomainChe
   const url = `${HOSTINGER_BASE}/api/domains/v1/availability`;
   const res = await timedFetch(url, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${getToken() ?? ''}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ domain: sld, tlds: [tld] }),
   });
   if (!res.ok) {
@@ -81,7 +79,7 @@ export async function purchaseDomain({
   if (contact) body.registrant = contact;
   const res = await timedFetch(url, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${getToken() ?? ''}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -98,7 +96,7 @@ export async function setDNSRecords(
   const url = `${HOSTINGER_BASE}/v2/domains/${encodeURIComponent(domain)}/dns`;
   const res = await timedFetch(url, {
     method: 'PUT',
-    headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${getToken() ?? ''}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ records }),
   });
   if (!res.ok) {
