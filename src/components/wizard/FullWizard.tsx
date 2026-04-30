@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type, Star, Zap } from "lucide-react";
+import { Loader2, X, Plus, Trash2, Eye, Upload, AlertTriangle, CheckCircle, Image, Facebook, Instagram, Youtube, Wifi, Monitor, Palette, Type, Star, Zap, Layout } from "lucide-react";
 import { DomainStep } from './DomainStep';
 
 const COLOR_PRESETS = [
@@ -26,6 +26,13 @@ const TYPOGRAPHY_PRESETS = [
   { name: "Elegant Classic", headingFont: "'Playfair Display', serif", bodyFont: "'Lato', sans-serif", scale: "comfortable" },
   { name: "Bold Impact", headingFont: "'Montserrat', sans-serif", bodyFont: "'Open Sans', sans-serif", scale: "spacious" },
   { name: "Minimal Refined", headingFont: "'DM Sans', sans-serif", bodyFont: "'DM Sans', sans-serif", scale: "compact" },
+];
+
+const TEMPLATE_PRESETS = [
+  { id: "minimal", name: "Minimal", desc: "Clean, simple, lots of white space", primary: "#18181B", background: "#FAFAFA", text: "#18181B", accent: "#71717A", gradient: "linear-gradient(135deg, #18181B 0%, #52525B 100%)", headingFont: "'DM Sans', sans-serif", bodyFont: "'Inter', sans-serif", borderRadius: "1rem", spacing: "tight" },
+  { id: "bold", name: "Bold", desc: "Strong colors, big impact", primary: "#0EA5E9", background: "#FFFFFF", text: "#1E293B", accent: "#F59E0B", gradient: "linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%)", headingFont: "'Montserrat', sans-serif", bodyFont: "'Open Sans', sans-serif", borderRadius: "1.5rem", spacing: "spacious" },
+  { id: "luxury", name: "Luxury", desc: "Elegant gold & deep tones", primary: "#1E1B4B", background: "#FEFCE8", text: "#1C1917", accent: "#D97706", gradient: "linear-gradient(135deg, #1E1B4B 0%, #7C3AED 100%)", headingFont: "'Playfair Display', serif", bodyFont: "'Lato', sans-serif", borderRadius: "2rem", spacing: "comfortable" },
+  { id: "tropical", name: "Tropical", desc: "Vibrant island vibes", primary: "#06B6D4", background: "#F0F9FF", text: "#0C4A6E", accent: "#FBBF24", gradient: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)", headingFont: "'Space Grotesk', sans-serif", bodyFont: "'Inter', sans-serif", borderRadius: "1.5rem", spacing: "spacious" },
 ];
 
 export function FullWizard() {
@@ -46,6 +53,7 @@ export function FullWizard() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [activeColorPreset, setActiveColorPreset] = useState<number | null>(null);
   const [activeTypographyPreset, setActiveTypographyPreset] = useState<number | null>(null);
+  const [activeTemplate, setActiveTemplate] = useState<number | null>(null);
   const [currentId, setCurrentId] = useState<string | null>(editId);
 
   const [formData, setFormData] = useState<any>({
@@ -74,6 +82,7 @@ export function FullWizard() {
     booking: { system: "", url: "", embedCode: "", sectionTitle: "Book Your Stay", sectionSubtitle: "" },
     hero: { showLogo: true, heroLogoUrl: "", heroLogoSize: 180, useSameAsHeader: true },
     domain: { purchaseDomain: false, customDomain: '' },
+    template: TEMPLATE_PRESETS[0].id,
   });
 
   useEffect(() => {
@@ -105,6 +114,14 @@ export function FullWizard() {
     };
     fetchData();
   }, [editId]);
+
+  // Sync activeTemplate when formData.template changes (e.g., loading existing data)
+  useEffect(() => {
+    if (formData.template) {
+      const idx = TEMPLATE_PRESETS.findIndex((t: any) => t.id === formData.template);
+      if (idx !== -1) setActiveTemplate(idx);
+    }
+  }, [formData.template]);
 
   // ── Auto-save to get an ID before uploading ──
   const ensureId = async (): Promise<string | null> => {
@@ -167,6 +184,28 @@ export function FullWizard() {
   const applyTypographyPreset = (preset: any, index: number) => {
     setFormData((prev: any) => ({ ...prev, typography: preset }));
     setActiveTypographyPreset(index);
+  };
+
+  const applyTemplate = (template: any, index: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      template: template.id,
+      colorPalette: {
+        primary: template.primary,
+        background: template.background,
+        text: template.text,
+        accent: template.accent,
+        gradient: template.gradient,
+      },
+      typography: {
+        headingFont: template.headingFont,
+        bodyFont: template.bodyFont,
+        scale: template.spacing,
+      },
+    }));
+    setActiveTemplate(index);
+    setActiveColorPreset(null);
+    setActiveTypographyPreset(null);
   };
 
   // ── Core upload function ──
@@ -703,6 +742,35 @@ export function FullWizard() {
             </Button>
           </div>
         </div>
+
+        {/* ── WEBSITE TEMPLATE ────────────────────────────────────────── */}
+        <div className="bg-white p-6 rounded-2xl border">
+          <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+            <Layout className="h-5 w-5 text-blue-500" />
+            Choose Your Website Style
+          </h2>
+          <p className="text-sm text-gray-400 mb-4">
+            Select a modern design template. This defines the look of your website.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {TEMPLATE_PRESETS.map((template, index) => (
+              <button
+                key={template.id}
+                onClick={() => applyTemplate(template, index)}
+                className={`p-3 rounded-xl border-2 transition-all text-left ${activeTemplate === index ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200 hover:border-blue-300"}`}
+              >
+                <div className="flex gap-1 mb-2">
+                  {[template.primary, template.accent, template.background].map((c, i) => (
+                    <div key={i} className="w-5 h-5 rounded-full border border-gray-100" style={{ backgroundColor: c }} />
+                  ))}
+                </div>
+                <p className="font-semibold text-xs">{template.name}</p>
+                <p className="text-[10px] text-gray-500 leading-tight mt-1">{template.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
 
         {/* ROOM TYPES */}
         <div className="bg-white p-6 rounded-2xl border">

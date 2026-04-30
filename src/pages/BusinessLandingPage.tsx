@@ -26,6 +26,101 @@ interface SiteTypography {
   bodyFont: string;
 }
 
+// Compute template-specific visual modifiers
+function getTemplateModifiers(template: string, colors: SiteColors, typography: SiteTypography) {
+  const base = {
+    heroOverlay: "from-black/40 via-black/25 to-black/75",
+    badgeBg: "bg-white/10 backdrop-blur-sm",
+    badgeBorder: "border border-white/20",
+    headingLetterSpacing: "-0.02em",
+    subTextOpacity: "0.9",
+    cardRadius: "rounded-3xl",
+    cardBorder: "border-slate-100",
+    cardShadow: "shadow-lg hover:shadow-2xl",
+    buttonRadius: "rounded-full",
+    sectionSpacing: "py-16 md:py-24",
+    galleryRadius: "rounded-[1.5rem]",
+    accentGlow: false,
+    hasMesh: false,
+    hasNoise: false,
+  };
+
+  switch (template) {
+    case "luxury":
+      return {
+        ...base,
+        heroOverlay: "from-black/60 via-black/40 to-black/85",
+        badgeBg: "bg-gradient-to-r from-amber-500/90 to-amber-600/90 backdrop-blur-md",
+        badgeBorder: "border border-amber-400/30",
+        headingLetterSpacing: "0.02em",
+        subTextOpacity: "0.85",
+        cardRadius: "rounded-2xl",
+        cardBorder: "border-amber-100",
+        cardShadow: "shadow-xl hover:shadow-[0_20px_60px_-12px_rgba(217,119,6,0.25)]",
+        buttonRadius: "rounded-full",
+        sectionSpacing: "py-20 md:py-28",
+        galleryRadius: "rounded-2xl",
+        accentGlow: true,
+        hasMesh: false,
+        hasNoise: false,
+      };
+    case "bold":
+      return {
+        ...base,
+        heroOverlay: "from-black/35 via-black/20 to-black/60",
+        badgeBg: "bg-white/95 backdrop-blur-md",
+        badgeBorder: "border-0 shadow-lg",
+        headingLetterSpacing: "-0.03em",
+        subTextOpacity: "0.9",
+        cardRadius: "rounded-2xl",
+        cardBorder: "border-slate-200",
+        cardShadow: "shadow-xl hover:shadow-[0_25px_50px_-12px_rgba(14,165,233,0.35)]",
+        buttonRadius: "rounded-xl",
+        sectionSpacing: "py-18 md:py-26",
+        galleryRadius: "rounded-2xl",
+        accentGlow: false,
+        hasMesh: false,
+        hasNoise: false,
+      };
+    case "tropical":
+      return {
+        ...base,
+        heroOverlay: "from-cyan-950/60 via-cyan-900/40 to-cyan-950/85",
+        badgeBg: "bg-white/90 backdrop-blur-sm border border-cyan-200",
+        badgeBorder: "border border-cyan-200/50",
+        headingLetterSpacing: "0.01em",
+        subTextOpacity: "0.85",
+        cardRadius: "rounded-2xl",
+        cardBorder: "border-cyan-100",
+        cardShadow: "shadow-lg hover:shadow-[0_20px_50px_-12px_rgba(6,182,212,0.30)]",
+        buttonRadius: "rounded-full",
+        sectionSpacing: "py-16 md:py-24",
+        galleryRadius: "rounded-xl",
+        accentGlow: false,
+        hasMesh: true,
+        hasNoise: false,
+      };
+    case "minimal":
+    default:
+      return {
+        ...base,
+        heroOverlay: "from-black/20 via-black/10 to-black/30",
+        badgeBg: "bg-black/5 backdrop-blur-sm border border-black/5",
+        badgeBorder: "border border-black/5",
+        headingLetterSpacing: "-0.02em",
+        subTextOpacity: "0.7",
+        cardRadius: "rounded-xl",
+        cardShadow: "shadow-sm hover:shadow-md",
+        buttonRadius: "rounded-lg",
+        sectionSpacing: "py-14 md:py-20",
+        galleryRadius: "rounded-xl",
+        accentGlow: false,
+        hasMesh: false,
+        hasNoise: true,  // subtle grain texture
+      };
+  }
+}
+
 export default function BusinessLandingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -96,6 +191,7 @@ export default function BusinessLandingPage() {
     services = [],
     videoTour,
     booking = {},
+    template = "minimal",  // default if not set
   } = siteData;
 
   const colors: SiteColors = rawColors || {
@@ -110,6 +206,9 @@ export default function BusinessLandingPage() {
     headingFont: "'DM Serif Display', serif",
     bodyFont: "'DM Sans', sans-serif",
   };
+
+  // Compute template-specific visual modifiers
+  const templateModifiers = getTemplateModifiers(template, colors, typography);
 
   const businessName = identity.resortName || identity.businessName || identity.name || "Business Name";
   const heroImage = media.heroImage || media.heroImages?.[0];
@@ -131,12 +230,15 @@ export default function BusinessLandingPage() {
     ? "Our Services"
     : "What We Offer";
 
-  const navLinks: { label: string; href: string }[] = headerSettings.navigationLinks || [
+  // Build default navigation from available sections; respect custom headerSettings if provided
+  const defaultNavLinks = [
     { label: "About", href: "#about" },
-    ...(offerings.length ? [{ label: offeringsLabel, href: "#offerings" }] : []),
+    ...(roomTypes?.length ? [{ label: "Stay", href: "#stay" }] : []),
+    ...(services?.length ? [{ label: "Experiences", href: "#experiences" }] : []),
     ...(galleryImages.length ? [{ label: "Gallery", href: "#gallery" }] : []),
     { label: "Contact", href: "#contact" },
   ];
+  const navLinks: { label: string; href: string }[] = headerSettings.navigationLinks || defaultNavLinks;
 
   const ctaLabel = identity.ctaLabel || (roomTypes?.length ? "Book Now" : "Get in Touch");
   const bookingUrl = booking?.url || booking?.embedUrl || null;
@@ -144,6 +246,7 @@ export default function BusinessLandingPage() {
   const hasBookingWidget = booking?.embedCode && booking.embedCode.trim().length > 10;
   const hasBooking = hasBookingWidget || !!bookingUrl;
   const ctaHref = hasBooking ? "#book" : "#contact";
+  const whatsappNumber = socialMedia.whatsapp || location.whatsapp;
 
   return (
     <div
@@ -283,7 +386,7 @@ export default function BusinessLandingPage() {
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section
-        className="hero-bg relative min-h-[100svh] flex items-end pb-16 sm:pb-24 px-5 sm:px-8 pt-24"
+        className="hero-bg relative min-h-[100svh] flex items-end pb-10 sm:pb-16 px-5 sm:px-8 pt-16"
         style={{
           background: heroImage
             ? `url(${heroImage}) center/cover no-repeat`
@@ -291,12 +394,12 @@ export default function BusinessLandingPage() {
         }}
       >
         {heroImage && (
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 pointer-events-none" />
+          <div className={`absolute inset-0 bg-gradient-to-t ${templateModifiers.heroOverlay} pointer-events-none`} />
         )}
 
         <div className="relative max-w-7xl mx-auto w-full">
           {brandStory.tagline && (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 mb-6 fade-up">
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${templateModifiers.badgeBg} ${templateModifiers.badgeBorder} mb-6 fade-up`}>
               <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" />
               <span className="text-white/90 text-xs font-semibold tracking-[0.18em] uppercase">
                 {brandStory.tagline}
@@ -305,14 +408,14 @@ export default function BusinessLandingPage() {
           )}
 
           <h1
-            className="text-[clamp(2.6rem,8vw,5.5rem)] font-bold text-white leading-[1.0] tracking-tight mb-5 max-w-4xl fade-up-1"
-            style={{ fontFamily: typography.headingFont }}
+            className="text-[clamp(3.2rem,10vw,7rem)] font-bold text-white leading-[0.95] tracking-tight mb-4 max-w-4xl fade-up-1"
+            style={{ fontFamily: typography.headingFont, letterSpacing: templateModifiers.headingLetterSpacing }}
           >
             {businessName}
           </h1>
 
           {brandStory.shortDescription && (
-            <p className="text-white/70 text-base sm:text-xl mb-9 leading-relaxed max-w-lg fade-up-2">
+            <p className="text-white/80 text-base sm:text-xl mb-6 leading-relaxed max-w-lg fade-up-2">
               {brandStory.shortDescription}
             </p>
           )}
@@ -320,18 +423,21 @@ export default function BusinessLandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 fade-up-3">
             <a
               href={ctaHref}
-              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-white text-sm sm:text-base shadow-2xl transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+              className={`inline-flex items-center justify-center gap-2.5 px-8 py-4 ${templateModifiers.buttonRadius} font-bold text-white text-sm sm:text-base ${templateModifiers.cardShadow} transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]`}
               style={{ backgroundColor: colors.accent || colors.primary }}
             >
               {ctaLabel}
               <ArrowUpRight className="h-4 w-4" />
             </a>
-            {offerings.length > 0 && (
+            {whatsappNumber && (
               <a
-                href="#offerings"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-sm sm:text-base bg-white/15 backdrop-blur-sm border border-white/25 hover:bg-white/25 transition-all"
+                href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center justify-center gap-2 px-8 py-4 ${templateModifiers.buttonRadius} font-bold text-white text-sm sm:text-base bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all`}
               >
-                {offeringsLabel}
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp
               </a>
             )}
           </div>
@@ -400,7 +506,7 @@ export default function BusinessLandingPage() {
 
       {/* ── ABOUT ───────────────────────────────────────────── */}
       {(brandStory.fullDescription || brandStory.shortDescription || identity.ownerName) && (
-        <section id="about" className="py-24 sm:py-32 px-5 sm:px-8 overflow-hidden">
+        <section id="about" className="py-16 sm:py-24 px-5 sm:px-8 overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-[1fr_1.15fr] gap-16 lg:gap-28 items-center">
               {/* Image column */}
@@ -494,19 +600,15 @@ export default function BusinessLandingPage() {
       )}
 
       {/* ── AMENITIES ───────────────────────────────────────── */}
-      {amenities.length > 0 && (
-        <section className="py-20 sm:py-28 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>
-                Amenities
-              </p>
+            {amenities.length > 0 && (
+        <section className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Amenities</p>
               <h2
-                className="text-4xl sm:text-5xl font-bold tracking-tight"
+                className="text-3xl sm:text-4xl font-bold tracking-tight"
                 style={{ fontFamily: typography.headingFont }}
-              >
-                Luxury Amenities
-              </h2>
+              >Luxury Amenities</h2>
             </div>
 
             {(() => {
@@ -538,18 +640,18 @@ export default function BusinessLandingPage() {
                 if (lower.includes('safe')) return { iconName: 'Shield', desc: 'In-room safes for your valuables.' };
                 if (lower.includes('tv')) return { iconName: 'Tv', desc: 'Entertainment with cable TV.' };
                 if (lower.includes('coffee')) return { iconName: 'Coffee', desc: 'Fresh coffee in your room.' };
-                if (lower.includes('mini bar')) return { iconName: 'Wine', desc: 'Stocked mini bar with refreshments.' };
+                if (lower.includes('mini bar')) return { iconName: 'Wine', desc: 'Stocked mini bar with refreshment.' };
                 if (lower.includes('balcony')) return { iconName: 'Mountain', desc: 'Private balconies with scenic views.' };
-                return { iconName: 'CheckCircle2', desc: 'Premium amenity for your comfort.' };
+                return { iconName: 'CheckCircle2', desc: '' };
               };
 
-              const categoryKeywords: { [key: string]: string[] } = {
+              const categoryKeywords: Record<string, string[]> = {
                 'Beach & Nature': ['beach', 'pool', 'garden', 'jacuzzi', 'kayak', 'snorkel', 'dive', 'nature', 'ocean', 'waves', 'leaf'],
                 'Comfort & Tech': ['wifi', 'air', 'spa', 'gym', 'service', 'laundry', 'safe', 'tv', 'coffee', 'mini', 'balcony', 'comfort', 'sparkles', 'dumbbell', 'snowflake', 'bell', 'shirt', 'shield', 'tv', 'coffee', 'mountain'],
                 'Dining & Entertainment': ['restaurant', 'bar', 'tennis', 'golf', 'massage', 'yoga', 'dining', 'entertainment', 'utensils', 'wine', 'trophy', 'flag', 'hand']
               };
 
-              const groupedAmenities: { [key: string]: string[] } = {};
+              const groupedAmenities: Record<string, string[]> = {};
               amenities.forEach((a: string) => {
                 const lower = a.toLowerCase();
                 let assigned = false;
@@ -569,33 +671,27 @@ export default function BusinessLandingPage() {
 
               return Object.entries(groupedAmenities).map(([category, amens]) => (
                 amens.length > 0 && (
-                  <div key={category} className="mb-16 last:mb-0">
-                    <h3 className="text-2xl sm:text-3xl font-bold mb-8 text-center" style={{ fontFamily: typography.headingFont }}>
+                  <div key={category} className="mb-10 last:mb-0">
+                    <h3 className="text-sm font-bold tracking-[0.15em] uppercase mb-4 text-center" style={{ color: colors.primary }}>
                       {category}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="flex flex-wrap justify-center gap-3">
                       {amens.map((amenity, i) => {
                         const data = getAmenityData(amenity);
                         const Icon = iconMap[data.iconName as keyof typeof iconMap];
                         return (
-                          <div
+                          <span
                             key={i}
-                            className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-slate-100 hover:border-slate-200 cursor-default"
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.boxShadow = `0 20px 40px -10px rgba(0,0,0,0.1), 0 0 30px ${colors.primary}30`;
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.boxShadow = `0 1px 3px rgba(0,0,0,0.1)`;
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm"
+                            style={{
+                              backgroundColor: `${colors.primary}12`,
+                              border: `1px solid ${colors.primary}30`,
+                              color: colors.text,
                             }}
                           >
-                            <div className="text-center">
-                              <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <Icon className="h-7 w-7 text-slate-600" />
-                              </div>
-                              <h4 className="font-bold text-slate-900 mb-2 text-lg">{amenity}</h4>
-                              <p className="text-sm text-slate-500 leading-relaxed">{data.desc}</p>
-                            </div>
-                          </div>
+                            {Icon && <Icon className="h-3.5 w-3.5" />}
+                            {amenity}
+                          </span>
                         );
                       })}
                     </div>
@@ -607,27 +703,18 @@ export default function BusinessLandingPage() {
         </section>
       )}
 
-      {/* ── OFFERINGS ───────────────────────────────────────── */}
-      {offerings.length > 0 && (
-        <section id="offerings" className="py-24 sm:py-32 px-5 sm:px-8">
+      {/* ── STAY ─────────────────────────────────────────────── */}
+      {roomTypes?.length > 0 && (
+        <section id="stay" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: colors.background }}>
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-14">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-14">
               <div>
-                <p
-                  className="text-xs font-bold tracking-[0.2em] uppercase mb-4"
-                  style={{ color: colors.primary }}
-                >
-                  {offeringsLabel}
-                </p>
+                <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Stay</p>
                 <h2
-                  className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight"
+                  className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight"
                   style={{ fontFamily: typography.headingFont }}
                 >
-                  {roomTypes?.length
-                    ? "Find Your Perfect Stay"
-                    : services?.length
-                    ? "How We Help"
-                    : "What We Offer"}
+                  Find Your Perfect Retreat
                 </h2>
               </div>
               {hasBooking && (
@@ -640,60 +727,47 @@ export default function BusinessLandingPage() {
                 </a>
               )}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {offerings.map((item: any, i: number) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {roomTypes.map((room: any, i: number) => (
                 <div
                   key={i}
-                  className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm card-lift flex flex-col"
+                  className={`group bg-white ${templateModifiers.cardRadius} overflow-hidden ${templateModifiers.cardBorder} ${templateModifiers.cardShadow} transition-all duration-300`}
                 >
-                  {item.imageUrl && (
-                    <div className="aspect-[4/3] img-zoom">
+                  {room.imageUrl && (
+                    <div className="aspect-[4/3] overflow-hidden">
                       <img
-                        src={item.imageUrl}
-                        alt={item.name || item.title}
+                        src={room.imageUrl}
+                        alt={room.name || room.title}
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
                   )}
-                  <div className="p-6 flex-1 flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-3">
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-3 mb-3">
                       <h3
-                        className="font-bold text-lg text-slate-900 leading-snug"
+                        className="font-bold text-xl text-slate-900 leading-tight"
                         style={{ fontFamily: typography.headingFont }}
                       >
-                        {item.name || item.title}
+                        {room.name || room.title}
                       </h3>
-                      {item.price && (
-                        <span
-                          className="text-xs font-black shrink-0 px-3 py-1.5 rounded-xl"
-                          style={{ backgroundColor: `${colors.accent}18`, color: colors.accent }}
-                        >
-                          ₱{Number(item.price).toLocaleString()}
+                      {room.price && (
+                        <span className="text-xs font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap" style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}>
+                          ₱{Number(room.price).toLocaleString()}
                         </span>
                       )}
                     </div>
-                    {item.description && (
-                      <p
-                        className="text-sm text-slate-500 leading-relaxed flex-1"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        } as React.CSSProperties}
-                      >
-                        {item.description}
+                    {room.description && (
+                      <p className="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-2">
+                        {room.description}
                       </p>
                     )}
                     <a
                       href={ctaHref}
-                      className="mt-auto inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                      style={{ backgroundColor: colors.primary }}
+                      className="inline-flex items-center gap-2 text-sm font-semibold"
+                      style={{ color: colors.primary }}
                     >
-                      {roomTypes?.length ? "Book Now" : "Inquire"}
-                      <ArrowUpRight className="h-3.5 w-3.5" />
+                      Book Now <ArrowUpRight className="h-3.5 w-3.5" />
                     </a>
                   </div>
                 </div>
@@ -703,9 +777,85 @@ export default function BusinessLandingPage() {
         </section>
       )}
 
+      {/* ── EXPERIENCES ───────────────────────────────────────── */}
+      {services?.length > 0 && (
+        <section id="experiences" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-14">
+              <div>
+                <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Experiences</p>
+                <h2
+                  className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight"
+                  style={{ fontFamily: typography.headingFont }}
+                >
+                  Curated Experiences
+                </h2>
+              </div>
+              {hasBooking && (
+                <a
+                  href={ctaHref}
+                  className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold transition-all hover:gap-2.5"
+                  style={{ color: colors.primary }}
+                >
+                  View All <ChevronRight className="h-4 w-4" />
+                </a>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service: any, i: number) => (
+                <div
+                  key={i}
+                  className={`group bg-white ${templateModifiers.cardRadius} overflow-hidden ${templateModifiers.cardBorder} ${templateModifiers.cardShadow} transition-all duration-300`}
+                >
+                  {service.imageUrl && (
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <img
+                        src={service.imageUrl}
+                        alt={service.name || service.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <h3
+                        className="font-bold text-xl text-slate-900 leading-tight"
+                        style={{ fontFamily: typography.headingFont }}
+                      >
+                        {service.name || service.title}
+                      </h3>
+                      {service.price && (
+                        <span className="text-xs font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap" style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}>
+                          ₱{Number(service.price).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    {service.description && (
+                      <p className="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-2">
+                        {service.description}
+                      </p>
+                    )}
+                    <a
+                      href={ctaHref}
+                      className="inline-flex items-center gap-2 text-sm font-semibold"
+                      style={{ color: colors.primary }}
+                    >
+                      Inquire <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+
+
       {/* ── GALLERY ─────────────────────────────────────────── */}
       {galleryImages.length > 1 && (
-        <section id="gallery" className="py-24 sm:py-32 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}07` }}>
+        <section id="gallery" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}07` }}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-14">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>
@@ -740,7 +890,7 @@ export default function BusinessLandingPage() {
 
       {/* ── VIDEO TOUR ──────────────────────────────────────── */}
       {videoTour && (
-        <section className="py-20 sm:py-24 px-5 sm:px-8">
+        <section className="py-16 sm:py-24 px-5 sm:px-8">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
               <h2
@@ -764,7 +914,7 @@ export default function BusinessLandingPage() {
 
       {/* ── TESTIMONIALS ────────────────────────────────────── */}
       {testimonials.length > 0 && (
-        <section className="py-24 sm:py-32 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}07` }}>
+        <section className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}07` }}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-14">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>
@@ -809,7 +959,7 @@ export default function BusinessLandingPage() {
 
       {/* ── FAQ ─────────────────────────────────────────────── */}
       {faq.length > 0 && (
-        <section className="py-24 sm:py-32 px-5 sm:px-8">
+        <section className="py-16 sm:py-24 px-5 sm:px-8">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-12">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>
@@ -848,7 +998,7 @@ export default function BusinessLandingPage() {
       {/* ── CTA BANNER ──────────────────────────────────────── */}
       {hasBooking && (
         <section
-          className="py-20 sm:py-24 px-5 sm:px-8 text-white text-center"
+          className="py-16 sm:py-24 px-5 sm:px-8 text-white text-center"
           style={{
             background:
               colors.gradient ||
@@ -867,7 +1017,7 @@ export default function BusinessLandingPage() {
             </p>
             <a
               href={ctaHref}
-              className="inline-flex items-center gap-2.5 px-9 py-4 bg-white rounded-2xl font-bold text-sm sm:text-base shadow-xl hover:opacity-95 hover:scale-[1.02] transition-all"
+              className={`inline-flex items-center gap-2.5 px-9 py-4 bg-white ${templateModifiers.buttonRadius} font-bold text-sm sm:text-base shadow-xl hover:opacity-95 hover:scale-[1.02] transition-all`}
               style={{ color: colors.primary }}
             >
               {ctaLabel} <ArrowUpRight className="h-4 w-4" />
@@ -876,8 +1026,77 @@ export default function BusinessLandingPage() {
         </section>
       )}
 
+      {/* ── LOCATION ───────────────────────────────────────────── */}
+      {(location.fullAddress || location.phone || location.contactEmail || location.googleMapsPlaceId) && (
+        <section id="location" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Location</p>
+              <h2
+                className="text-3xl sm:text-4xl font-bold tracking-tight"
+                style={{ fontFamily: typography.headingFont }}
+              >Find Us</h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+              {/* Map / Image */}
+              <div className="aspect-video rounded-2xl overflow-hidden bg-slate-200">
+                {location.googleMapsPlaceId ? (
+                  <iframe
+                    title="Map"
+                    src={`https://www.google.com/maps/embed/v1/place?key=${(location as any).googleMapsApiKey || 'YOUR_API_KEY'}&q=${encodeURIComponent(location.googleMapsPlaceId)}`}
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : (
+                  <img
+                    src={media.logoUrl || galleryImages[0] || undefined}
+                    alt="Location view"
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+              {/* Details */}
+              <div>
+                <div className="space-y-6">
+                  {location.fullAddress && (
+                    <div className="flex items-start gap-4">
+                      <MapPin className="h-5 w-5 shrink-0 mt-0.5" style={{ color: colors.primary }} />
+                      <p className="text-slate-600 leading-relaxed">{location.fullAddress}</p>
+                    </div>
+                  )}
+                  {(location.phone || identity.phone) && (
+                    <div className="flex items-center gap-4">
+                      <Phone className="h-5 w-5 shrink-0" style={{ color: colors.primary }} />
+                      <p className="text-slate-600">{location.phone || identity.phone}</p>
+                    </div>
+                  )}
+                  {(location.contactEmail || identity.contactEmail) && (
+                    <div className="flex items-center gap-4">
+                      <Mail className="h-5 w-5 shrink-0" style={{ color: colors.primary }} />
+                      <p className="text-slate-600">{location.contactEmail || identity.contactEmail}</p>
+                    </div>
+                  )}
+                </div>
+                {(location.phone || location.contactEmail) && (
+                  <a
+                    href={whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}` : `tel:${location.phone || identity.phone}`}
+                    className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
+                    style={{ backgroundColor: colors.primary }}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Get in Touch
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── CONTACT ─────────────────────────────────────────── */}
-      <section id="contact" className="py-24 sm:py-32 px-5 sm:px-8">
+      <section id="contact" className="py-16 sm:py-24 px-5 sm:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-start">
             {/* Info */}
@@ -939,7 +1158,7 @@ export default function BusinessLandingPage() {
                 />
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-2xl text-sm font-bold text-white transition-all hover:opacity-90 hover:scale-[1.01] active:scale-[0.99]"
+                  className={`w-full py-4 ${templateModifiers.buttonRadius} text-sm font-bold text-white transition-all hover:opacity-90 hover:scale-[1.01] active:scale-[0.99]`}
                   style={{ backgroundColor: colors.primary }}
                 >
                   Send Message
@@ -951,151 +1170,95 @@ export default function BusinessLandingPage() {
       </section>
 
       {/* ── FOOTER ──────────────────────────────────────────── */}
-      <footer className="relative py-16 sm:py-20 backdrop-blur-sm" style={{ backgroundColor: `${colors.background}F0` }}>
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          {/* 4 Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
-            {/* Logo + About */}
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                {media.logoUrl && (
-                  <img src={media.logoUrl} alt={businessName} className="h-8 w-auto object-contain" />
-                )}
-                <span
-                  className="font-bold text-lg tracking-tight"
-                  style={{ fontFamily: typography.headingFont, color: colors.text }}
-                >
-                  {businessName}
-                </span>
-              </div>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                {brandStory.shortDescription || "Experience the best in luxury and comfort."}
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="font-bold text-slate-900 mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                {navLinks.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-slate-500 hover:text-slate-900 transition-colors text-sm"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h3 className="font-bold text-slate-900 mb-4">Contact Info</h3>
-              <div className="space-y-3">
-                {(identity.phone || location.phone) && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-600 text-sm">{identity.phone || location.phone}</span>
-                  </div>
-                )}
-                {(identity.contactEmail || location.contactEmail || location.email) && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-600 text-sm break-all">
-                      {identity.contactEmail || location.contactEmail || location.email}
-                    </span>
-                  </div>
-                )}
-                {(location.fullAddress || identity.location) && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-slate-400" />
-                    <span className="text-slate-600 text-sm leading-relaxed">
-                      {location.fullAddress || identity.location}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Newsletter Signup */}
-            <div>
-              <h3 className="font-bold text-slate-900 mb-4">Newsletter</h3>
-              <p className="text-slate-500 text-sm mb-4">Subscribe for updates and exclusive offers.</p>
-              <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-3 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all"
-                  style={{ "--tw-ring-color": colors.primary } as React.CSSProperties}
-                />
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ backgroundColor: colors.primary }}
-                >
-                  Subscribe
-                </button>
-              </form>
-            </div>
-          </div>
-
-          {/* Bottom Section */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-slate-200">
-            {/* Social Icons */}
-            <div className="flex gap-3">
-              {socialMedia.facebook && (
-                <a
-                  href={socialMedia.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                  style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}
-                >
-                  <Facebook className="h-5 w-5" />
-                </a>
-              )}
-              {socialMedia.instagram && (
-                <a
-                  href={socialMedia.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center transition-all hover:scale-110"
-                >
-                  <Instagram className="h-5 w-5" />
-                </a>
-              )}
-              {socialMedia.youtube && (
-                <a
-                  href={socialMedia.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all hover:scale-110"
-                >
-                  <YoutubeIcon className="h-5 w-5" />
-                </a>
-              )}
-            </div>
-
-            {/* Copyright */}
-            <p className="text-slate-400 text-sm">
-              © {new Date().getFullYear()} {businessName}. All rights reserved.
-            </p>
-          </div>
+      <footer className="relative py-12 sm:py-16 border-t border-slate-200" style={{ backgroundColor: colors.background }}>
+  <div className="max-w-7xl mx-auto px-5 sm:px-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+      {/* Brand */}
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          {media.logoUrl && <img src={media.logoUrl} alt={businessName} className="h-7 w-auto object-contain" />}
+          <span className="font-bold text-lg tracking-tight" style={{ fontFamily: typography.headingFont, color: colors.text }}>{businessName}</span>
         </div>
+        <p className="text-slate-500 text-sm leading-relaxed">
+          {brandStory.shortDescription || "A modern boutique resort in Palawan offering luxury comfort and unforgettable experiences."}
+        </p>
+      </div>
 
-        {/* Back-to-Top Button */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className={`fixed bottom-6 left-6 w-12 h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-            scrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          }`}
-          aria-label="Back to top"
-        >
-          <ArrowUpRight className="h-5 w-5" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
-        </button>
-      </footer>
+      {/* Quick Links */}
+      <div>
+        <h4 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Explore</h4>
+        <ul className="space-y-2 text-sm">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <a href={link.href} className="text-slate-500 hover:text-slate-900 transition-colors">{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Contact + WhatsApp */}
+      <div>
+        <h4 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Contact</h4>
+        <div className="space-y-3 text-sm">
+          {(identity.phone || location.phone) && (
+            <a href={`tel:${identity.phone || location.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+              <Phone className="h-4 w-4" /> {identity.phone || location.phone}
+            </a>
+          )}
+          {(identity.contactEmail || location.contactEmail) && (
+            <a href={`mailto:${identity.contactEmail || location.contactEmail}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+              <Mail className="h-4 w-4" /> {identity.contactEmail || location.contactEmail}
+            </a>
+          )}
+        </div>
+        {whatsappNumber && (
+          <a
+            href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
+            style={{ backgroundColor: '#25D366' }}
+          >
+            <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+          </a>
+        )}
+      </div>
+    </div>
+
+    {/* Bottom: Copyright + Social */}
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-slate-200">
+      <p className="text-slate-400 text-xs">© {new Date().getFullYear()} {businessName}. All rights reserved.</p>
+      <div className="flex gap-3">
+        {socialMedia.facebook && (
+          <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}>
+            <Facebook className="h-4 w-4" />
+          </a>
+        )}
+        {socialMedia.instagram && (
+          <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center transition-all hover:scale-110">
+            <Instagram className="h-4 w-4" />
+          </a>
+        )}
+        {socialMedia.youtube && (
+          <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all hover:scale-110">
+            <YoutubeIcon className="h-4 w-4" />
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* Back-to-Top Button */}
+  <button
+    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+    className={`fixed bottom-6 left-6 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${
+      scrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+    }`}
+    aria-label="Back to top"
+  >
+    <ArrowUpRight className="h-4 w-4" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
+  </button>
+</footer>
 
       {/* Floating WhatsApp */}
       {(socialMedia.whatsapp || location.whatsapp) && (
@@ -1103,10 +1266,10 @@ export default function BusinessLandingPage() {
           href={`https://wa.me/${(socialMedia.whatsapp || location.whatsapp).replace(/[^0-9]/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110"
+          className="fixed bottom-5 right-5 z-50 w-11 h-11 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
           aria-label="Chat on WhatsApp"
         >
-          <MessageCircle className="h-7 w-7" />
+          <MessageCircle className="h-5 w-5" />
         </a>
       )}
     </div>
