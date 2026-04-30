@@ -262,23 +262,37 @@ export function FullWizard() {
   };
 
   // ── Room image upload ──
-  const handleRoomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, roomIndex: number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { toast({ variant: "destructive", title: "Not an image" }); return; }
+  const handleRoomImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>, roomIndex: number) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
     const id = await ensureId();
     if (!id) return;
-    const url = await uploadImage(file, "rooms", id);
-    if (url) {
+
+    const urls: string[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        toast({ variant: "destructive", title: "Skipped non-image file" });
+        continue;
+      }
+      const url = await uploadImage(file, "rooms", id);
+      if (url) urls.push(url);
+    }
+
+    if (urls.length > 0) {
       setFormData((prev: any) => {
         const newRooms = [...(prev.roomTypes || [])];
-        newRooms[roomIndex] = { ...newRooms[roomIndex], imageUrl: url };
+        const room = { ...newRooms[roomIndex] };
+        // Initialize images array if not present; also discard legacy single-imageUrl
+        room.images = [...(room.images || []), ...urls];
+        room.imageUrl = ""; // clear legacy field
+        newRooms[roomIndex] = room;
         return { ...prev, roomTypes: newRooms };
       });
-      toast({ title: "Room image uploaded!" });
+      toast({ title: `${urls.length} image(s) uploaded` });
     }
-    e.target.value = "";
-  };
+
+    if (e.target) e.target.value = "";
+  };;
 
   // ── Gallery upload — FIX: uses ref, not createElement ──
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -782,29 +796,134 @@ export function FullWizard() {
                   <span className="font-semibold text-sm">Item {i + 1}</span>
                   <Button variant="ghost" size="sm" className="text-red-400" onClick={() => setFormData((p: any) => ({ ...p, roomTypes: p.roomTypes.filter((_: any, idx: number) => idx !== i) }))}><Trash2 className="h-4 w-4" /></Button>
                 </div>
+
+                {/* ── IMAGE GALLERY ── */}
                 <div>
-                  <input id={`room-img-${i}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleRoomImageUpload(e, i)} />
-                  <Button variant="outline" size="sm" className="gap-2 min-h-[44px]" onClick={() => document.getElementById(`room-img-${i}`)?.click()} disabled={uploading !== null}>
-                    <Upload className="h-4 w-4" /> {room.imageUrl ? "Replace Image" : "Upload Image"}
+                  <input
+                    id={`room-imgs-${i}`}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleRoomImagesUpload(e, i)}
+                  />
+                  <Button variant="outline" size="sm" className="gap-2 min-h-[44px]" onClick={() => document.getElementById(`room-imgs-${i}`)?.click()} disabled={uploading !== null}>
+                    <Upload className="h-4 w-4" /> {(room.images || []).length > 0 ? "Add More Images" : "Upload Images"}
                   </Button>
-                  {room.imageUrl && (
+
+                  {/* ── Multi-image grid ── */}
+                  {(room.images || []).length > 0 && (
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      {(room.images || []).map((url: string, j: number) => (
+                        <div key={`img-${j}`} className="relative aspect-video rounded-lg overflow-hidden border bg-gray-100 group">
+                          <img src={url} alt={`Room ${i + 1} — ${j + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => {
+                              const arr = [...(formData.roomTypes || [])];
+                              const imgs = [...(arr[i].images || [])];
+                              imgs.splice(j, 1);
+                              arr[i] = { ...arr[i], images: imgs };
+                              setFormData((p: any) => ({ ...p, roomTypes: arr }));
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* ── Legacy single-image fallback ── */}
+                  {(!room.images || room.images.length === 0) && room.imageUrl && (
                     <div className="mt-2 relative">
                       <img src={room.imageUrl} alt="Room" className="w-full h-36 object-cover rounded-xl" />
-                      <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={() => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], imageUrl: "" }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8"
+                        onClick={() => {
+                          const arr = [...formData.roomTypes];
+                          arr[i] = { ...arr[i], imageUrl: "", images: [] };
+                          setFormData((p: any) => ({ ...p, roomTypes: arr }));
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   )}
                 </div>
-                {[
-                  { key: "name", placeholder: "Room / service name" },
-                  { key: "price", placeholder: "Price (e.g. ₱2,500/night)" },
-                  { key: "description", placeholder: "Description" },
-                ].map(({ key, placeholder }) => (
-                  <Input key={key} className="min-h-[44px]" value={room[key] || ""} placeholder={placeholder}
-                    onChange={(e) => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], [key]: e.target.value }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }} />
-                ))}
+
+                {/* ── TEXT FIELDS ── */}
+                <Input
+                  className="min-h-[44px]"
+                  value={room.name || ""}
+                  placeholder="Room / service name"
+                  onChange={(e) => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], name: e.target.value }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }}
+                />
+                <Input
+                  className="min-h-[44px]"
+                  value={room.price || ""}
+                  placeholder="Price (e.g. ₱2,500/night)"
+                  onChange={(e) => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], price: e.target.value }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }}
+                />
+                <Textarea
+                  rows={3}
+                  value={room.description || ""}
+                  placeholder="Describe this room or service..."
+                  onChange={(e) => { const arr = [...formData.roomTypes]; arr[i] = { ...arr[i], description: e.target.value }; setFormData((p: any) => ({ ...p, roomTypes: arr })); }}
+                />
+
+                {/* ── ROOM AMENITIES ── */}
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wider text-gray-500">Room Amenities</Label>
+                  {(room.amenities || []).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {(room.amenities || []).map((a: string, j: number) => (
+                        <span key={j} className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-gray-100 border border-gray-200">
+                          {a}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const arr = [...formData.roomTypes];
+                              const ams = [...(arr[i].amenities || [])];
+                              ams.splice(j, 1);
+                              arr[i] = { ...arr[i], amenities: ams };
+                              setFormData((p: any) => ({ ...p, roomTypes: arr }));
+                            }}
+                            className="ml-1 text-gray-400 hover:text-red-500"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Input
+                      className="min-h-[40px] text-sm"
+                      placeholder="Add amenity (e.g. WiFi, Pool, AC...)"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                          e.preventDefault();
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          const arr = [...formData.roomTypes];
+                          const ams = [...(arr[i].amenities || [])];
+                          if (!ams.includes(val)) {
+                            ams.push(val);
+                            arr[i] = { ...arr[i], amenities: ams };
+                            setFormData((p: any) => ({ ...p, roomTypes: arr }));
+                          }
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             ))}
-            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, roomTypes: [...(p.roomTypes || []), { name: "", price: "", description: "", imageUrl: "" }] }))}>
+            <Button variant="outline" className="w-full min-h-[44px]" onClick={() => setFormData((p: any) => ({ ...p, roomTypes: [...(p.roomTypes || []), { name: "", price: "", description: "", images: [], amenities: [] }] }))}>
               <Plus className="h-4 w-4 mr-2" /> Add Room / Service
             </Button>
           </div>
