@@ -745,10 +745,10 @@ export default function BusinessLandingPage() {
                   className={`group w-full text-left bg-white ${templateModifiers.cardRadius} overflow-hidden ${templateModifiers.cardBorder} ${templateModifiers.cardShadow} transition-all duration-300`}
                   type="button"
                 >
-                  {room.imageUrl && (
+                  {(room.images?.[0] || room.imageUrl) && (
                     <div className="aspect-[4/3] overflow-hidden">
                       <img
-                        src={room.imageUrl}
+                        src={(room.images?.[0] || room.imageUrl)}
                         alt={room.name || room.title}
                         loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
