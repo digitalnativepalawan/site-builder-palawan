@@ -1388,7 +1388,7 @@ export default function BusinessLandingPage() {
               </div>
 
               {/* Content body */}
-              <div className="flex-1 overflow-y-auto px-6 py-6 pb-24">
+              <div className="flex-1 overflow-y-auto px-6 py-6 pb-28">
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <h2
