@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, ArrowLeft, Phone, Mail, MapPin,
   Instagram, Facebook, Youtube as YoutubeIcon,
-  MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight, CheckCircle2,
-  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet, Boat, Compass, Scooter, Suns, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, Boat, Compass, Scooter
+  MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight,
+  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet, Boat, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -625,7 +625,7 @@ export default function BusinessLandingPage() {
             {(() => {
               const iconMap = {
                 Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet,
-                Boat, Compass, Scooter, Sun, Anchor, Fish, Trophy, Flag, Hand,
+                Boat, Compass, Scooter, Anchor, Fish, Trophy, Flag, Hand,
                 Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
               };
 
