@@ -527,34 +527,7 @@ export default function BusinessLandingPage() {
                     />
                   )}
                 </div>
-                {/* Floating amenities pill */}
-                {amenities.length > 0 && (
-                  <div className="absolute -bottom-4 sm:-bottom-5 left-4 right-4 sm:-right-5 bg-white rounded-xl shadow-xl p-3 sm:p-4 border border-slate-100">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-2">
-                      Top Amenities
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {amenities.slice(0, 4).map((a: string, i: number) => (
-                        <span
-                          key={i}
-                          className="text-[10px] font-medium px-2 py-0.5 rounded-md"
-                          style={{ backgroundColor: `${colors.primary}10`, color: colors.primary }}
-                        >
-                          {a}
-                        </span>
-                      ))}
-                    </div>
-                    {amenities.length > 4 && (
-                      <a
-                        href="#amenities"
-                        className="mt-2 block text-[10px] font-semibold"
-                        style={{ color: colors.primary }}
-                      >
-                        View all
-                      </a>
-                    )}
-                  </div>
-                )}
+
               </div>
 
               {/* Text column */}
