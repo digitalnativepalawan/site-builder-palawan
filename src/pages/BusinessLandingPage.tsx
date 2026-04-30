@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Loader2, ArrowLeft, Phone, Mail, MapPin,
-  Instagram, Facebook, Youtube as YoutubeIcon,
-  MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight,
-  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Ship, Compass, Bike, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
-} from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function cn(...classes: (string | false | null | undefined)[]) {
@@ -158,7 +153,7 @@ export default function BusinessLandingPage() {
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center flex-col gap-4 bg-white">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+        <Icons.Loader2 className="h-10 w-10 animate-spin text-blue-500" />
         <p className="text-slate-400 font-medium text-sm">Loading your site…</p>
       </div>
     );
@@ -287,7 +282,7 @@ export default function BusinessLandingPage() {
           onClick={() => navigate("/dashboard")}
           className="bg-white/92 backdrop-blur shadow-lg border-0 text-xs font-semibold hover:bg-white gap-1.5"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
+          <Icons.ArrowLeft className="h-3.5 w-3.5" /> Dashboard
         </Button>
       </div>
 
@@ -357,7 +352,7 @@ export default function BusinessLandingPage() {
             onClick={() => setNavOpen(!navOpen)}
             aria-label="Toggle menu"
           >
-            {navOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {navOpen ? <Icons.X className="h-5 w-5" /> : <Icons.Menu className="h-5 w-5" />}
           </button>
         </div>
 
@@ -434,7 +429,7 @@ export default function BusinessLandingPage() {
               style={{ backgroundColor: colors.accent || colors.primary }}
             >
               {ctaLabel}
-              <ArrowUpRight className="h-4 w-4" />
+              <Icons.ArrowUpRight className="h-4 w-4" />
             </a>
             {whatsappNumber && (
               <a
@@ -443,7 +438,7 @@ export default function BusinessLandingPage() {
                 rel="noopener noreferrer"
                 className={`inline-flex items-center justify-center gap-2 px-8 py-4 ${templateModifiers.buttonRadius} font-bold text-white text-sm sm:text-base bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all`}
               >
-                <MessageCircle className="h-4 w-4" />
+                <Icons.MessageCircle className="h-4 w-4" />
                 WhatsApp
               </a>
             )}
@@ -495,7 +490,7 @@ export default function BusinessLandingPage() {
                   className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-white text-base shadow-xl hover:opacity-90 hover:scale-[1.02] transition-all"
                   style={{ backgroundColor: colors.primary }}
                 >
-                  {ctaLabel} <ArrowUpRight className="h-5 w-5" />
+                  {ctaLabel} <Icons.ArrowUpRight className="h-5 w-5" />
                 </a>
                 <div className="flex flex-wrap justify-center gap-5 text-xs text-slate-400 font-medium">
                   {["Instant confirmation", "No hidden fees", "Best rate guaranteed"].map((t) => (
@@ -623,40 +618,35 @@ export default function BusinessLandingPage() {
             </div>
 
             {(() => {
-              const iconMap = {
-                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets,
-                Ship, Compass, Bike, Anchor, Fish, Trophy, Flag, Hand,
-                Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
-              };
 
               const getAmenityData = (amenity: string) => {
                 const lower = amenity.toLowerCase();
-                if (lower.includes('wifi')) return { iconName: 'Wifi', desc: 'High-speed internet access throughout the property.' };
-                if (lower.includes('pool') || lower.includes('swimming')) return { iconName: 'Waves', desc: 'Crystal-clear swimming pool with stunning views.' };
-                if (lower.includes('restaurant') || lower.includes('dining')) return { iconName: 'Utensils', desc: 'Fine dining with local and international cuisine.' };
-                if (lower.includes('bar')) return { iconName: 'Wine', desc: 'Relax with cocktails at our beachfront bar.' };
-                if (lower.includes('spa')) return { iconName: 'Sparkles', desc: 'Rejuvenate with our full-service spa treatments.' };
-                if (lower.includes('gym')) return { iconName: 'Dumbbell', desc: 'State-of-the-art fitness center for your workout needs.' };
-                if (lower.includes('beach')) return { iconName: 'Waves', desc: 'Direct access to pristine white-sand beaches.' };
-                if (lower.includes('garden')) return { iconName: 'Leaf', desc: 'Lush tropical gardens for peaceful strolls.' };
-                if (lower.includes('jacuzzi')) return { iconName: 'Droplets', desc: 'Soak in our luxurious jacuzzi tubs.' };
-                if (lower.includes('kayak') || lower.includes('water') || lower.includes('boat') || lower.includes('island')) return { iconName: 'Anchor', desc: 'Explore the waters with island hopping and water sports.' };
-                if (lower.includes('snorkel') || lower.includes('dive')) return { iconName: 'Fish', desc: 'Discover underwater wonders with snorkeling and diving gear.' };
-                if (lower.includes('scooter') || lower.includes('bike') || lower.includes('rental')) return { iconName: 'Bike', desc: 'Explore the island at your own pace.' };
-                if (lower.includes('tennis')) return { iconName: 'Trophy', desc: 'Challenge yourself on our tennis courts.' };
-                if (lower.includes('golf')) return { iconName: 'Flag', desc: 'Play a round on our championship golf course.' };
-                if (lower.includes('massage')) return { iconName: 'Hand', desc: 'Indulge in therapeutic massages.' };
-                if (lower.includes('yoga')) return { iconName: 'Sparkles', desc: 'Find balance with our yoga sessions.' };
-                if (lower.includes('air')) return { iconName: 'Snowflake', desc: 'Climate-controlled comfort in every room.' };
-                if (lower.includes('parking')) return { iconName: 'Car', desc: 'Secure parking facilities available.' };
-                if (lower.includes('service')) return { iconName: 'Bell', desc: '24/7 room service for your convenience.' };
-                if (lower.includes('laundry')) return { iconName: 'Shirt', desc: 'On-site laundry services.' };
-                if (lower.includes('safe')) return { iconName: 'Shield', desc: 'In-room safes for your valuables.' };
-                if (lower.includes('tv')) return { iconName: 'Tv', desc: 'Entertainment with cable TV.' };
-                if (lower.includes('coffee')) return { iconName: 'Coffee', desc: 'Fresh coffee in your room.' };
-                if (lower.includes('mini bar')) return { iconName: 'Wine', desc: 'Stocked mini bar with refreshments.' };
-                if (lower.includes('balcony')) return { iconName: 'Mountain', desc: 'Private balconies with scenic views.' };
-                return { iconName: null, desc: '' };
+                if (lower.includes('wifi')) return { icon: Icons.Wifi, desc: 'High-speed internet access throughout the property.' };
+                if (lower.includes('pool') || lower.includes('swimming')) return { icon: Icons.Waves, desc: 'Crystal-clear swimming pool with stunning views.' };
+                if (lower.includes('restaurant') || lower.includes('dining')) return { icon: Icons.Utensils, desc: 'Fine dining with local and international cuisine.' };
+                if (lower.includes('bar')) return { icon: Icons.Wine, desc: 'Relax with cocktails at our beachfront bar.' };
+                if (lower.includes('spa')) return { icon: Icons.Sparkles, desc: 'Rejuvenate with our full-service spa treatments.' };
+                if (lower.includes('gym')) return { icon: Icons.Dumbbell, desc: 'State-of-the-art fitness center for your workout needs.' };
+                if (lower.includes('beach')) return { icon: Icons.Waves, desc: 'Direct access to pristine white-sand beaches.' };
+                if (lower.includes('garden')) return { icon: Icons.Leaf, desc: 'Lush tropical gardens for peaceful strolls.' };
+                if (lower.includes('jacuzzi')) return { icon: Icons.Droplets, desc: 'Soak in our luxurious jacuzzi tubs.' };
+                if (lower.includes('kayak') || lower.includes('water') || lower.includes('boat') || lower.includes('island')) return { icon: Icons.Anchor, desc: 'Explore the waters with island hopping and water sports.' };
+                if (lower.includes('snorkel') || lower.includes('dive')) return { icon: Icons.Fish, desc: 'Discover underwater wonders with snorkeling and diving gear.' };
+                if (lower.includes('scooter') || lower.includes('bike') || lower.includes('rental')) return { icon: Icons.Bike, desc: 'Explore the island at your own pace.' };
+                if (lower.includes('tennis')) return { icon: Icons.Trophy, desc: 'Challenge yourself on our tennis courts.' };
+                if (lower.includes('golf')) return { icon: Icons.Flag, desc: 'Play a round on our championship golf course.' };
+                if (lower.includes('massage')) return { icon: Icons.Hand, desc: 'Indulge in therapeutic massages.' };
+                if (lower.includes('yoga')) return { icon: Icons.Sparkles, desc: 'Find balance with our yoga sessions.' };
+                if (lower.includes('air')) return { icon: Icons.Snowflake, desc: 'Climate-controlled comfort in every room.' };
+                if (lower.includes('parking')) return { icon: Icons.Car, desc: 'Secure parking facilities available.' };
+                if (lower.includes('service')) return { icon: Icons.Bell, desc: '24/7 room service for your convenience.' };
+                if (lower.includes('laundry')) return { icon: Icons.Shirt, desc: 'On-site laundry services.' };
+                if (lower.includes('safe')) return { icon: Icons.Shield, desc: 'In-room safes for your valuables.' };
+                if (lower.includes('tv')) return { icon: Icons.Tv, desc: 'Entertainment with cable TV.' };
+                if (lower.includes('coffee')) return { icon: Icons.Coffee, desc: 'Fresh coffee in your room.' };
+                if (lower.includes('mini bar')) return { icon: Icons.Wine, desc: 'Stocked mini bar with refreshments.' };
+                if (lower.includes('balcony')) return { icon: Icons.Mountain, desc: 'Private balconies with scenic views.' };
+                return { icon: null, desc: '' };
               };
 
               const categoryKeywords: Record<string, string[]> = {
@@ -691,8 +681,7 @@ export default function BusinessLandingPage() {
                     </h3>
                     <div className="flex flex-wrap justify-center gap-2">
                       {amens.map((amenity, i) => {
-                        const data = getAmenityData(amenity);
-                        const Icon = iconMap[data.iconName as keyof typeof iconMap];
+                        const { icon: Icon, desc } = getAmenityData(amenity);
                         return (
                           <span
                             key={i}
@@ -737,7 +726,7 @@ export default function BusinessLandingPage() {
                   className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold transition-all hover:gap-2.5"
                   style={{ color: colors.primary }}
                 >
-                  View All <ChevronRight className="h-4 w-4" />
+                  View All <Icons.ChevronRight className="h-4 w-4" />
                 </a>
               )}
             </div>
@@ -781,7 +770,7 @@ export default function BusinessLandingPage() {
                       className="inline-flex items-center gap-2 text-sm font-semibold"
                       style={{ color: colors.primary }}
                     >
-                      Book Now <ArrowUpRight className="h-3.5 w-3.5" />
+                      Book Now <Icons.ArrowUpRight className="h-3.5 w-3.5" />
                     </a>
                   </div>
                 </div>
@@ -811,7 +800,7 @@ export default function BusinessLandingPage() {
                   className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold transition-all hover:gap-2.5"
                   style={{ color: colors.primary }}
                 >
-                  View All <ChevronRight className="h-4 w-4" />
+                  View All <Icons.ChevronRight className="h-4 w-4" />
                 </a>
               )}
             </div>
@@ -855,7 +844,7 @@ export default function BusinessLandingPage() {
                       className="inline-flex items-center gap-2 text-sm font-semibold"
                       style={{ color: colors.primary }}
                     >
-                      Inquire <ArrowUpRight className="h-3.5 w-3.5" />
+                      Inquire <Icons.ArrowUpRight className="h-3.5 w-3.5" />
                     </a>
                   </div>
                 </div>
@@ -949,7 +938,7 @@ export default function BusinessLandingPage() {
                 >
                   <div className="flex gap-0.5">
                     {Array.from({ length: t.rating || 5 }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <Icons.Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
                   <p className="text-slate-600 leading-relaxed text-sm sm:text-base flex-1">
@@ -994,7 +983,7 @@ export default function BusinessLandingPage() {
                 >
                   <summary className="flex items-center justify-between px-6 py-5 cursor-pointer font-semibold text-slate-900 text-sm sm:text-base list-none gap-3">
                     {item.question}
-                    <ChevronRight
+                    <Icons.ChevronRight
                       className="h-5 w-5 shrink-0 transition-transform duration-300 group-open:rotate-90"
                       style={{ color: colors.primary }}
                     />
@@ -1034,7 +1023,7 @@ export default function BusinessLandingPage() {
               className={`inline-flex items-center gap-2.5 px-9 py-4 bg-white ${templateModifiers.buttonRadius} font-bold text-sm sm:text-base shadow-xl hover:opacity-95 hover:scale-[1.02] transition-all`}
               style={{ color: colors.primary }}
             >
-              {ctaLabel} <ArrowUpRight className="h-4 w-4" />
+              {ctaLabel} <Icons.ArrowUpRight className="h-4 w-4" />
             </a>
           </div>
         </section>
@@ -1076,19 +1065,19 @@ export default function BusinessLandingPage() {
                 <div className="space-y-6">
                   {location.fullAddress && (
                     <div className="flex items-start gap-3">
-                      <MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: colors.primary }} />
+                      <Icons.MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: colors.primary }} />
                       <p className="text-slate-600 leading-relaxed">{location.fullAddress}</p>
                     </div>
                   )}
                   {(location.phone || identity.phone) && (
                     <div className="flex items-center gap-3">
-                      <Phone className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
+                      <Icons.Phone className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
                       <p className="text-slate-600">{location.phone || identity.phone}</p>
                     </div>
                   )}
                   {(location.contactEmail || identity.contactEmail) && (
                     <div className="flex items-center gap-3">
-                      <Mail className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
+                      <Icons.Mail className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
                       <p className="text-slate-600">{location.contactEmail || identity.contactEmail}</p>
                     </div>
                   )}
@@ -1099,7 +1088,7 @@ export default function BusinessLandingPage() {
                     className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-full text-sm font-bold text-white transition-all hover:opacity-90"
                     style={{ backgroundColor: colors.primary }}
                   >
-                    <MessageCircle className="h-4 w-4" />
+                    <Icons.MessageCircle className="h-4 w-4" />
                     Get in Touch
                   </a>
                 )}
@@ -1128,19 +1117,19 @@ export default function BusinessLandingPage() {
               <div className="space-y-2">
                 {(identity.phone || location.phone) && (
                   <p className="text-sm text-slate-600 flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
+                    <Icons.Phone className="h-4 w-4" />
                     {identity.phone || location.phone}
                   </p>
                 )}
                 {(identity.contactEmail || location.contactEmail || location.email) && (
                   <p className="text-sm text-slate-600 flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
+                    <Icons.Mail className="h-4 w-4" />
                     {identity.contactEmail || location.contactEmail || location.email}
                   </p>
                 )}
                 {(location.fullAddress || identity.location) && (
                   <p className="text-sm text-slate-600 flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
+                    <Icons.MapPin className="h-4 w-4" />
                     {location.fullAddress || identity.location}
                   </p>
                 )}
@@ -1216,12 +1205,12 @@ export default function BusinessLandingPage() {
         <div className="space-y-3 text-sm">
           {(identity.phone || location.phone) && (
             <a href={`tel:${identity.phone || location.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-              <Phone className="h-4 w-4" /> {identity.phone || location.phone}
+              <Icons.Phone className="h-4 w-4" /> {identity.phone || location.phone}
             </a>
           )}
           {(identity.contactEmail || location.contactEmail) && (
             <a href={`mailto:${identity.contactEmail || location.contactEmail}`} className="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-              <Mail className="h-4 w-4" /> {identity.contactEmail || location.contactEmail}
+              <Icons.Mail className="h-4 w-4" /> {identity.contactEmail || location.contactEmail}
             </a>
           )}
         </div>
@@ -1233,7 +1222,7 @@ export default function BusinessLandingPage() {
             className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
             style={{ backgroundColor: '#25D366' }}
           >
-            <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+            <Icons.MessageCircle className="h-4 w-4" /> Chat on WhatsApp
           </a>
         )}
       </div>
@@ -1245,17 +1234,17 @@ export default function BusinessLandingPage() {
       <div className="flex gap-3">
         {socialMedia.facebook && (
           <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}>
-            <Facebook className="h-4 w-4" />
+            <Icons.Facebook className="h-4 w-4" />
           </a>
         )}
         {socialMedia.instagram && (
           <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center transition-all hover:scale-110">
-            <Instagram className="h-4 w-4" />
+            <Icons.Instagram className="h-4 w-4" />
           </a>
         )}
         {socialMedia.youtube && (
           <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all hover:scale-110">
-            <YoutubeIcon className="h-4 w-4" />
+            <Icons.Youtube className="h-4 w-4" />
           </a>
         )}
       </div>
@@ -1270,7 +1259,7 @@ export default function BusinessLandingPage() {
     }`}
     aria-label="Back to top"
   >
-    <ArrowUpRight className="h-4 w-4" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
+    <Icons.ArrowUpRight className="h-4 w-4" style={{ color: colors.primary, transform: 'rotate(-90deg)' }} />
   </button>
 </footer>
 
@@ -1283,7 +1272,7 @@ export default function BusinessLandingPage() {
           className="fixed bottom-4 right-4 z-50 w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-md flex items-center justify-center transition-all hover:scale-110"
           aria-label="Chat on WhatsApp"
         >
-          <MessageCircle className="h-5 w-5" />
+          <Icons.MessageCircle className="h-5 w-5" />
         </a>
       )}
     </div>
