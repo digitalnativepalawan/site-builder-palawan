@@ -1281,7 +1281,7 @@ export default function BusinessLandingPage() {
         const currentImage = images[galleryIndex] || '';
 
         // Touch handlers for swipe-down
-        const onTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientY);
+        const onTouchStart = (e: React.TouchEvent) => { setTouchStart(e.touches[0].clientY); setDragOffset(0); };
         const onTouchMove = (e: React.TouchEvent) => {
           const delta = e.touches[0].clientY - touchStart;
           if (delta > 0) setDragOffset(delta);
@@ -1396,7 +1396,7 @@ export default function BusinessLandingPage() {
                     <p className="text-slate-500 text-sm mb-6">{(room as any).tagline}</p>
                   )}
 
-                  <div className="prose prose-slate max-w-none">
+                  <div className="max-w-none">
                     <p className="text-slate-600 leading-relaxed whitespace-pre-line">
                       {room.description}
                     </p>
