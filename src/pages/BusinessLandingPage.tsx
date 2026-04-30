@@ -603,12 +603,12 @@ export default function BusinessLandingPage() {
             {amenities.length > 0 && (
         <section className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
+            <div className="text-center mb-10">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Amenities</p>
               <h2
                 className="text-3xl sm:text-4xl font-bold tracking-tight"
                 style={{ fontFamily: typography.headingFont }}
-              >Luxury Amenities</h2>
+              >Amenities</h2>
             </div>
 
             {(() => {
@@ -671,25 +671,25 @@ export default function BusinessLandingPage() {
 
               return Object.entries(groupedAmenities).map(([category, amens]) => (
                 amens.length > 0 && (
-                  <div key={category} className="mb-10 last:mb-0">
-                    <h3 className="text-sm font-bold tracking-[0.15em] uppercase mb-4 text-center" style={{ color: colors.primary }}>
+                  <div key={category} className="mb-8 last:mb-0">
+                    <h3 className="text-sm font-bold tracking-[0.15em] uppercase mb-3 text-center" style={{ color: colors.primary }}>
                       {category}
                     </h3>
-                    <div className="flex flex-wrap justify-center gap-3">
+                    <div className="flex flex-wrap justify-center gap-2">
                       {amens.map((amenity, i) => {
                         const data = getAmenityData(amenity);
                         const Icon = iconMap[data.iconName as keyof typeof iconMap];
                         return (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm"
+                            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm"
                             style={{
-                              backgroundColor: `${colors.primary}12`,
-                              border: `1px solid ${colors.primary}30`,
+                              border: `1px solid ${colors.primary}25`,
                               color: colors.text,
+                              backgroundColor: 'transparent',
                             }}
                           >
-                            {Icon && <Icon className="h-3.5 w-3.5" />}
+                            {Icon && <Icon className="h-3.5 w-3.5" style={{ color: colors.primary }} />}
                             {amenity}
                           </span>
                         );
@@ -961,7 +961,7 @@ export default function BusinessLandingPage() {
       {faq.length > 0 && (
         <section className="py-16 sm:py-24 px-5 sm:px-8">
           <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-12">
+            <div className="text-center mb-10">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>
                 FAQ
               </p>
@@ -1030,7 +1030,7 @@ export default function BusinessLandingPage() {
       {(location.fullAddress || location.phone || location.contactEmail || location.googleMapsPlaceId) && (
         <section id="location" className="py-16 sm:py-24 px-5 sm:px-8" style={{ backgroundColor: `${colors.primary}05` }}>
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
+            <div className="text-center mb-10">
               <p className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: colors.primary }}>Location</p>
               <h2
                 className="text-3xl sm:text-4xl font-bold tracking-tight"
