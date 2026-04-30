@@ -123,6 +123,10 @@ export default function BusinessLandingPage() {
   const [siteData, setSiteData] = useState<any>(null);
   const [navOpen, setNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<any>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -149,6 +153,15 @@ export default function BusinessLandingPage() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedRoom) closeModal();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedRoom]);
 
   if (loading) {
     return (
@@ -250,6 +263,17 @@ export default function BusinessLandingPage() {
   const ctaHref = hasBooking ? "#book" : "#contact";
   const whatsappNumber = socialMedia.whatsapp || location.whatsapp;
 
+  // Room modal
+  const openRoom = (room: any) => {
+    setSelectedRoom(room);
+    setGalleryIndex(0);
+    setDragOffset(0);
+  };
+  const closeModal = () => {
+    setSelectedRoom(null);
+    setGalleryIndex(0);
+  };
+
   return (
     <div
       className="min-h-screen w-full flex flex-col overflow-x-hidden scroll-smooth antialiased"
@@ -272,7 +296,9 @@ export default function BusinessLandingPage() {
         .fade-up-3 { animation: fadeUp 0.75s ease 0.40s forwards; opacity:0; }
         details[open] summary ~ * { animation: fadeUp 0.3s ease; }
         :focus-visible { outline: 2px solid ${colors.primary}; outline-offset: 3px; }
-      `}</style>
+      
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }`}</style>
 
       {/* Dashboard shortcut */}
       <div className="fixed top-4 left-4 z-[200]">
@@ -704,10 +730,12 @@ export default function BusinessLandingPage() {
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {roomTypes.map((room: any, i: number) => (
-                <div
+{roomTypes.map((room: any, i: number) => (
+                <button
                   key={i}
-                  className={`group bg-white ${templateModifiers.cardRadius} overflow-hidden ${templateModifiers.cardBorder} ${templateModifiers.cardShadow} transition-all duration-300`}
+                  onClick={() => openRoom(room)}
+                  className={`group w-full text-left bg-white ${templateModifiers.cardRadius} overflow-hidden ${templateModifiers.cardBorder} ${templateModifiers.cardShadow} transition-all duration-300`}
+                  type="button"
                 >
                   {room.imageUrl && (
                     <div className="aspect-[4/3] overflow-hidden">
@@ -738,15 +766,11 @@ export default function BusinessLandingPage() {
                         {room.description}
                       </p>
                     )}
-                    <a
-                      href={ctaHref}
-                      className="inline-flex items-center gap-2 text-sm font-semibold"
-                      style={{ color: colors.primary }}
-                    >
-                      Book Now <Icons.ArrowUpRight className="h-3.5 w-3.5" />
-                    </a>
+                    <div className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: colors.primary }}>
+                      View details <Icons.ArrowUpRight className="h-3.5 w-3.5" />
+                    </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -1248,6 +1272,211 @@ export default function BusinessLandingPage() {
           <Icons.MessageCircle className="h-5 w-5" />
         </a>
       )}
-    </div>
+    
+      {/* ── ROOM DETAIL MODAL ───────────────────────────────── */}
+      {selectedRoom && (() => {
+        // Prepare images for gallery
+        const room = selectedRoom;
+        const images: string[] = (room as any).images || (room.imageUrl ? [room.imageUrl] : []);
+        const currentImage = images[galleryIndex] || '';
+
+        // Touch handlers for swipe-down
+        const onTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientY);
+        const onTouchMove = (e: React.TouchEvent) => {
+          const delta = e.touches[0].clientY - touchStart;
+          if (delta > 0) setDragOffset(delta);
+        };
+        const onTouchEnd = () => {
+          if (dragOffset > 150) closeModal();
+          else setDragOffset(0);
+        };
+
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            onClick={(e) => e.target === e.currentTarget && closeModal()}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" />
+
+            {/* Modal sheet */}
+            <div
+              className="relative w-full max-h-[90vh] bg-white rounded-t-3xl overflow-hidden flex flex-col shadow-2xl animate-slide-up"
+              style={{ transform: `translateY(${dragOffset}px)` }}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="room-modal-title"
+            >
+              {/* Close button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/90 backdrop-blur border border-slate-100 flex items-center justify-center transition-all hover:scale-105"
+                aria-label="Close"
+              >
+                <Icons.X className="h-5 w-5" />
+              </button>
+
+              {/* Image gallery */}
+              <div className="relative aspect-[4/3] sm:aspect-video bg-slate-200 flex-shrink-0">
+                {images.length > 0 ? (
+                  <>
+                    <div
+                      className="flex h-full transition-transform duration-300 ease-out"
+                      style={{ transform: `translateX(-${galleryIndex * 100}%)` }}
+                    >
+                      {images.map((img, idx) => (
+                        <div key={idx} className="min-w-full h-full">
+                          <img
+                            src={img}
+                            alt={`${room.name || room.title} - Photo ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Navigation arrows */}
+                    {images.length > 1 && (
+                      <>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + images.length) % images.length); }}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur border border-slate-100 flex items-center justify-center transition-all hover:scale-105"
+                          aria-label="Previous image"
+                        >
+                          <Icons.ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % images.length); }}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur border border-slate-100 flex items-center justify-center transition-all hover:scale-105"
+                          aria-label="Next image"
+                        >
+                          <Icons.ChevronRight className="h-5 w-5" />
+                        </button>
+                        {/* Pagination dots */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          {images.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={(e) => { e.stopPropagation(); setGalleryIndex(idx); }}
+                              className={`w-2 h-2 rounded-full transition-all ${idx === galleryIndex ? 'bg-white scale-125' : 'bg-white/50'}`}
+                              aria-label={`Go to image ${idx + 1}`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Icons.Image className="h-12 w-12 text-slate-400" />
+                  </div>
+                )}
+              </div>
+
+              {/* Content body */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 pb-24">
+                <div className="max-w-2xl mx-auto">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <h2
+                      id="room-modal-title"
+                      className="text-2xl sm:text-3xl font-bold tracking-tight"
+                      style={{ fontFamily: typography.headingFont }}
+                    >
+                      {room.name || room.title}
+                    </h2>
+                    {room.price && (
+                      <span className="text-lg font-semibold shrink-0" style={{ color: colors.primary }}>
+                        ₱{Number(room.price).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {(room as any).tagline && (
+                    <p className="text-slate-500 text-sm mb-6">{(room as any).tagline}</p>
+                  )}
+
+                  <div className="prose prose-slate max-w-none">
+                    <p className="text-slate-600 leading-relaxed whitespace-pre-line">
+                      {room.description}
+                    </p>
+                  </div>
+
+                  {/* Room-specific amenities */}
+                  {(room as any).amenities && Array.isArray((room as any).amenities) && (room as any).amenities.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4" style={{ color: colors.primary }}>Room Amenities</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {(room as any).amenities.map((a: string, idx: number) => {
+                          const lower = a.toLowerCase();
+                          let Icon: any = null;
+                          if (lower.includes('wifi')) Icon = Icons.Wifi;
+                          else if (lower.includes('pool')) Icon = Icons.Waves;
+                          else if (lower.includes('restaurant') || lower.includes('dining')) Icon = Icons.Utensils;
+                          else if (lower.includes('bar')) Icon = Icons.Wine;
+                          else if (lower.includes('spa')) Icon = Icons.Sparkles;
+                          else if (lower.includes('gym')) Icon = Icons.Dumbbell;
+                          else if (lower.includes('beach')) Icon = Icons.Waves;
+                          else if (lower.includes('garden')) Icon = Icons.Leaf;
+                          else if (lower.includes('jacuzzi')) Icon = Icons.Droplets;
+                          else if (lower.includes('kayak') || lower.includes('boat') || lower.includes('island')) Icon = Icons.Anchor;
+                          else if (lower.includes('snorkel') || lower.includes('dive')) Icon = Icons.Fish;
+                          else if (lower.includes('bike') || lower.includes('rental')) Icon = Icons.Bike;
+                          else if (lower.includes('tennis')) Icon = Icons.Trophy;
+                          else if (lower.includes('golf')) Icon = Icons.Flag;
+                          else if (lower.includes('massage')) Icon = Icons.Hand;
+                          else if (lower.includes('yoga')) Icon = Icons.Sparkles;
+                          else if (lower.includes('air')) Icon = Icons.Snowflake;
+                          else if (lower.includes('parking')) Icon = Icons.Car;
+                          else if (lower.includes('service')) Icon = Icons.Bell;
+                          else if (lower.includes('laundry')) Icon = Icons.Shirt;
+                          else if (lower.includes('safe')) Icon = Icons.Shield;
+                          else if (lower.includes('tv')) Icon = Icons.Tv;
+                          else if (lower.includes('coffee')) Icon = Icons.Coffee;
+                          else if (lower.includes('mini bar')) Icon = Icons.Wine;
+                          else if (lower.includes('balcony')) Icon = Icons.Mountain;
+                          return (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs border"
+                              style={{ borderColor: `${colors.primary}25`, color: colors.text }}
+                            >
+                              {Icon && <Icon className="h-3.5 w-3.5" style={{ color: colors.primary }} />}
+                              {a}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Sticky CTA */}
+              <div className="sticky bottom-0 bg-white border-t border-slate-100 p-4 flex gap-3">
+                <a
+                  href={ctaHref}
+                  className="flex-1 py-3 rounded-full text-sm font-bold text-white text-center transition-all hover:opacity-90"
+                  style={{ backgroundColor: colors.primary }}
+                >
+                  Book Now
+                </a>
+                {whatsappNumber && (
+                  <a
+                    href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-3 rounded-full text-sm font-semibold text-white transition-all hover:opacity-90"
+                    style={{ backgroundColor: colors.primary }}
+                  >
+                    <Icons.MessageCircle className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+</div>
   );
 }
