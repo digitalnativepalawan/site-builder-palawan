@@ -5,7 +5,7 @@ import {
   Loader2, ArrowLeft, Phone, Mail, MapPin,
   Instagram, Facebook, Youtube as YoutubeIcon,
   MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight, CheckCircle2,
-  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain,
+  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, Boat, Compass, Scooter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -211,6 +211,13 @@ export default function BusinessLandingPage() {
   const templateModifiers = getTemplateModifiers(template, colors, typography);
 
   const businessName = identity.resortName || identity.businessName || identity.name || "Business Name";
+  const aboutDescription = (brandStory.fullDescription || brandStory.shortDescription || '').split('\n\n').slice(0, 2).join('\n\n');
+  const normalizeQuestion = (q: string) => {
+    const lower = q.toLowerCase();
+    if (lower.includes('are you in port barton')) return 'Are you located in Port Barton?';
+    if (lower.includes('you serve food')) return 'Do you serve food?';
+    return q;
+  };
   const heroImage = media.heroImage || media.heroImages?.[0];
   const galleryImages: string[] = media.galleryImages || media.photos || [];
 
@@ -511,7 +518,7 @@ export default function BusinessLandingPage() {
             <div className="grid lg:grid-cols-[1fr_1.15fr] gap-16 lg:gap-28 items-center">
               {/* Image column */}
               <div className="relative order-2 lg:order-1">
-                <div className="aspect-[4/5] sm:aspect-[4/3] lg:aspect-[4/5] rounded-[2.5rem] bg-slate-100 img-zoom">
+                <div className="aspect-[3/4] rounded-[2.5rem] bg-slate-100 img-zoom">
                   {(media.ownerPhoto || media.aboutImage || galleryImages[0]) ? (
                     <img
                       src={media.ownerPhoto || media.aboutImage || galleryImages[0]}
@@ -527,26 +534,30 @@ export default function BusinessLandingPage() {
                 </div>
                 {/* Floating amenities pill */}
                 {amenities.length > 0 && (
-                  <div className="absolute -bottom-5 sm:-bottom-6 left-4 right-4 sm:-right-6 bg-white rounded-2xl shadow-2xl p-4 sm:p-5 border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  <div className="absolute -bottom-4 sm:-bottom-5 left-4 right-4 sm:-right-5 bg-white rounded-xl shadow-xl p-3 sm:p-4 border border-slate-100">
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em] mb-2">
                       Top Amenities
                     </p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1">
                       {amenities.slice(0, 4).map((a: string, i: number) => (
                         <span
                           key={i}
-                          className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                          style={{ backgroundColor: `${colors.primary}12`, color: colors.primary }}
+                          className="text-[10px] font-medium px-2 py-0.5 rounded-md"
+                          style={{ backgroundColor: `${colors.primary}10`, color: colors.primary }}
                         >
                           {a}
                         </span>
                       ))}
-                      {amenities.length > 4 && (
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500">
-                          +{amenities.length - 4} more
-                        </span>
-                      )}
                     </div>
+                    {amenities.length > 4 && (
+                      <a
+                        href="#amenities"
+                        className="mt-2 block text-[10px] font-semibold"
+                        style={{ color: colors.primary }}
+                      >
+                        View all
+                      </a>
+                    )}
                   </div>
                 )}
               </div>
@@ -565,8 +576,8 @@ export default function BusinessLandingPage() {
                 >
                   {identity.ownerName ? `Meet ${identity.ownerName}` : "About Us"}
                 </h2>
-                <p className="text-base sm:text-lg text-slate-500 leading-relaxed mb-9">
-                  {brandStory.fullDescription || brandStory.shortDescription}
+                <p className="text-base sm:text-lg text-slate-500 leading-loose max-w-md mb-9">
+                  {aboutDescription}
                 </p>
                 {features.length > 0 && (
                   <ul className="space-y-4">
@@ -575,7 +586,7 @@ export default function BusinessLandingPage() {
                       const label = isObj ? f.title : f;
                       const desc = isObj ? f.description : null;
                       return (
-                        <li key={i} className="flex items-start gap-4">
+                        <li key={i} className="flex items-start gap-3">
                           <span
                             className="w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0 mt-0.5"
                             style={{ backgroundColor: colors.primary }}
@@ -613,7 +624,7 @@ export default function BusinessLandingPage() {
 
             {(() => {
               const iconMap = {
-                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, CheckCircle2
+                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, Boat, Compass, Scooter, CheckCircle2
               };
 
               const getAmenityData = (amenity: string) => {
@@ -627,8 +638,9 @@ export default function BusinessLandingPage() {
                 if (lower.includes('beach')) return { iconName: 'Waves', desc: 'Direct access to pristine white-sand beaches.' };
                 if (lower.includes('garden')) return { iconName: 'Leaf', desc: 'Lush tropical gardens for peaceful strolls.' };
                 if (lower.includes('jacuzzi')) return { iconName: 'Droplets', desc: 'Soak in our luxurious jacuzzi tubs.' };
-                if (lower.includes('kayak') || lower.includes('water')) return { iconName: 'Anchor', desc: 'Explore the waters with our kayak rentals.' };
-                if (lower.includes('snorkel') || lower.includes('dive')) return { iconName: 'Fish', desc: 'Discover underwater wonders with snorkeling gear.' };
+                if (lower.includes('kayak') || lower.includes('water') || lower.includes('boat') || lower.includes('island')) return { iconName: 'Anchor', desc: 'Explore the waters with island hopping and water sports.' };
+                if (lower.includes('snorkel') || lower.includes('dive')) return { iconName: 'Fish', desc: 'Discover underwater wonders with snorkeling and diving gear.' };
+                if (lower.includes('scooter') || lower.includes('bike') || lower.includes('rental')) return { iconName: 'Scooter', desc: 'Explore the island at your own pace.' };
                 if (lower.includes('tennis')) return { iconName: 'Trophy', desc: 'Challenge yourself on our tennis courts.' };
                 if (lower.includes('golf')) return { iconName: 'Flag', desc: 'Play a round on our championship golf course.' };
                 if (lower.includes('massage')) return { iconName: 'Hand', desc: 'Indulge in therapeutic massages.' };
@@ -640,14 +652,14 @@ export default function BusinessLandingPage() {
                 if (lower.includes('safe')) return { iconName: 'Shield', desc: 'In-room safes for your valuables.' };
                 if (lower.includes('tv')) return { iconName: 'Tv', desc: 'Entertainment with cable TV.' };
                 if (lower.includes('coffee')) return { iconName: 'Coffee', desc: 'Fresh coffee in your room.' };
-                if (lower.includes('mini bar')) return { iconName: 'Wine', desc: 'Stocked mini bar with refreshment.' };
+                if (lower.includes('mini bar')) return { iconName: 'Wine', desc: 'Stocked mini bar with refreshments.' };
                 if (lower.includes('balcony')) return { iconName: 'Mountain', desc: 'Private balconies with scenic views.' };
-                return { iconName: 'CheckCircle2', desc: '' };
+                return { iconName: null, desc: '' };
               };
 
               const categoryKeywords: Record<string, string[]> = {
-                'Beach & Nature': ['beach', 'pool', 'garden', 'jacuzzi', 'kayak', 'snorkel', 'dive', 'nature', 'ocean', 'waves', 'leaf'],
-                'Comfort & Tech': ['wifi', 'air', 'spa', 'gym', 'service', 'laundry', 'safe', 'tv', 'coffee', 'mini', 'balcony', 'comfort', 'sparkles', 'dumbbell', 'snowflake', 'bell', 'shirt', 'shield', 'tv', 'coffee', 'mountain'],
+                'Beach & Nature': ['beach', 'pool', 'garden', 'jacuzzi', 'kayak', 'snorkel', 'dive', 'nature', 'ocean', 'waves', 'leaf', 'boat', 'island', 'anch'],
+                'Comfort & Tech': ['wifi', 'air', 'spa', 'gym', 'service', 'laundry', 'safe', 'tv', 'coffee', 'mini', 'balcony', 'comfort', 'sparkles', 'dumbbell', 'snowflake', 'bell', 'shirt', 'shield', 'tv', 'coffee', 'mountain', 'scooter', 'bike', 'rental'],
                 'Dining & Entertainment': ['restaurant', 'bar', 'tennis', 'golf', 'massage', 'yoga', 'dining', 'entertainment', 'utensils', 'wine', 'trophy', 'flag', 'hand']
               };
 
@@ -727,7 +739,7 @@ export default function BusinessLandingPage() {
                 </a>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {roomTypes.map((room: any, i: number) => (
                 <div
                   key={i}
@@ -801,7 +813,7 @@ export default function BusinessLandingPage() {
                 </a>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service: any, i: number) => (
                 <div
                   key={i}
@@ -1061,20 +1073,20 @@ export default function BusinessLandingPage() {
               <div>
                 <div className="space-y-6">
                   {location.fullAddress && (
-                    <div className="flex items-start gap-4">
-                      <MapPin className="h-5 w-5 shrink-0 mt-0.5" style={{ color: colors.primary }} />
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-4 w-4 shrink-0 mt-0.5" style={{ color: colors.primary }} />
                       <p className="text-slate-600 leading-relaxed">{location.fullAddress}</p>
                     </div>
                   )}
                   {(location.phone || identity.phone) && (
-                    <div className="flex items-center gap-4">
-                      <Phone className="h-5 w-5 shrink-0" style={{ color: colors.primary }} />
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
                       <p className="text-slate-600">{location.phone || identity.phone}</p>
                     </div>
                   )}
                   {(location.contactEmail || identity.contactEmail) && (
-                    <div className="flex items-center gap-4">
-                      <Mail className="h-5 w-5 shrink-0" style={{ color: colors.primary }} />
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-4 w-4 shrink-0" style={{ color: colors.primary }} />
                       <p className="text-slate-600">{location.contactEmail || identity.contactEmail}</p>
                     </div>
                   )}
@@ -1170,9 +1182,9 @@ export default function BusinessLandingPage() {
       </section>
 
       {/* ── FOOTER ──────────────────────────────────────────── */}
-      <footer className="relative py-12 sm:py-16 border-t border-slate-200" style={{ backgroundColor: colors.background }}>
+      <footer className="relative py-10 sm:py-12 border-t border-slate-100" style={{ backgroundColor: colors.background }}>
   <div className="max-w-7xl mx-auto px-5 sm:px-8">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Brand */}
       <div>
         <div className="flex items-center gap-3 mb-3">
@@ -1216,7 +1228,7 @@ export default function BusinessLandingPage() {
             href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
             style={{ backgroundColor: '#25D366' }}
           >
             <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
@@ -1226,7 +1238,7 @@ export default function BusinessLandingPage() {
     </div>
 
     {/* Bottom: Copyright + Social */}
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-slate-200">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
       <p className="text-slate-400 text-xs">© {new Date().getFullYear()} {businessName}. All rights reserved.</p>
       <div className="flex gap-3">
         {socialMedia.facebook && (
@@ -1266,7 +1278,7 @@ export default function BusinessLandingPage() {
           href={`https://wa.me/${(socialMedia.whatsapp || location.whatsapp).replace(/[^0-9]/g, "")}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-5 right-5 z-50 w-11 h-11 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-4 right-4 z-50 w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-md flex items-center justify-center transition-all hover:scale-110"
           aria-label="Chat on WhatsApp"
         >
           <MessageCircle className="h-5 w-5" />
