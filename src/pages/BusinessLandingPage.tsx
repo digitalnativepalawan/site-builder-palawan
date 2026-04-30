@@ -5,7 +5,7 @@ import {
   Loader2, ArrowLeft, Phone, Mail, MapPin,
   Instagram, Facebook, Youtube as YoutubeIcon,
   MessageCircle, Star, ChevronRight, Menu, X, ArrowUpRight, CheckCircle2,
-  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, Boat, Compass, Scooter
+  Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet, Boat, Compass, Scooter, Suns, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, Boat, Compass, Scooter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -624,7 +624,9 @@ export default function BusinessLandingPage() {
 
             {(() => {
               const iconMap = {
-                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplets, Anchor, Fish, Trophy, Flag, Hand, Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain, Boat, Compass, Scooter, CheckCircle2
+                Wifi, Waves, Utensils, Wine, Sparkles, Dumbbell, Leaf, Droplet,
+                Boat, Compass, Scooter, Sun, Anchor, Fish, Trophy, Flag, Hand,
+                Snowflake, Car, Bell, Shirt, Shield, Tv, Coffee, Mountain
               };
 
               const getAmenityData = (amenity: string) => {
@@ -694,9 +696,9 @@ export default function BusinessLandingPage() {
                         return (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm"
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm transition-all hover:bg-primary/5 active:scale-95"
                             style={{
-                              border: `1px solid ${colors.primary}25`,
+                              border: `1px solid ${colors.primary}20`,
                               color: colors.text,
                               backgroundColor: 'transparent',
                             }}
