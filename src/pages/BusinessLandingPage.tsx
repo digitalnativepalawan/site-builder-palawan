@@ -154,13 +154,21 @@ export default function BusinessLandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close modal on Escape key
+  // Close modal on Escape key + prevent body scroll when open
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && selectedRoom) closeModal();
     };
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    if (selectedRoom) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+    return () => {
+      window.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
   }, [selectedRoom]);
 
   if (loading) {
@@ -1275,9 +1283,14 @@ export default function BusinessLandingPage() {
     
       {/* ── ROOM DETAIL MODAL ───────────────────────────────── */}
       {selectedRoom && (() => {
-        // Prepare images for gallery
+        // Prepare images for gallery (supports images[] array or single imageUrl)
         const room = selectedRoom;
-        const images: string[] = (room as any).images || (room.imageUrl ? [room.imageUrl] : []);
+        let images: string[] = [];
+        if (Array.isArray((room as any).images) && (room as any).images.length > 0) {
+          images = (room as any).images.filter((img: string) => typeof img === 'string' && img.trim());
+        } else if (room.imageUrl) {
+          images = [room.imageUrl];
+        }
         const currentImage = images[galleryIndex] || '';
 
         // Touch handlers for swipe-down
@@ -1319,11 +1332,11 @@ export default function BusinessLandingPage() {
               </button>
 
               {/* Image gallery */}
-              <div className="relative aspect-[4/3] sm:aspect-video bg-slate-200 flex-shrink-0">
+              <div className="relative h-[45vh] sm:h-[40vh] bg-slate-200 flex-shrink-0">
                 {images.length > 0 ? (
                   <>
                     <div
-                      className="flex h-full transition-transform duration-300 ease-out"
+                      className="flex h-full transition-transform duration-300 ease-out will-change-transform"
                       style={{ transform: `translateX(-${galleryIndex * 100}%)` }}
                     >
                       {images.map((img, idx) => (
